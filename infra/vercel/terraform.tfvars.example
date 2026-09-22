@@ -1,0 +1,9 @@
+database_url         = "postgresql://..."
+better_auth_secret   = "replace-with-32-plus-character-secret"
+google_client_id     = "replace-with-google-client-id"
+google_client_secret = "replace-with-google-client-secret"
+# /api/revalidate 保護用。`openssl rand -hex 16` で生成し、trigger.dev にも同値を設定する。
+revalidate_secret    = "replace-with-16-plus-character-secret"
+gemini_api_key       = "replace-with-gemini-api-key"
+ai_summary_model     = "gemini-3.1-flash-lite"
+ai_summary_batch_limit = "10"

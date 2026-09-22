@@ -1,0 +1,45 @@
+name: DB Schema Check
+
+# スキーマ変更時に migration の整合性を検証
+
+on:
+  pull_request:
+    paths:
+      - 'db/**'
+      - 'drizzle.config.ts'
+      - 'bun.lock'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  schema-check:
+    name: Drizzle migration check
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup
+
+      # schema と migrations が一致しているか
+      # generate を空走させて新規ファイルが生成されないことを確認
+      - name: Check migrations are up to date
+        run: |
+          bun drizzle-kit generate
+          if [ -n "$(git status --porcelain db/migrations)" ]; then
+            echo "❌ Schema変更後に bun run db:generate を実行していません"
+            git status db/migrations
+            exit 1
+          fi
+
+      # 破壊的変更の検知
+      - name: Detect destructive migrations
+        run: |
+          if grep -rEi "(DROP TABLE|DROP COLUMN|ALTER COLUMN.*TYPE)" db/migrations/*.sql; then
+            echo "⚠️  破壊的変更が検出されました。レビューで承認が必要です。"
+            echo "::warning::Destructive migration detected"
+          fi

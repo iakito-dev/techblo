@@ -1,0 +1,77 @@
+# Pre-commit hooks
+# https://github.com/evilmartians/lefthook
+#
+# 人間でもAIエージェントでも、コミットを残す全員に同じ品質ゲートを通す。
+
+pre-commit:
+  parallel: true
+  commands:
+    # 1. 機密ファイルの混入チェック
+    # .env / .env.local / .env.production 等は禁止、.env.example は許可
+    no-secrets:
+      run: |
+        for f in {staged_files}; do
+          case "$f" in
+            .env|.env.local|.env.production|.env.development|.env.test|*credentials*.json|*.pem)
+              echo "❌ 機密ファイル候補が staged されています: $f"
+              exit 1
+              ;;
+          esac
+        done
+      stage_fixed: false
+
+    # 2. 大きすぎるファイルの混入チェック(>1MB)
+    no-large-files:
+      run: |
+        for f in {staged_files}; do
+          if [ -f "$f" ] && [ "$(wc -c < "$f")" -gt 1048576 ]; then
+            echo "❌ 1MB超のファイル: $f"
+            exit 1
+          fi
+        done
+
+    # 3. Biome で format + lint(自動修正)
+    # `--bun` で Bun ランタイム強制(Node arch 不整合を回避)
+    biome:
+      glob: "*.{ts,tsx,js,jsx,cjs,mjs,json,jsonc}"
+      run: bunx --bun biome check --write --no-errors-on-unmatched {staged_files}
+      stage_fixed: true
+
+    # 4. TypeScript 型チェック(プロジェクト全体)
+    typecheck:
+      glob: "*.{ts,tsx}"
+      run: bun run typecheck
+
+    # 5. アーキ依存方向チェック(dependency-cruiser / ADR-0010)
+    # staged に ts/tsx があれば実行。部分グラフでは cross-feature を見逃すため全体をスキャンする
+    depcruise:
+      glob: "*.{ts,tsx}"
+      run: bun run depcruise
+
+commit-msg:
+  commands:
+    # Conventional Commits 形式チェック
+    conventional:
+      run: |
+        msg=$(cat {1})
+        pattern='^(feat|fix|refactor|docs|chore|test|perf|style|ci|build|revert)(\([a-z0-9-]+\))?: .+'
+        if ! echo "$msg" | grep -qE "$pattern"; then
+          echo "❌ Conventional Commits 形式に従ってください"
+          echo "   例: feat(feed): add infinite scroll"
+          exit 1
+        fi
+
+pre-push:
+  parallel: true
+  commands:
+    # push前にテストを通す(時間かかるのでpre-commitではなくpre-push)
+    # `--bun` で Bun ランタイム強制(Node arch 不整合を回避)
+    # `--passWithNoTests` でテストファイル未作成段階でもパス
+    test:
+      run: bunx --bun vitest run --passWithNoTests
+
+# AIエージェント実行時はinteractive promptを避ける
+output:
+  - meta
+  - summary
+  - failure

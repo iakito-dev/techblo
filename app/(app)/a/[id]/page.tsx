@@ -1,0 +1,250 @@
+import { ExternalLink } from 'lucide-react';
+import type { Metadata } from 'next';
+import { cacheLife } from 'next/cache';
+import Link from 'next/link';
+import { notFound } from 'next/navigation';
+import { Suspense } from 'react';
+import { ArticleDetailActions } from '@/components/article/article-detail-actions';
+import { ArticleViewTracker } from '@/components/article/article-view-tracker';
+import { CompanyFavicon } from '@/components/article/company-favicon';
+import { JsonLd } from '@/components/seo/json-ld';
+import { SummaryView } from '@/features/ai-summary/web/components/summary-view';
+import { getSummaryByArticleId } from '@/features/ai-summary/web/queries';
+import { articleFallbackImage } from '@/features/feed/web/article-image';
+import { ArticleBackLink } from '@/features/feed/web/components/article-back-link';
+import { ArticleDetailSkeleton } from '@/features/feed/web/components/article-detail-skeleton';
+import { ArticleHeroImage } from '@/features/feed/web/components/article-hero-image';
+import { ShareButton } from '@/features/feed/web/components/share-button';
+import { getArticleById } from '@/features/feed/web/queries';
+import { toExcerpt } from '@/features/feed/web/strip-html';
+import { articleJsonLd } from '@/lib/seo';
+import { resolveBaseUrl } from '@/lib/site-url';
+import { formatRelative } from '@/shared/date';
+import { MOBILE_GUTTER_CLASS } from '@/shared/layout';
+
+// article.id は uuid。不正な形式は DB エラーになるため事前に弾いて not-found 扱いにする。
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/**
+ * 主アクションの遷移先を示すドメイン表示。`www.` は情報量が無いので落とす。
+ * URL は取込時に検証済みだが、壊れた値で記事ページ全体を落とさないよう失敗時は空にする
+ * (表示が1行消えるだけで、ボタン自体は href をそのまま使う)。
+ */
+function hostname(url: string): string {
+  try {
+    return new URL(url).hostname.replace(/^www\./, '');
+  } catch {
+    return '';
+  }
+}
+
+/**
+ * 記事取得。cacheComponents 下では generateMetadata からの取得も「キャッシュ済み」である
+ * 必要があるため 'use cache' でキャッシュする(id ごと。記事内容はほぼ不変)。
+ */
+async function loadArticle(id: string) {
+  'use cache';
+  cacheLife('hours');
+  if (!UUID_RE.test(id)) return null;
+  return getArticleById(id);
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const article = await loadArticle(id);
+  if (!article) return { title: '記事が見つかりません' };
+
+  // 説明文は AI要約(独自テキスト)を最優先し、無ければ RSS 抜粋で代替する。
+  // アグリゲータの薄い複製ページにならないよう、要約があればそれを meta description にする。
+  const summary = await getSummaryByArticleId(id);
+  const description = summary?.overview
+    ? toExcerpt(summary.overview, 160)
+    : article.description
+      ? toExcerpt(article.description, 120)
+      : undefined;
+  // 元記事に OGP 画像があればそのままホットリンクで使う(任意比率のまま共有される)。
+  // 無い記事だけ自前生成の 1200x630 カード(/api/og、AI要約 or タイトル主役)で代替する(ADR-0029)。
+  const image = article.ogImage
+    ? { url: article.ogImage, alt: article.title }
+    : { url: articleFallbackImage(article.id), width: 1200, height: 630, alt: article.title };
+
+  return {
+    title: article.title,
+    description,
+    alternates: { canonical: `/a/${id}` },
+    openGraph: {
+      type: 'article',
+      url: `/a/${id}`,
+      title: article.title,
+      description,
+      images: [image],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: article.title,
+      description,
+      images: [image],
+    },
+  };
+}
+
+/**
+ * 記事ページ(/a/[id])。一覧のカードをタップした時の遷移先であり、共有リンクの着地先でもある
+ * (X / Threads と同じ「タイムライン → 個別ページ」の形。ADR-0036)。
+ *
+ * シェル(Header / Sidebar / MobileNav)は (app)/layout.tsx が保持するため、遷移で
+ * 差し替わるのはこのコンテンツ領域だけになる。記事本体はユーザーに依存せず 'use cache' で
+ * 取得するので、カード側の prefetch でほぼ即時に描画できる。保存状態(ユーザー依存)だけを
+ * 別の Suspense 境界に隔離し、本文の表示を待たせない。
+ */
+export default function ArticlePage({ params }: { params: Promise<{ id: string }> }) {
+  return (
+    <div className="min-h-dvh pb-[calc(var(--mobile-nav-h)+1rem)] lg:pb-12 lg:pl-64">
+      {/* 幅は 2xl(672px)。一覧の3列時のカード幅(約 490px)より少し広い「1枚を開いた」幅で、
+          和文 15px の本文が 40 字前後/行に収まり読みやすい。lg 以上のガター(lg:px-8)は
+          フィード(page.tsx)と揃え、戻る操作で左端が動かないようにする。 */}
+      {/* 上部の余白は「共有 Header の mb-8 + main の上余白 + 戻る行」で三重に積み上がっていた。
+          記事は上から読み始めるものなので、戻る行をヘッダー直下に寄せて本文の頭出しを早める。
+          max-lg の -mt-4 は Header の mb-8 を半分食う分(lg+ は Header 自体が出ないため
+          lg:pt-6 で自前の上余白を持つ)。 */}
+      <main
+        className={`mx-auto max-w-2xl max-lg:-mt-4 ${MOBILE_GUTTER_CLASS} pb-8 md:px-6 md:pb-10 lg:px-8 lg:pt-6`}
+      >
+        <ArticleBackLink className="mb-1" />
+        <Suspense fallback={<ArticleDetailSkeleton />}>
+          <ArticleContent params={params} />
+        </Suspense>
+      </main>
+    </div>
+  );
+}
+
+async function ArticleContent({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const article = await loadArticle(id);
+  if (!article) notFound();
+
+  const summary = await getSummaryByArticleId(id);
+  const baseUrl = resolveBaseUrl();
+  // JSON-LD/meta の説明文も AI要約を優先(generateMetadata と同方針)。
+  const jsonLdDescription = summary?.overview
+    ? toExcerpt(summary.overview, 160)
+    : article.description
+      ? toExcerpt(article.description, 120)
+      : undefined;
+
+  return (
+    // 一覧のカード(ArticleCard)を「1枚開いた」続きに見せるため、カードと同じ上罫(1.5px の
+    // hairline)+ 見出し行 + タイトル + 抜粋 の骨格をそのまま拡大する。面・影・角丸は使わない
+    // (ADR-0035)。企業のブランド色は使わず、カードと同じくファビコンで出典を示す。
+    <article className="border-border-default border-t-[1.5px] pt-4">
+      {/* 表示回数の加算と既読マーク。ダイアログ起動時ではなく着地側で行う(ADR-0036)。 */}
+      <ArticleViewTracker articleId={article.id} />
+      <JsonLd
+        data={articleJsonLd(
+          {
+            url: `${baseUrl}/a/${article.id}`,
+            title: article.title,
+            description: jsonLdDescription,
+            imageUrl: `${baseUrl}${articleFallbackImage(article.id)}`,
+            publishedAt: article.publishedAt,
+            author: article.author ?? undefined,
+            companyName: article.company.name,
+          },
+          baseUrl,
+        )}
+      />
+      {/* 見出し行: カードと同じ「ファビコン 20px + 企業名 11.5px 太字 / 右端に相対日時」。
+          企業名は企業ページへのリンク(下線は hover 時だけ。常時下線だとカードの見出し行と
+          見た目が変わる)。著者は記事ページにしか無い情報で、企業名より従属的なので
+          企業名の後ろに通常ウェイト・muted で添える。 */}
+      <div className="mb-3 flex items-center gap-[7px] font-semibold text-[11.5px] text-fg-default">
+        <CompanyFavicon url={article.url} name={article.company.name} size={20} />
+        <Link
+          href={`/companies/${article.company.slug}`}
+          className="min-w-0 truncate transition-colors hover:text-accent hover:underline hover:decoration-[1.5px] hover:underline-offset-4"
+        >
+          {article.company.name}
+        </Link>
+        {article.author && (
+          <span className="min-w-0 truncate font-normal text-fg-muted">
+            <span aria-hidden="true">・</span>
+            {article.author}
+          </span>
+        )}
+        <span className="ml-auto shrink-0 font-normal text-fg-muted">
+          {formatRelative(article.publishedAt)}
+        </span>
+      </div>
+
+      {/* タイトル: カード(18px・3行クランプ)の拡大版。クランプは外し、字間・行送りは
+          カードと同じ比率(tracking -0.015em)にして「同じ活字の続き」に見せる。 */}
+      <h1 className="font-bold text-[1.375rem] text-fg-default leading-[1.4] tracking-[-0.015em] md:text-[1.625rem]">
+        {article.title}
+      </h1>
+
+      {/* AI要約。元記事の抜粋(複製)ではない独自テキストでページに価値を持たせる(ADR-0026/0031)。 */}
+      {summary && (
+        <div className="mt-5">
+          <SummaryView overview={summary.overview} bullets={summary.bullets} tags={summary.tags} />
+        </div>
+      )}
+
+      {/* RSS 抜粋: カードの抜粋(13.5px・muted・1.75)と同じ声色で、本文として読める 15px に上げる。 */}
+      {article.description && (
+        <p className="mt-5 text-[15px] text-fg-muted leading-[1.8]">
+          {toExcerpt(article.description, 400)}
+        </p>
+      )}
+
+      {/* 元記事のプレビュー画像(OGP、無ければ自前生成)。タイトル直下ではなく本文の後ろに置く:
+          一覧のカードは画像を持たない(ADR-0011)ので、タイトル直下に大きな面があると
+          「同じ紙面の続き」に見えなくなる。X の投稿のリンクカードと同じく、テキストを読み終えた
+          位置に「元記事へ」の入口として出す(画像全体が元記事へのリンク)。角丸・影は使わず、
+          白地の OGP が地色に溶けないよう hairline の輪郭だけ付ける。 */}
+      {/* 元記事ブロック: プレビュー画像 + 遷移先ドメイン + 主アクションを1つの塊にする。
+          以前は画像とボタンが罫線で分断され、ボタンが保存アイコンと同じ行に小さく並んでいて
+          「このページで一番したいこと」が読み取れなかった。読み終えた位置に入口をまとめ、
+          幅いっぱいの1つのボタンにすることで、主アクション(外部へ)と副アクション(共有・保存)の
+          優劣を形で示す。ドメインを出すのは遷移先が外部だと押す前に分かるようにするため。 */}
+      <div className="mt-6">
+        <ArticleHeroImage
+          article={article}
+          href={article.url}
+          className="aspect-[1200/630] w-full object-cover ring-1 ring-border-default ring-inset"
+        />
+        <p className="mt-2 truncate text-[11.5px] text-fg-subtle">{hostname(article.url)}</p>
+      </div>
+
+      {/* アクション行: 左に保存・お気に入り・共有のアイコン、右端に「元記事を開く」。
+          旧ダイアログのフッターと同じ並びに戻している。アイコンだけの副アクションを左に溜めて
+          右端にラベル付きの主アクションを置く形は、読み終えた視線の終点(右下)に外部への出口が
+          来るので押しやすく、幅いっぱいのボタンより紙面も静かになる。
+          主アクションなので ink の塗りにする(design.md がプライマリボタンへの ink 塗りを
+          許容する範囲。teal の塗りは引き続き使わない)。 */}
+      <div className="mt-6 flex items-center gap-1 border-border-default border-t pt-4">
+        {/* 保存系だけがユーザー依存。ここだけをストリームさせ、本文は待たせない。
+            fallback はボタン2つ分(size-11 + gap-1)の枠で、解決時に共有ボタンが動かないようにする。 */}
+        <Suspense fallback={<div className="h-11 w-[5.75rem]" />}>
+          <div className="flex items-center gap-1">
+            <ArticleDetailActions articleId={article.id} />
+          </div>
+        </Suspense>
+        <ShareButton articleId={article.id} title={article.title} />
+        <a
+          href={article.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="ml-auto inline-flex min-h-12 touch-manipulation items-center gap-2 rounded-md bg-primary px-5 font-semibold text-fg-inverse text-sm transition-colors hover:bg-primary-hover"
+        >
+          元記事を開く
+          <ExternalLink aria-hidden="true" className="size-4" />
+        </a>
+      </div>
+    </article>
+  );
+}

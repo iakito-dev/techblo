@@ -1,0 +1,83 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1779979417967,
+      "tag": "0000_faulty_wither",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1780478831720,
+      "tag": "0001_perpetual_ted_forrester",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1780583873982,
+      "tag": "0002_easy_chamber",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1781087127933,
+      "tag": "0003_fearless_barracuda",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1781090656315,
+      "tag": "0004_article_search_trgm",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1781247618509,
+      "tag": "0005_remarkable_alice",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1781315622984,
+      "tag": "0006_fast_scrambler",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1781433795958,
+      "tag": "0007_article_summaries",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1781435177055,
+      "tag": "0008_fat_nicolaos",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1781529477713,
+      "tag": "0009_small_warstar",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1789292375945,
+      "tag": "0010_new_darwin",
+      "breakpoints": true
+    }
+  ]
+}

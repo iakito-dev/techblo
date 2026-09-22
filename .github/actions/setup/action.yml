@@ -1,0 +1,18 @@
+name: Setup
+description: .tool-versions の bun を入れ、依存キャッシュを復元して bun install する
+
+runs:
+  using: composite
+  steps:
+    # bun のバージョンはローカル(asdf / mise)と同じ .tool-versions を唯一の真実源にする
+    - uses: oven-sh/setup-bun@v2
+      with:
+        bun-version-file: .tool-versions
+    - uses: actions/cache@v5
+      with:
+        path: ~/.bun/install/cache
+        key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-bun-
+    - run: bun install --frozen-lockfile
+      shell: bash

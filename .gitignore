@@ -1,0 +1,73 @@
+# dependencies
+node_modules/
+.pnp
+.pnp.*
+
+# testing
+coverage/
+.nyc_output/
+
+# next.js
+.next/
+out/
+build/
+dist/
+
+# misc
+.DS_Store
+*.pem
+.idea/
+*.iml
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files (重要: 絶対にcommitしない)
+.env
+.env*.local
+.env.development
+.env.production
+
+# vercel
+.vercel/
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# bun
+bun.lockb-debug
+
+# turbo
+.turbo/
+
+# trigger.dev
+.trigger/
+
+# drizzle
+db/migrations/meta/_journal.json.bak
+
+# IDE
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.cursor/
+
+# OS
+Thumbs.db
+
+# Eval results (将来)
+evals/results/
+
+# Playwright
+test-results/
+playwright-report/
+playwright/.cache/
+
+# AI agent runtime
+.agents/installed/
+.vercel
+.env*

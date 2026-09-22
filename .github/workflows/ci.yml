@@ -1,0 +1,126 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+# 同じブランチで連続pushがあれば古い実行をキャンセル
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# 全ジョブ読み取り専用で十分(書き込みが要るジョブだけ個別に広げる)
+permissions:
+  contents: read
+
+jobs:
+  # ─────────────────────────────────────────────
+  # Lint & Format
+  # ─────────────────────────────────────────────
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup
+      # biome check は formatter の差分も検出するので format:check は不要
+      - run: bun run lint
+      - run: bun run depcruise
+
+  # ─────────────────────────────────────────────
+  # Typecheck
+  # ─────────────────────────────────────────────
+  typecheck:
+    name: Typecheck
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup
+      # tsconfig は incremental: true。tsbuildinfo を持ち越すと 2 回目以降が数倍速い
+      - uses: actions/cache@v5
+        with:
+          path: tsconfig.tsbuildinfo
+          key: ${{ runner.os }}-tsbuildinfo-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-tsbuildinfo-
+      - run: bun run typecheck
+
+  # ─────────────────────────────────────────────
+  # Unit & Integration tests
+  # ─────────────────────────────────────────────
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      DATABASE_URL: ${{ secrets.TEST_DATABASE_URL }}
+      BETTER_AUTH_SECRET: ${{ secrets.TEST_BETTER_AUTH_SECRET }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup
+      - run: bun run test:unit
+      - run: bun run test:integration
+        if: ${{ env.DATABASE_URL != '' }}
+
+  # ─────────────────────────────────────────────
+  # Build
+  # ─────────────────────────────────────────────
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup
+      - name: Restore .next cache
+        uses: actions/cache@v5
+        with:
+          path: ${{ github.workspace }}/.next/cache
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('bun.lock') }}-${{ hashFiles('**/*.{js,jsx,ts,tsx}', '!node_modules/**') }}
+          restore-keys: |
+            ${{ runner.os }}-nextjs-${{ hashFiles('bun.lock') }}-
+      - run: bun run build
+        env:
+          # CI はビルド成功確認のみ。env 検証はスキップし、必須 var は非空ダミーを与える
+          # (db/client の postgres() 初期化は接続文字列のパースが通れば OK。実接続はしない)。
+          # 'use cache' な getCompanies はビルド時プリレンダで getSession(動的)より後に呼ぶ設計に
+          # しており、ビルド時には実行されない(ADR-0016)。
+          SKIP_ENV_VALIDATION: "true"
+          DATABASE_URL: postgresql://user:password@localhost:5432/techblo
+          NEXT_PUBLIC_POSTHOG_KEY: phc_dummy
+          NEXT_PUBLIC_POSTHOG_HOST: https://example.com
+
+  # ─────────────────────────────────────────────
+  # Security audit
+  # ─────────────────────────────────────────────
+  # critical のみゲートをかける。high/moderate は transitive deps の upstream 更新待ちが多いため、
+  # 警告として記録するが PR は止めない。定期的に dependabot で更新する想定。
+  audit:
+    name: Security audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup
+      - name: Audit (critical のみ fail)
+        run: bun audit --audit-level=critical
+      - name: Audit (full report, 警告として表示)
+        run: bun audit || true
+        continue-on-error: true
+
+  # ─────────────────────────────────────────────
+  # 全部成功したらgreen
+  # ─────────────────────────────────────────────
+  all-checks:
+    name: All checks passed
+    if: always()
+    needs: [lint, typecheck, test, build]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fail if any required check failed
+        if: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
+        run: exit 1

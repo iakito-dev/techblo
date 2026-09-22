@@ -1,0 +1,21 @@
+# Cursor Rules — Techblo
+
+このプロジェクトの指示は `AGENTS.md` に集約されています。
+
+必ず以下を参照してください:
+
+1. `AGENTS.md` — 全AIエージェント共通の指示
+2. `docs/README.md` — ドキュメント索引
+3. 該当機能の `docs/features/` と `docs/adr/`
+
+## 要点抜粋(Cursor向け)
+
+- TypeScript strict、`any` 禁止、Zodで型を派生
+- ファイル名 kebab-case、コンポーネント PascalCase
+- features/A から features/B を import しない
+- db/ を app/ から直接 import しない
+- throw せず `Result<T, E>` を返す
+- コメントは Why のみ
+- shadcn/ui コンポーネントは components/ui/ に配置
+
+詳細は `AGENTS.md` 参照。

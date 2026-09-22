@@ -1,0 +1,52 @@
+version: 2
+updates:
+  # npm/bun の依存(package.json)
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "10:00"
+      timezone: "Asia/Tokyo"
+    open-pull-requests-limit: 5
+    groups:
+      # 開発依存をまとめて更新
+      dev-dependencies:
+        dependency-type: "development"
+      # 同じスコープのパッケージをまとめて
+      next:
+        patterns:
+          - "next"
+          - "@next/*"
+          - "eslint-config-next"
+      react:
+        patterns:
+          - "react"
+          - "react-dom"
+          - "@types/react*"
+      drizzle:
+        patterns:
+          - "drizzle-orm"
+          - "drizzle-kit"
+      better-auth:
+        patterns:
+          - "better-auth"
+          - "@better-auth/*"
+      observability:
+        patterns:
+          - "@sentry/*"
+          - "posthog-*"
+    labels:
+      - "dependencies"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    labels:
+      - "dependencies"
+      - "ci"
