@@ -27,6 +27,7 @@ export function readGuestUnsubscribed(): string[] {
 
 function writeCookie(slugs: string[]): void {
   if (typeof document === 'undefined') return;
+  // biome-ignore lint/suspicious/noDocumentCookie: 直後の router.refresh() より前に確実に反映させるため同期 API で書く(Cookie Store API は非同期)
   document.cookie = `${GUEST_UNSUBSCRIBED_COOKIE}=${serializeUnsubscribed(slugs)}; path=/; max-age=${COOKIE_MAX_AGE}; samesite=lax`;
 }
 
@@ -34,6 +35,7 @@ function writeCookie(slugs: string[]): void {
 export function clearGuestUnsubscribed(): void {
   if (typeof document === 'undefined') return;
   for (const name of [GUEST_UNSUBSCRIBED_COOKIE, GUEST_UNSUBSCRIBED_COOKIE_LEGACY]) {
+    // biome-ignore lint/suspicious/noDocumentCookie: 同上(writeCookie 参照)
     document.cookie = `${name}=; path=/; max-age=0; samesite=lax`;
   }
 }

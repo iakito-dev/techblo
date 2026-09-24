@@ -12,10 +12,10 @@ bun install
 cp .env.example .env.local
 $EDITOR .env.local
 
-# 3. DB マイグレーション(Neon 接続情報が必要)
+# 3. DB マイグレーション(Supabase Postgres の接続情報が必要)
 bun run db:migrate
 
-# 4. シード(6社の企業マスタを投入)
+# 4. シード(企業マスタを投入)
 bun run db:seed
 
 # 5. 開発サーバー起動
@@ -38,8 +38,8 @@ bun run dev
 ## 技術スタック
 
 Next.js 16 + React 19 + TypeScript + Tailwind v4 + shadcn/ui +
-Drizzle ORM + Neon Postgres + Better Auth + Trigger.dev v4 +
-Sentry + PostHog + Vercel。
+Drizzle ORM + Supabase Postgres + Better Auth + Trigger.dev v4 +
+PostHog + Vercel(Sentry は導入予定)。
 
 詳細は [`TECH_STACK.md`](./TECH_STACK.md)。
 

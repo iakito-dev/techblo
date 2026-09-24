@@ -232,9 +232,11 @@ function RefreshButton() {
   function handleClick() {
     startTransition(async () => {
       try {
-        const { ingested, failed } = await refreshFeed();
+        const { ingested, failed, skipped } = await refreshFeed();
         router.refresh();
-        if (failed > 0) {
+        if (skipped) {
+          toast.info('少し前に更新済みです。最新の記事を表示しています');
+        } else if (failed > 0) {
           toast.warning(`新着 ${ingested} 件を取得(${failed} 社は取得失敗)`);
         } else {
           toast.success(

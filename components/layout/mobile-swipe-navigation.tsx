@@ -356,7 +356,7 @@ export function MobileSwipeNavigation() {
       // スタイルは onTouchEnd 系(cancel/reduced-motion/slide-in effect)が必ず後始末する。
       // mid-drag/mid-animation のまま unmount された時だけ下の unmount effect が掃除する。
     };
-  }, [pathname, router, startTransition]);
+  }, [pathname, router]);
 
   // unmount 時のみ、走行中のタイマー/rAF と残った inline スタイルを掃除する。
   useEffect(() => {

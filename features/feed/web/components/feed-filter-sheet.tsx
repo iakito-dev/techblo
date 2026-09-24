@@ -14,6 +14,7 @@ import {
   type ReadFilterMode,
 } from '../../domain/feed-sort';
 import { useFeedNav } from '../view-models/feed-nav-context';
+import { parseListParam } from '../view-models/parse-list-param';
 import { FeedBottomSheet } from './feed-bottom-sheet';
 
 const READ_OPTIONS: { value: ReadFilterMode; label: string }[] = [
@@ -62,18 +63,13 @@ export function FeedFilterSheet({
   const params = useSearchParams();
   const { navigate } = useFeedNav();
 
-  const parseList = (raw: string | null) =>
-    raw
-      ? raw
-          .split(',')
-          .map((s) => s.trim())
-          .filter(Boolean)
-      : [];
   const urlSort = parseFeedSort(params.get('sort') ?? undefined);
   const urlRead = parseReadMode(params.get('read') ?? undefined);
   const urlPeriod = parsePeriod(params.get('period') ?? undefined);
-  const urlCompanies = useMemo(() => parseList(params.get('company')), [params]);
-  const urlFeeds = useMemo(() => parseList(params.get('feed')), [params]);
+  const companyParam = params.get('company');
+  const feedParam = params.get('feed');
+  const urlCompanies = useMemo(() => parseListParam(companyParam), [companyParam]);
+  const urlFeeds = useMemo(() => parseListParam(feedParam), [feedParam]);
 
   const [sort, setSort] = useState<FeedSort>(urlSort);
   const [read, setRead] = useState<ReadFilterMode>(urlRead);

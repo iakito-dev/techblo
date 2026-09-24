@@ -30,10 +30,11 @@
 
 ## 1. プロジェクト概要
 
-- **何**: 6社の技術ブログをRSSで集約、カードUIで閲覧
+- **何**: 日本の企業テックブログ(`scripts/seed.ts` の企業マスタ)をRSSで集約、カードUIで閲覧
 - **誰向け**: ソフトウェアエンジニア・AI関心層
 - **MVP範囲**: 一覧 + 外部リンク + Google認証 + ブックマーク/お気に入り/購読設定
-- **MVP除外**: AI要約、検索、タグ、通知、海外AI企業
+- **MVP除外(ADR-0005 時点)**: AI要約、検索、タグ、通知、海外AI企業
+  - その後 AI要約(ADR-0026)・検索(ADR-0022)・タグ(ADR-0027)は実装済み。未実装は通知・海外AI企業
 
 ---
 
@@ -43,11 +44,11 @@
 - **React 19** + React Compiler
 - **TypeScript** strict
 - **Tailwind CSS v4** + **shadcn/ui**
-- **Drizzle ORM** + **Neon Postgres**
-- **Better Auth**(Google OAuth)
-- **Trigger.dev v3**(RSS取得バッチ)
+- **Drizzle ORM** + **Supabase Postgres**(postgres-js / ADR-0033)
+- **Better Auth**(Google / GitHub / Discord OAuth)
+- **Trigger.dev v4**(RSS取得・AI要約バッチ)
 - **Bun** + **Biome**
-- **Sentry** + **PostHog**
+- **PostHog**(Sentry は導入予定・未導入。現状のエラーは `lib/observability/logger` に出す)
 
 詳細は `TECH_STACK.md` を参照。
 

@@ -65,7 +65,7 @@ refreshUserFeedAction(id): Result<{ added }, { message }>     // 手動更新
 - ログイン必須(プライベート)。各操作は所有者(`user_id`)を WHERE に含めて他人の行に触れない。
 - 登録時に RSS を即時取得し、記事が0件 / 取得失敗ならフィードを作らない。
 - 1ユーザーの登録上限 `MAX_FEEDS_PER_USER = 50`。同一 URL の重複登録は不可。
-- URL は http/https のみ。SSRF 対策で内部 IP(プライベート/ループバック/リンクローカル/メタデータ)宛ては拒否(`lib/http/safe-url.ts`)。
+- URL は http/https のみ。SSRF 対策で内部 IP(プライベート/ループバック/リンクローカル/メタデータ)宛ては拒否(`lib/http/safe-url.ts`)。取得時はリダイレクトを自動追従せず、転送先も毎回同じ検証を通してから辿る(最大 5 回。`safeFetch` の `guardUrl`)。
 - 取得は登録時の即時 + 定期バッチ `trigger/fetch-user-feeds.ts`(毎時 :15)。
 
 ## フィルタ(サイドバー / チップ / シート)

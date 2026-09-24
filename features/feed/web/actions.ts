@@ -11,15 +11,20 @@ import { trackView } from '../application/track-view';
 import { updateArticleMetrics } from '../application/update-article-metrics';
 import { upsertArticles } from '../application/upsert-articles';
 import type { FeedError } from '../domain/errors';
+import { canRefreshNow } from '../domain/refresh-cooldown';
 import { DrizzleArticleRepository } from '../infrastructure/drizzle-article-repository';
+import { DrizzleCompanyRepository } from '../infrastructure/drizzle-company-repository';
 
 const articleRepo = new DrizzleArticleRepository(db);
+const companyRepo = new DrizzleCompanyRepository(db);
 
 export type RefreshResult = {
   /** 取り込めた(新規 upsert された)記事数の合計。 */
   ingested: number;
   /** 取得に失敗した企業数。 */
   failed: number;
+  /** 直近に取込済み(クールダウン中)のためクロールを省略したか。 */
+  skipped: boolean;
 };
 
 /**
@@ -30,8 +35,14 @@ export type RefreshResult = {
  *
  * 注意: 全企業を同期クロールするため数秒〜十数秒かかる(Vercel の関数実行時間内)。
  * 1社の失敗・メトリクス取得失敗は全体を止めない。
+ * 直近の取込試行(cron 含む)からクールダウン内なら何もせず skipped を返す(domain/refresh-cooldown.ts)。
  */
 export async function refreshFeed(): Promise<RefreshResult> {
+  const lastAttemptAt = await companyRepo.findLastIngestAttemptAt();
+  if (!canRefreshNow(lastAttemptAt, new Date())) {
+    return { ingested: 0, failed: 0, skipped: true };
+  }
+
   const sink = upsertArticles({ articles: articleRepo });
   const results = await ingestAllCompanies(sink);
 
@@ -52,7 +63,7 @@ export async function refreshFeed(): Promise<RefreshResult> {
 
   // フィードキャッシュを無効化して、直後の再描画で新着を反映する(全バリアント)。
   revalidateTag(CACHE_TAGS.feed, 'max');
-  return { ingested, failed };
+  return { ingested, failed, skipped: false };
 }
 
 /**

@@ -145,7 +145,7 @@ trackArticleView(input: { articleId: string }): Promise<Result<void, FeedError>>
 - 公開フィードは `'use cache'` + `cacheTag('feed')` でキャッシュし、`cacheLife('minutes')` で再検証
 - 企業一覧・ユーザー単位データ(bookmark/favorite/購読)も `'use cache'` 化し、操作 Action はユーザー単位タグの `updateTag` で無効化する(`revalidatePath('/')` は使わない=ゲスト共通の feed キャッシュを巻き添えにしない)。ADR-0016
 - ソート/期間/企業の切替は `FeedList` を再マウントせず、URL 由来の変化を検知して内部 state を page=1 へ同期する(カード DOM を保持)。切替先は `FeedControls` のセグメント/チップのホバー/フォーカスで `router.prefetch` 済み。ADR-0016
-- 新規取得: Trigger.dev の `fetch-feed-articles` タスクが1時間おきに全企業の RSS を取得する。取得後に直近記事のはてなブックマーク数も更新し、人気順の材料を揃える。ローカル検証は `scripts/ingest.ts` で全企業を取得する。トップバーの更新ボタン(`RefreshButton` → `refreshFeed` Server Action)からオンデマンド取得もできる
+- 新規取得: Trigger.dev の `fetch-feed-articles` タスクが1時間おきに全企業の RSS を取得する。取得後に直近記事のはてなブックマーク数も更新し、人気順の材料を揃える。ローカル検証は `scripts/ingest.ts` で全企業を取得する。トップバーの更新ボタン(`RefreshButton` → `refreshFeed` Server Action)からオンデマンド取得もできる。Server Action は外部から直接呼べるため、直近の取込試行(cron 含む、企業の `last_fetched_at` / `last_error_at` の最大)から 5 分以内はクロールせず `skipped` を返す(`domain/refresh-cooldown.ts`)
 - 日付の TZ 補正: `companies.feedTimezone` を設定したフィードは、宣言 TZ を無視して `pubDate` の壁時計をその TZ で解釈する(TZ 欠落/誤記フィード対応。メルカリが実例)。取込時に「now+10分」を超えて未来の `publishedAt` は取込時刻にクランプし警告する(誤設定でも「たった今」固定を防ぐ)。詳細は ADR-0025 / `docs/guides/adding-a-company.md`
 - 未読/既読フィルタ(`?read=unread|read`、既定 all): 記事ページを開くと既読化(ログイン=DB / ゲスト=localStorage)。フィルタは feed クエリの `EXISTS`/`NOT EXISTS` で絞る(全件既読 ID を持たない)。ログインはサーバー絞り込み、ゲストは `FeedList` がクライアント側 hide。未読バッジは出さない。詳細は ADR-0021 / `docs/features/reads.md`
 - モバイルドック(<md): `MobileFeedDock` は `MobileNav` と共有 `bottom-chrome` Context を購読し、下スクロールで両者を同じ距離だけ一体退避する。企業/既読/期間フィルタ適用中(件数バッジ表示中)は退避させない。フィード末尾は `--mobile-nav-h` + ドック高ぶんの余白を確保する。詳細は ADR-0023。

@@ -3,6 +3,7 @@
 import { useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useFeedNav } from './feed-nav-context';
+import { parseListParam } from './parse-list-param';
 
 /**
  * 企業フィルタの複数選択(?company=a,b,c)の ViewModel。
@@ -25,16 +26,7 @@ export function useFeedCompanies(): {
   const params = useSearchParams();
   const { isPending, navigate, prefetch } = useFeedNav();
   const urlValue = params.get('company') ?? '';
-  const companies = useMemo(
-    () =>
-      urlValue
-        ? urlValue
-            .split(',')
-            .map((s) => s.trim())
-            .filter(Boolean)
-        : [],
-    [urlValue],
-  );
+  const companies = useMemo(() => parseListParam(urlValue), [urlValue]);
   const [optimistic, setOptimistic] = useState<string[]>(companies);
 
   useEffect(() => {

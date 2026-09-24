@@ -169,7 +169,7 @@ techblo/
    ↓
 [db/client.ts: drizzle.select() with cache]
    ↓
-[Neon Postgres]
+[Supabase Postgres]
 ```
 - **PPR**: shell部分(ヘッダー・サイドバー)は静的化、記事カードは動的
 - **キャッシュ**: 未ログイン時のフィードは `unstable_cache` で 60秒 edge cache
@@ -295,11 +295,11 @@ Server Action / queries は Result を返し、throw は避ける(observability�
 | 種別 | ツール | 対象 |
 |---|---|---|
 | Unit | Vitest | features/*/policies.ts、lib/rss/parser.ts |
-| Integration | Vitest + Test DB | features/*/actions.ts(Neon branchで隔離) |
+| Integration | Vitest + Test DB | features/*/actions.ts(`TEST_DATABASE_URL` の別インスタンスで隔離) |
 | E2E | Playwright | 主要シナリオ(閲覧→ログイン→ブックマーク) |
 | Visual | Storybook 8 | components/ui/*、ArticleCardの状態網羅 |
 
-**MVPでは Unit + 主要 E2E に絞る**。Integration テストは Neon branching で本番影響なく実行可能。
+**MVPでは Unit + 主要 E2E に絞る**。Integration テストは本番と別の Test DB(`TEST_DATABASE_URL`)で実行する(ADR-0033)。
 
 ---
 

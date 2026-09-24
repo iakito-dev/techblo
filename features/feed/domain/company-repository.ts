@@ -29,4 +29,9 @@ export interface CompanyRepository {
   listEnabledWithCounts(): Promise<CompanyWithCounts[]>;
   /** slug で1社を引く(有効な企業のみ)。無ければ null。企業ページ用。 */
   findBySlug(slug: string): Promise<CompanyDetail | null>;
+  /**
+   * 企業フィードの直近の取込試行時刻(成功・失敗の新しい方、全企業の最大)。未取込なら null。
+   * 手動更新のクールダウン判定に使う。
+   */
+  findLastIngestAttemptAt(): Promise<Date | null>;
 }

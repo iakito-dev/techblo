@@ -1,4 +1,4 @@
-import { and, count, desc, eq, isNull } from 'drizzle-orm';
+import { and, count, desc, eq, isNull, max } from 'drizzle-orm';
 import type { Database } from '@/db/client';
 import { articles } from '@/db/schema/articles';
 import { companies } from '@/db/schema/companies';
@@ -69,5 +69,21 @@ export class DrizzleCompanyRepository implements CompanyRepository {
       description: r.description,
       articleCount: r.articleCount,
     };
+  }
+
+  async findLastIngestAttemptAt(): Promise<Date | null> {
+    const rows = await this.db
+      .select({
+        lastFetchedAt: max(companies.lastFetchedAt),
+        lastErrorAt: max(companies.lastErrorAt),
+      })
+      .from(companies)
+      .where(eq(companies.enabled, true));
+
+    const times = [rows[0]?.lastFetchedAt, rows[0]?.lastErrorAt].filter(
+      (d): d is Date => d instanceof Date,
+    );
+    if (times.length === 0) return null;
+    return new Date(Math.max(...times.map((d) => d.getTime())));
   }
 }

@@ -25,7 +25,7 @@
 ### データ層
 | 領域 | 技術 |
 |---|---|
-| DB | **Neon** (Serverless Postgres + DB branching) |
+| DB | **Supabase Postgres**(東京リージョン・Transaction Pooler 経由。ADR-0033 で Neon から移行) |
 | ORM | **Drizzle ORM** + Drizzle Studio |
 | バリデーション | **Zod 4** |
 
@@ -33,18 +33,18 @@
 | 領域 | 技術 |
 |---|---|
 | 認証ライブラリ | **Better Auth** |
-| プロバイダー | Google OAuth(MVPは1つに絞る) |
+| プロバイダー | Google / GitHub / Discord OAuth |
 
 ### バックグラウンド処理
 | 領域 | 技術 |
 |---|---|
 | ジョブキュー | **Trigger.dev v4** |
-| 用途 | RSS定期取得、将来のAI要約バッチ |
+| 用途 | RSS定期取得、AI要約・カテゴリ分類バッチ |
 
-### AI(将来フェーズ)
+### AI
 | 領域 | 技術 |
 |---|---|
-| AI SDK | **Vercel AI SDK 4** |
+| AI SDK | **Vercel AI SDK** + Google Gemini(`lib/ai/llm-client.ts`。要約は ADR-0026) |
 | 拡張 | **MCP** + **Claude Agent SDK** |
 
 ### 状態管理
@@ -56,7 +56,7 @@
 ### 観測・運用
 | 領域 | 技術 |
 |---|---|
-| エラー監視 | **Sentry** |
+| エラー監視 | **Sentry**(導入予定・未導入) |
 | プロダクト分析 | **PostHog**(アナリティクス + Feature Flag + セッション録画) |
 
 ### 開発基盤
@@ -83,7 +83,7 @@
 | 項目 | 無料枠 | 月額 |
 |---|---|---|
 | Vercel Hobby | 100GB帯域、Cron無制限 | $0 |
-| Neon Free | 0.5GB DB、Auto-suspend | $0 |
+| Supabase Free | プラン条件は Supabase の料金ページで確認 | $0 |
 | Better Auth | OSS自前ホスト | $0 |
 | Trigger.dev Free | 5,000 runs/月 | $0 |
 | PostHog Free | 1Mイベント/月、5Kセッション録画 | $0 |
@@ -93,7 +93,7 @@
 
 スケール時の有料化ライン例:
 - Vercel Pro($20/月)— 帯域超過 or Cron頻度up
-- Neon Launch($19/月)— DB 0.5GB超 or 計算リソース増
+- Supabase Pro — DB 容量超過 or 計算リソース増
 
 ### 無料枠の注意事項(確認済み)
 
@@ -104,7 +104,6 @@
 | **PostHog Free** | 超過すると自動課金発生 → **Billing Limit を必ず設定** |
 | **Sentry Developer** | 1ユーザーのみ、エラー5K/月 |
 | **Resend Free** | 月3,000通 + **日100通上限**、1ドメイン |
-| **Neon Free** | 5分非アクティブで auto-suspend(初回アクセス遅延あり) |
 
 ---
 
@@ -125,7 +124,7 @@
      └──────────────┘   └─────────────────┘
               ↓
         ┌─────────┐
-        │  Neon   │
+        │Supabase │
         │Postgres │
         └─────────┘
               ↑
@@ -163,7 +162,7 @@
 - Postgres = 業界標準、ベンダー移行容易
 - Server Actions + Drizzleでバックエンド分離不要だが、必要になれば Hono 等で容易に分離可能
 - shadcn/uiは「自分のコード」なのでベンダーロックなし
-- Neon の DB branching で本番影響なしに移行検証可能
+- (旧)Neon の DB branching 前提の記述は ADR-0033 で撤回。テスト DB は `TEST_DATABASE_URL` の別インスタンス
 
 ---
 
@@ -174,7 +173,7 @@
 | SvelteKit / Astro / Nuxt | エコシステム規模、shadcn/ui同等品、AI assistantsの精度 |
 | Remix | App Router の Next.js とほぼ同等、情報量で劣る |
 | Prisma | 重い、Serverless遅、AIプロンプト消費が大きい |
-| Supabase | All-in-oneだがDB branchingでNeonが勝る、Better Authで認証独立化 |
+| Supabase(当初) | 当初は DB branching で Neon を採用したが、ADR-0033 で Supabase(東京)へ移行済み。認証は Better Auth のまま |
 | Clerk(認証) | 月10k MAU超で$25/月発生、Better Authで十分 |
 | Cloudflare Pages + Workers | Next.js互換が不完全、Hyperdrive必要 |
 | LangChain | 個人開発には過剰、Vercel AI SDKで十分 |

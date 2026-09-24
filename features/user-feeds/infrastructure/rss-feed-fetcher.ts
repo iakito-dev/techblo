@@ -6,14 +6,15 @@ import type { FeedFetcher } from '../application/feed-fetcher';
 
 /**
  * FeedFetcher の実装(Driven Adapter)。
- * SSRF 検証 → XML 取得 → 記事パース + メタ抽出を1経路にまとめる。
+ * SSRF 検証(リダイレクト先含む)→ XML 取得 → 記事パース + メタ抽出を1経路にまとめる。
  * ユーザー向け文言にして返す(actions 層がそのままトーストに出せる粒度)。
  */
 export const rssFeedFetcher: FeedFetcher = async (rssUrl) => {
+  // 形式・ホストの誤りは取得前に入力エラーとして返す(リダイレクト先は fetchFeed 内で再検証)。
   const safe = await assertPublicHttpUrl(rssUrl);
   if (!safe.ok) return err(safe.error);
 
-  const fetched = await fetchFeed(rssUrl);
+  const fetched = await fetchFeed(safe.value, { guardUrl: assertPublicHttpUrl });
   if (!fetched.ok) return err(`フィードを取得できませんでした(${fetched.error})`);
 
   const parsed = parseFeed(fetched.value);

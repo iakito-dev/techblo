@@ -9,6 +9,7 @@ import {
   type ReadFilterMode,
 } from '../../domain/feed-sort';
 import { useFeedNav } from './feed-nav-context';
+import { parseListParam } from './parse-list-param';
 
 /**
  * フィルタ(ステータス / 期間 / 企業)の単一の真実の源(ViewModel)。
@@ -44,15 +45,10 @@ export function useFeedFilters(): FeedFilters & {
 
   const status = parseReadMode(params.get('read') ?? undefined);
   const period = parsePeriod(params.get('period') ?? undefined);
-  const parseList = (raw: string | null) =>
-    raw
-      ? raw
-          .split(',')
-          .map((s) => s.trim())
-          .filter(Boolean)
-      : [];
-  const companies = useMemo(() => parseList(params.get('company')), [params]);
-  const userFeeds = useMemo(() => parseList(params.get('feed')), [params]);
+  const companyParam = params.get('company');
+  const feedParam = params.get('feed');
+  const companies = useMemo(() => parseListParam(companyParam), [companyParam]);
+  const userFeeds = useMemo(() => parseListParam(feedParam), [feedParam]);
 
   const activeCount =
     (status !== 'all' ? 1 : 0) + (period !== 'all' ? 1 : 0) + companies.length + userFeeds.length;

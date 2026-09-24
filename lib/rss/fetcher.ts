@@ -1,12 +1,17 @@
-import { safeFetch } from '@/lib/http/fetcher';
+import { safeFetch, type UrlGuard } from '@/lib/http/fetcher';
 import { err, ok, type Result } from '@/shared/result';
 
 /**
  * RSS/Atom フィードのXMLを取得する。
  * timeout/retry は safeFetch に委譲。
+ * ユーザー入力 URL の場合は guardUrl を渡し、リダイレクト先まで SSRF 検証させる。
  */
-export async function fetchFeed(url: string): Promise<Result<string, string>> {
+export async function fetchFeed(
+  url: string,
+  options: { guardUrl?: UrlGuard } = {},
+): Promise<Result<string, string>> {
   const res = await safeFetch(url, {
+    guardUrl: options.guardUrl,
     timeoutMs: 15_000,
     retries: 3,
     headers: {

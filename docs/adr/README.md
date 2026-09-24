@@ -18,8 +18,11 @@
 | [0010](./0010-layered-hexagonal-within-features.md) | feature 内部のレイヤード + ヘキサゴナル(軽量DDD) | Accepted |
 | [0011](./0011-base44-design-refresh.md) | Base44参照デザインへの刷新(インディゴ配色 + テキスト主体カード) | Accepted |
 | [0012](./0012-subscription-initialization-on-signup.md) | 初回ログイン時の subscriptions 初期化を better-auth フックで行う | Accepted |
-| [0013](./0013-offset-pagination-and-feed-cache.md) | フィードはオフセットページネーション + キャッシュ | Accepted |
-| [0014](./0014-user-private-rss-feeds.md) | ユーザー登録RSS(プライベート)を別テーブル分離 + UNION マージ | Accepted |
+| [0013](./0013-cross-feature-article-composition.md) ※ | 記事に対する横断機能(購読/ブックマーク/お気に入り)は app 層で合成する | Accepted |
+| [0013](./0013-offset-pagination-and-feed-cache.md) ※ | フィードはオフセットページネーション + キャッシュ | Accepted |
+| [0014](./0014-external-popularity-signals.md) ※ | 人気順に外部シグナル(はてなブックマーク数)を採用 | Accepted |
+| [0014](./0014-user-private-rss-feeds.md) ※ | ユーザー登録RSS(プライベート)を別テーブル分離 + UNION マージ | Accepted |
+| [0015](./0015-feed-ui-refinements.md) | フィード UI のレイアウト・操作性リファインメント(配色は維持) | Accepted |
 | [0016](./0016-user-scoped-cache-and-feed-rerender.md) | フィードのユーザー単位キャッシュと再マウント回避 | Accepted |
 | [0017](./0017-guest-saves-local-and-merge-on-login.md) | ゲスト保存は localStorage、ログインで DB へマージ | Accepted |
 | [0018](./0018-popularity-velocity-trend-score.md) | 人気順を累計はてブ数から伸び速度(velocity)へ | Accepted |
@@ -40,6 +43,11 @@
 | [0033](./0033-migrate-neon-to-supabase-postgres-js.md) | DB を Neon から Supabase(東京)へ移行・postgres-js ドライバ化 | Accepted |
 | [0034](./0034-article-categories-by-function.md) | 記事カテゴリは職能軸の7種、保存済み要約から独立ステップで分類する | Accepted |
 | [0035](./0035-sectioned-feed-and-editorial-cards.md) | セクション型フィードとエディトリアル(上罫)カード | Accepted |
+| [0036](./0036-article-detail-as-page-instead-of-dialog.md) | 記事詳細をダイアログから個別ページへ | Accepted |
+
+※ 0013 と 0014 は同日に並行して採番され、番号が2件ずつ重複している。コードやドキュメントから
+参照済みのため改番はしない(既存ADRは変更しない)。**これらを参照する時は番号だけでなく
+ファイル名(例: `ADR-0014 user-private-rss-feeds`)で区別すること**。新しい ADR は一覧の最大番号 + 1 を使う。
 
 ## 運用ルール
 
