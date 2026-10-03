@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { err, ok } from '@/shared/result';
-import { safeFetch, type UrlGuard } from './fetcher';
+import { readTextWithLimit, safeFetch, type UrlGuard } from './fetcher';
 
 const redirect = (location: string) => new Response(null, { status: 302, headers: { location } });
 
@@ -56,5 +56,47 @@ describe('safeFetch guardUrl', () => {
 
     expect(res.ok).toBe(false);
     expect(fetchMock).not.toHaveBeenCalled();
+  });
+});
+
+describe('readTextWithLimit', () => {
+  /** content-length を付けずにチャンクで流すレスポンス(実際の読み込みバイト数で打ち切れるかを見る)。 */
+  const streamed = (...chunks: string[]) =>
+    new Response(
+      new ReadableStream({
+        start(controller) {
+          for (const c of chunks) controller.enqueue(new TextEncoder().encode(c));
+          controller.close();
+        },
+      }),
+    );
+
+  it('上限以内ならテキストを返す(マルチバイトがチャンク境界で割れても復元する)', async () => {
+    const bytes = new TextEncoder().encode('テック');
+    const res = new Response(
+      new ReadableStream({
+        start(controller) {
+          controller.enqueue(bytes.slice(0, 4));
+          controller.enqueue(bytes.slice(4));
+          controller.close();
+        },
+      }),
+    );
+
+    expect(await readTextWithLimit(res, 1024)).toEqual(ok('テック'));
+  });
+
+  it('content-length が上限を超えていれば読まずに拒否する', async () => {
+    const res = new Response('x', { headers: { 'content-length': String(10 * 1024 * 1024) } });
+
+    const result = await readTextWithLimit(res, 1024 * 1024);
+
+    expect(result.ok).toBe(false);
+  });
+
+  it('content-length が無くても読み込み中に上限を超えたら打ち切る', async () => {
+    const result = await readTextWithLimit(streamed('a'.repeat(600), 'b'.repeat(600)), 1000);
+
+    expect(result.ok).toBe(false);
   });
 });

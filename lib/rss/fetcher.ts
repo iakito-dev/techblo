@@ -1,5 +1,8 @@
-import { safeFetch, type UrlGuard } from '@/lib/http/fetcher';
-import { err, ok, type Result } from '@/shared/result';
+import { readTextWithLimit, safeFetch, type UrlGuard } from '@/lib/http/fetcher';
+import { err, type Result } from '@/shared/result';
+
+/** フィード XML の上限サイズ。大手テックブログの全文入りフィードでも数 MB に収まる。 */
+const MAX_FEED_BYTES = 10 * 1024 * 1024;
 
 /**
  * RSS/Atom フィードのXMLを取得する。
@@ -21,9 +24,10 @@ export async function fetchFeed(
   if (!res.ok) return err(res.error);
 
   try {
-    const xml = await res.value.text();
-    if (!xml.trim()) return err('empty response body');
-    return ok(xml);
+    const xml = await readTextWithLimit(res.value, MAX_FEED_BYTES);
+    if (!xml.ok) return xml;
+    if (!xml.value.trim()) return err('empty response body');
+    return xml;
   } catch (e) {
     return err(e instanceof Error ? e.message : String(e));
   }

@@ -17,6 +17,12 @@ type FetchOptions = Omit<RequestInit, 'redirect'> & {
 const MAX_REDIRECTS = 5;
 
 /**
+ * 取得元に名乗る User-Agent。連絡先として本番ドメインを添える。
+ * Trigger.dev(バッチ)でも同じ値になるよう環境変数に依存させない。
+ */
+const USER_AGENT = 'Techblo/1.0 (+https://techblo.dev)';
+
+/**
  * Timeout + retry 付き fetch。
  * RSS取得や OGP取得など、不安定な外部リソースに対して使う。
  */
@@ -65,7 +71,7 @@ async function fetchOnce(
 ): Promise<Result<Response, string>> {
   const signal = AbortSignal.timeout(timeoutMs);
   const headers = {
-    'User-Agent': 'Techblo/1.0 (+https://techblo.example)',
+    'User-Agent': USER_AGENT,
     ...init.headers,
   };
   if (!guardUrl) return ok(await fetch(url, { ...init, signal, headers }));
@@ -83,6 +89,45 @@ async function fetchOnce(
     current = new URL(location, safe.value).toString();
   }
   return err('リダイレクトが多すぎます');
+}
+
+/**
+ * レスポンス本文を上限バイト数までテキストで読む。超えたら読み込みを打ち切って err を返す。
+ * ユーザー登録 URL などが巨大な本文を返してもメモリを使い切らないようにするため。
+ */
+export async function readTextWithLimit(
+  res: Response,
+  maxBytes: number,
+): Promise<Result<string, string>> {
+  const tooLarge = `レスポンスが大きすぎます(上限 ${Math.floor(maxBytes / 1024 / 1024)}MB)`;
+  const declared = Number(res.headers.get('content-length'));
+  if (Number.isFinite(declared) && declared > maxBytes) {
+    await res.body?.cancel();
+    return err(tooLarge);
+  }
+  if (!res.body) return ok('');
+
+  const reader = res.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let total = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    total += value.byteLength;
+    if (total > maxBytes) {
+      await reader.cancel();
+      return err(tooLarge);
+    }
+    chunks.push(value);
+  }
+
+  const buf = new Uint8Array(total);
+  let offset = 0;
+  for (const chunk of chunks) {
+    buf.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  return ok(new TextDecoder().decode(buf));
 }
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));

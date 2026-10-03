@@ -1,10 +1,13 @@
-import { safeFetch } from '@/lib/http/fetcher';
+import { readTextWithLimit, safeFetch } from '@/lib/http/fetcher';
 import { logger } from '@/lib/observability/logger';
 import type { ArticleId } from '@/shared/type-utils';
 import type { ArticleContentFetcher, FetchedContent } from '../domain/article-content-fetcher';
 
 /** 本文として短すぎる(抽出失敗とみなす)下限文字数。下回ったら null で抜粋フォールバックさせる。 */
 const MIN_USABLE_CHARS = 200;
+
+/** 記事 HTML の上限サイズ。超える場合は本文取得を諦めて抜粋フォールバックさせる。 */
+const MAX_HTML_BYTES = 5 * 1024 * 1024;
 
 /**
  * HTML から本文プレーンテキストを抽出する素朴な実装。
@@ -37,8 +40,12 @@ export class HtmlContentFetcher implements ArticleContentFetcher {
       logger.warn('article content fetch failed', { articleId: input.articleId, error: res.error });
       return null;
     }
-    const html = await res.value.text();
-    const text = extractText(html);
+    const html = await readTextWithLimit(res.value, MAX_HTML_BYTES);
+    if (!html.ok) {
+      logger.warn('article content too large', { articleId: input.articleId, error: html.error });
+      return null;
+    }
+    const text = extractText(html.value);
     if (text.length < MIN_USABLE_CHARS) return null;
     return { text, source: 'full_text' };
   }

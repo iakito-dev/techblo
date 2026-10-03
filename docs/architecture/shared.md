@@ -239,7 +239,7 @@ export async function safeFetch(
         ...init,
         signal: AbortSignal.timeout(timeoutMs),
         headers: {
-          'User-Agent': 'Techblo/1.0 (+https://techblo.example)',
+          'User-Agent': 'Techblo/1.0 (+https://techblo.dev)',
           ...init.headers,
         },
       });
