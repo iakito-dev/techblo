@@ -24,7 +24,7 @@ export function SavedArticlesSkeleton({ kind }: { kind: 'bookmark' | 'favorite' 
           <h1 className="font-bold text-xl tracking-tight">{title}</h1>
         </div>
       </div>
-      {/* 「N件の記事」と同じ行高のプレースホルダ(-mt-2 mb-5 も SavedArticlesView と一致させる) */}
+      {/* 「N件」と同じ行高のプレースホルダ(-mt-2 mb-5 も SavedArticlesView と一致させる) */}
       <div className="-mt-2 mb-5 h-5 w-20 animate-pulse rounded bg-bg-surface-3" />
       <FeedGridSkeleton />
     </section>

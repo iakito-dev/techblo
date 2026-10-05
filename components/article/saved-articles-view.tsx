@@ -1,7 +1,6 @@
 'use client';
 
-import { Button, Dropdown, Label } from '@heroui/react';
-import { ArrowUpDown, Bookmark, ChevronDown, Heart, Inbox } from 'lucide-react';
+import { Bookmark, Heart, Inbox, Search } from 'lucide-react';
 import Link from 'next/link';
 import { useRef, useState, useTransition } from 'react';
 import { toast } from 'sonner';
@@ -12,6 +11,8 @@ import type { ArticleCard as ArticleCardType } from '@/features/feed/application
 import { ArticleCard } from '@/features/feed/web/components/article-card';
 import { FEED_GAP_CLASS } from '@/features/feed/web/feed-grid-classes';
 import { ActionButtons } from './article-actions';
+import { SavedSearchInput, SavedSortDropdown } from './saved-articles-controls';
+import { filterAndSortSaved, type SavedSort } from './saved-articles-filter';
 import { type GuestSaveKind, setGuestSave, useGuestSaves } from './use-guest-saves';
 
 type SavedKind = Exclude<GuestSaveKind, 'read'>;
@@ -33,13 +34,6 @@ const KIND_CONFIG = {
   },
 } satisfies Record<SavedKind, unknown>;
 
-type SavedSort = 'savedAt' | 'publishedAt';
-
-const SORT_OPTIONS: { value: SavedSort; label: string }[] = [
-  { value: 'savedAt', label: '保存した日' },
-  { value: 'publishedAt', label: '記事の公開日' },
-];
-
 /** フェードアウト時間(ms)。wrapper の duration-300 と合わせる。 */
 const LEAVE_DURATION = 300;
 const UNDO_DURATION = 5000;
@@ -50,7 +44,8 @@ const UNDO_DURATION = 5000;
  * - 解除 Undo: ページ種別の解除はカードを即削除せずフェードアウト + トーストの「元に戻す」で
  *   元の位置に復元できる(誤タップによる保存消失の防止)。サーバーへは解除を即送り、Undo は
  *   再保存を送る(どちらも冪等)。一覧は初期 props で固定し、revalidate による並び替えを受けない。
- * - 並び替え: 保存した日(props 順 = 新しい順)/ 記事の公開日。
+ * - 絞り込み・並び替え: 保存済みの全件を props で受けており(ページングなし)、全件が対象。
+ *   保存した順(props 順 = 新しい順)/ 公開日の新しい順・古い順。状態は component state のみ。
  * - 記事の props はサーバー(またはゲストの localStorage 解決)から受け、状態はここで持つ。
  */
 export function SavedArticlesView({
@@ -74,18 +69,29 @@ export function SavedArticlesView({
   // 一覧は初回マウント時点で固定。離脱→再訪時にサーバーの最新状態へ揃う)。
   const [stableArticles] = useState(articles);
   const [sort, setSort] = useState<SavedSort>('savedAt');
+  const [query, setQuery] = useState('');
   // ページ種別を解除した記事(フェード中 → hidden)。Undo で両方から外して復元する。
   const [unsavedIds, setUnsavedIds] = useState<ReadonlySet<string>>(new Set());
   const [hiddenIds, setHiddenIds] = useState<ReadonlySet<string>>(new Set());
   const hideTimers = useRef(new Map<string, ReturnType<typeof setTimeout>>());
 
   const visibleCount = stableArticles.filter((a) => !unsavedIds.has(a.id)).length;
-  const sorted =
-    sort === 'publishedAt'
-      ? [...stableArticles].sort(
-          (a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime(),
-        )
-      : stableArticles;
+  const sorted = filterAndSortSaved(
+    stableArticles,
+    (a) => ({
+      title: a.title,
+      companyName: a.company.name,
+      publishedAt: new Date(a.publishedAt),
+      overview: summaries[a.id]?.overview,
+      tags: summaries[a.id]?.tags,
+    }),
+    query,
+    sort,
+  );
+  // 解除フェード中のカードは描画には残すが件数には含めない
+  const matchedCount = sorted.filter((a) => !unsavedIds.has(a.id)).length;
+  const isFiltering = query.trim() !== '';
+  const showControls = visibleCount > 1 || query !== '';
 
   function persistPageSaved(articleId: string, next: boolean) {
     if (isGuest) {
@@ -164,9 +170,16 @@ export function SavedArticlesView({
           <Icon className="size-5 text-fg-muted" />
           <h1 className="font-bold text-xl tracking-tight">{title}</h1>
         </div>
-        {visibleCount > 1 && <SortDropdown sort={sort} onSelect={setSort} />}
       </div>
-      <p className="-mt-2 mb-5 text-fg-muted text-sm">{visibleCount}件の記事</p>
+      {showControls && <SavedSearchInput value={query} onChange={setQuery} />}
+      <div
+        className={`${showControls ? 'mt-3' : '-mt-2'} mb-5 flex items-center justify-between gap-3`}
+      >
+        <p className="text-fg-muted text-sm">
+          {isFiltering ? `${matchedCount}件 / 全${visibleCount}件` : `${visibleCount}件`}
+        </p>
+        {showControls && <SavedSortDropdown sort={sort} onSelect={setSort} />}
+      </div>
 
       {visibleCount === 0 ? (
         <div className="flex flex-col items-center justify-center px-6 py-24 text-center">
@@ -176,6 +189,18 @@ export function SavedArticlesView({
           <Link href="/" className="mt-4 font-medium text-accent text-sm hover:underline">
             フィードを見る
           </Link>
+        </div>
+      ) : matchedCount === 0 && isFiltering ? (
+        <div className="flex flex-col items-center justify-center px-6 py-20 text-center">
+          <Search className="size-10 text-fg-subtle" />
+          <p className="mt-4 font-bold text-fg-default">一致する記事がありません</p>
+          <button
+            type="button"
+            onClick={() => setQuery('')}
+            className="mt-3 rounded-sm font-medium text-accent text-sm hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+          >
+            絞り込みをクリア
+          </button>
         </div>
       ) : (
         <>
@@ -215,7 +240,7 @@ export function SavedArticlesView({
             })}
           </div>
           {/* 件数が少ないと左上に寄って空白が広がるため、薄い補足で「これから増える」ことを示す */}
-          {visibleCount <= 2 && (
+          {visibleCount <= 2 && !isFiltering && (
             <p className="mt-8 text-center text-fg-subtle text-sm">
               {emptyHint}。
               <Link href="/" className="ml-1 text-accent hover:underline">
@@ -226,49 +251,6 @@ export function SavedArticlesView({
         </>
       )}
     </section>
-  );
-}
-
-function SortDropdown({
-  sort,
-  onSelect,
-}: {
-  sort: SavedSort;
-  onSelect: (next: SavedSort) => void;
-}) {
-  const currentLabel = SORT_OPTIONS.find((o) => o.value === sort)?.label ?? '保存した日';
-  return (
-    <Dropdown>
-      <Button
-        variant="outline"
-        aria-label="並び替え"
-        className="h-9 shrink-0 gap-1.5 rounded-sm bg-bg-surface font-medium text-sm shadow-xs"
-      >
-        <ArrowUpDown className="size-4 shrink-0 text-fg-muted" />
-        <span className="whitespace-nowrap">{currentLabel}</span>
-        <ChevronDown className="size-4 shrink-0 text-fg-subtle" />
-      </Button>
-      <Dropdown.Popover className="w-44 rounded-sm">
-        <Dropdown.Menu
-          aria-label="並び替え"
-          className="rounded-sm"
-          selectionMode="single"
-          selectedKeys={[sort]}
-          onSelectionChange={(keys) => {
-            if (keys === 'all') return;
-            const key = [...keys][0];
-            if (key) onSelect(key as SavedSort);
-          }}
-        >
-          {SORT_OPTIONS.map(({ value, label }) => (
-            <Dropdown.Item key={value} id={value} textValue={label}>
-              <Label>{label}</Label>
-              <Dropdown.ItemIndicator />
-            </Dropdown.Item>
-          ))}
-        </Dropdown.Menu>
-      </Dropdown.Popover>
-    </Dropdown>
   );
 }
 

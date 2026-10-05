@@ -16,7 +16,7 @@
 
 - 各カードに ブックマークボタン(🔖 アイコン)
 - ナビ: 「ブックマーク」リンク → `/bookmarks`
-- 一覧画面: 同じカードUI。並び替え(保存した日 / 記事の公開日、既定は保存した日の新しい順)
+- 一覧画面: 同じカードUI。絞り込み + 並び替え(下記「一覧の絞り込み・並び替え」)
 - 解除時は即削除せずフェードアウト + トースト「ブックマークを解除しました [元に戻す]」(5秒)。Undo で元の位置に復元
 - 空状態はアイコン + 説明 + 「フィードを見る」導線。1〜2件時はグリッド下に薄い補足 + 導線
 - モバイル: 下部タブの「保存」
@@ -79,3 +79,14 @@ toggleBookmark({ articleId }): Promise<Result<{ added: boolean }, BookmarkError>
 - `features/bookmarks`(4層): `setBookmark` / `listBookmarkedArticleIds`、`setBookmarkAction`(セッションは `lib/auth` 直取得)、`getBookmarkedArticleIds`。`onConflictDoNothing` で冪等。
 - 記事カードの🔖は横断 UI `components/article/article-actions.tsx`(client・楽観更新)。`features/feed` は保存系を import せず `ArticleCard` の `actions` スロットで受ける。
 - `/bookmarks`(`app/bookmarks/page.tsx`、要 `requireSession`)が `getBookmarkedArticleIds` → `features/feed` の `getArticlesByIds` で記事本体を取得し追加順に表示。空状態あり。
+
+## 一覧の絞り込み・並び替え
+
+`/bookmarks` と `/favorites`(ログイン・ゲスト共通の `SavedArticlesView`)の一覧上部に追加。状態は component state のみで URL には載せない(離脱でリセット)。
+
+- キーワード絞り込み: タイトル・企業名・AI要約の概要/タグへの部分一致。NFKC + 小文字化で正規化し、空白(全角含む)区切りは AND。保存一覧はページングせず全件を読み込むため、絞り込みも全件が対象
+- 並び替え: 保存した順(新しい順・既定)/ 公開日が新しい順 / 公開日が古い順
+- 件数表示: 「N件」、絞り込み中は「N件 / 全M件」
+- 絞り込み結果 0 件: 「一致する記事がありません」+「絞り込みをクリア」(保存 0 件の空状態とは別)
+- 入力は lg 未満 16px(iOS の自動ズーム回避)。コントロールは 2 件以上の保存がある時に表示
+- ロジックは `components/article/saved-articles-filter.ts`(純関数・unit test あり)、UI は `saved-articles-controls.tsx`
