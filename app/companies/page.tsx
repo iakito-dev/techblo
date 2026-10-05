@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { connection } from 'next/server';
 import { Suspense } from 'react';
+import { CompaniesFilter } from '@/components/article/companies-filter';
 import { CompanyFavicon } from '@/components/article/company-favicon';
 import { Header } from '@/components/layout/header';
 import { JsonLd } from '@/components/seo/json-ld';
@@ -89,23 +90,25 @@ async function CompaniesList() {
           })),
         })}
       />
-      <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {companies.map((company) => (
-          <li key={company.id}>
-            <Link
-              href={`/companies/${company.slug}`}
-              className="flex items-center gap-3 rounded-xl border border-border-card bg-bg-surface p-4 shadow-card transition-colors hover:border-border-default"
-              style={{ ['--brand' as string]: company.brandColor }}
-            >
-              <CompanyFavicon url={company.siteUrl} name={company.name} />
-              <div className="min-w-0">
-                <p className="truncate font-semibold text-fg-default">{company.name}</p>
-                <p className="text-fg-muted text-xs">記事 {company.articleCount} 件</p>
-              </div>
-            </Link>
-          </li>
-        ))}
-      </ul>
+      <CompaniesFilter>
+        <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {companies.map((company) => (
+            <li key={company.id} data-company-name={company.name}>
+              <Link
+                href={`/companies/${company.slug}`}
+                className="flex items-center gap-3 rounded-xl border border-border-card bg-bg-surface p-4 shadow-card transition-colors hover:border-border-default"
+                style={{ ['--brand' as string]: company.brandColor }}
+              >
+                <CompanyFavicon url={company.siteUrl} name={company.name} />
+                <div className="min-w-0">
+                  <p className="truncate font-semibold text-fg-default">{company.name}</p>
+                  <p className="text-fg-muted text-xs">記事 {company.articleCount} 件</p>
+                </div>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </CompaniesFilter>
     </>
   );
 }

@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
 import { CompanyArticleGrid } from '@/components/article/company-article-grid';
 import { CompanyFavicon } from '@/components/article/company-favicon';
+import { COMPANY_PAGE_SIZE } from '@/components/article/company-page-size';
 import { getCompanyArticles } from '@/components/article/feed-load-more';
 import { Header } from '@/components/layout/header';
 import { JsonLd } from '@/components/seo/json-ld';
@@ -14,7 +15,8 @@ import { breadcrumbJsonLd, companyCollectionJsonLd } from '@/lib/seo';
 import { resolveBaseUrl } from '@/lib/site-url';
 
 // 企業ページに初期表示する記事数。SEO 上「中身のある一覧」にしつつ、初回ペイロードを抑える。
-const PAGE_SIZE = 30;
+// 「もっと読む」の1ページ分と同じ値(オフセットの整合)。
+const PAGE_SIZE = COMPANY_PAGE_SIZE;
 
 /**
  * 企業の説明文を決める。マスタの description を優先し、無ければ一般的な紹介文で補う
@@ -105,7 +107,7 @@ async function CompanyContent({ params }: { params: Promise<{ slug: string }> })
 
   const baseUrl = resolveBaseUrl();
   const description = companyDescription(company.name, company.description);
-  const { items, isGuest } = await getCompanyArticles({ slug, page: 1, limit: PAGE_SIZE });
+  const { items, hasMore, isGuest } = await getCompanyArticles({ slug, page: 1, limit: PAGE_SIZE });
 
   return (
     <div style={{ ['--brand' as string]: company.brandColor }}>
@@ -168,7 +170,7 @@ async function CompanyContent({ params }: { params: Promise<{ slug: string }> })
       </header>
 
       {items.length > 0 ? (
-        <CompanyArticleGrid items={items} isGuest={isGuest} />
+        <CompanyArticleGrid slug={slug} items={items} initialHasMore={hasMore} isGuest={isGuest} />
       ) : (
         <p className="rounded-md border border-border-default bg-bg-surface p-12 text-center text-fg-muted">
           まだ記事がありません。
