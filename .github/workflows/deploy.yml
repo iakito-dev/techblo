@@ -1,0 +1,152 @@
+name: Deploy
+
+# main の更新に合わせて、Vercel が面倒を見ない本番反映をまとめて行う。
+#   1. migrate  … db/migrations の未適用分を本番 DB に適用
+#   2. seed     … 企業マスタ(scripts/seed.ts)を本番 DB に upsert
+#   3. trigger  … Trigger.dev の本番タスクを再デプロイ(置き去りにすると旧バンドルのまま cron が動く)
+# 関係するファイルが変わったジョブだけが動く。順番は migrate → seed → trigger で固定。
+
+on:
+  push:
+    branches: [main]
+  # 手動実行用(Actions タブから。動かすジョブを選べる)
+  workflow_dispatch:
+    inputs:
+      migrate:
+        description: 本番 DB にマイグレーションを適用する
+        type: boolean
+        default: false
+      seed:
+        description: 企業マスタを本番 DB に反映する
+        type: boolean
+        default: false
+      trigger:
+        description: Trigger.dev を再デプロイする
+        type: boolean
+        default: true
+
+# 本番反映は途中で止めず、後続は順番待ちにする
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  # ─────────────────────────────────────────────
+  # どのジョブを動かすか決める
+  # ─────────────────────────────────────────────
+  changes:
+    name: Detect changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      migrate: ${{ steps.plan.outputs.migrate }}
+      seed: ${{ steps.plan.outputs.seed }}
+      trigger: ${{ steps.plan.outputs.trigger }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          # push 前後の差分を取るため履歴ごと取得する
+          fetch-depth: 0
+      - name: Plan
+        id: plan
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BEFORE: ${{ github.event.before }}
+          INPUT_MIGRATE: ${{ inputs.migrate }}
+          INPUT_SEED: ${{ inputs.seed }}
+          INPUT_TRIGGER: ${{ inputs.trigger }}
+        run: |
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            migrate=$INPUT_MIGRATE; seed=$INPUT_SEED; trigger=$INPUT_TRIGGER
+          elif files=$(git diff --name-only "$BEFORE" "$GITHUB_SHA"); then
+            migrate=false; seed=false; trigger=false
+            if echo "$files" | grep -qE '^db/migrations/'; then migrate=true; fi
+            if echo "$files" | grep -qx 'scripts/seed.ts'; then seed=true; fi
+            # docs・Markdown・テストだけの変更はタスクのバンドルに入らないので再デプロイしない
+            if echo "$files" | grep -qvE '^docs/|\.md$|\.test\.tsx?$'; then trigger=true; fi
+          else
+            # 差分が取れないとき(force push 等)は全部動かす。どのジョブも再実行して安全
+            migrate=true; seed=true; trigger=true
+          fi
+          {
+            echo "migrate=$migrate"
+            echo "seed=$seed"
+            echo "trigger=$trigger"
+          } | tee -a "$GITHUB_OUTPUT"
+
+  # ─────────────────────────────────────────────
+  # DB マイグレーション
+  # ─────────────────────────────────────────────
+  migrate:
+    name: Migrate DB
+    needs: changes
+    if: needs.changes.outputs.migrate == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      DATABASE_URL: ${{ secrets.PROD_DATABASE_URL }}
+    steps:
+      - name: Warn if secret is missing
+        if: ${{ env.DATABASE_URL == '' }}
+        run: echo "::warning::PROD_DATABASE_URL が未設定のためマイグレーションをスキップしました"
+      - uses: actions/checkout@v6
+        if: ${{ env.DATABASE_URL != '' }}
+      - uses: ./.github/actions/setup
+        if: ${{ env.DATABASE_URL != '' }}
+      - run: bun run db:migrate
+        if: ${{ env.DATABASE_URL != '' }}
+
+  # ─────────────────────────────────────────────
+  # 企業マスタの反映
+  # ─────────────────────────────────────────────
+  seed:
+    name: Seed companies
+    needs: [changes, migrate]
+    # migrate がスキップでも動かす(失敗・キャンセル時だけ止める)
+    if: ${{ !failure() && !cancelled() && needs.changes.outputs.seed == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      DATABASE_URL: ${{ secrets.PROD_DATABASE_URL }}
+    steps:
+      - name: Warn if secret is missing
+        if: ${{ env.DATABASE_URL == '' }}
+        run: echo "::warning::PROD_DATABASE_URL が未設定のため企業マスタの反映をスキップしました"
+      - uses: actions/checkout@v6
+        if: ${{ env.DATABASE_URL != '' }}
+      - uses: ./.github/actions/setup
+        if: ${{ env.DATABASE_URL != '' }}
+      - run: bun run db:seed
+        if: ${{ env.DATABASE_URL != '' }}
+
+  # ─────────────────────────────────────────────
+  # Trigger.dev
+  # ─────────────────────────────────────────────
+  trigger:
+    name: Deploy Trigger.dev
+    needs: [changes, migrate, seed]
+    # 新しいタスクは新しいスキーマを前提にするので、DB 反映が失敗したら出さない
+    if: ${{ !failure() && !cancelled() && needs.changes.outputs.trigger == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      TRIGGER_ACCESS_TOKEN: ${{ secrets.TRIGGER_ACCESS_TOKEN }}
+      TRIGGER_PROJECT_REF: ${{ secrets.TRIGGER_PROJECT_REF }}
+    steps:
+      - name: Warn if secrets are missing
+        if: ${{ env.TRIGGER_ACCESS_TOKEN == '' || env.TRIGGER_PROJECT_REF == '' }}
+        run: echo "::warning::TRIGGER_ACCESS_TOKEN / TRIGGER_PROJECT_REF が未設定のため Trigger.dev のデプロイをスキップしました"
+      - uses: actions/checkout@v6
+        if: ${{ env.TRIGGER_ACCESS_TOKEN != '' && env.TRIGGER_PROJECT_REF != '' }}
+      - uses: ./.github/actions/setup
+        if: ${{ env.TRIGGER_ACCESS_TOKEN != '' && env.TRIGGER_PROJECT_REF != '' }}
+      # trigger-cli.ts は CLI を npx で起動するので node も揃える
+      - uses: actions/setup-node@v6
+        if: ${{ env.TRIGGER_ACCESS_TOKEN != '' && env.TRIGGER_PROJECT_REF != '' }}
+        with:
+          node-version-file: .nvmrc
+      - run: bun run trigger:deploy
+        if: ${{ env.TRIGGER_ACCESS_TOKEN != '' && env.TRIGGER_PROJECT_REF != '' }}

@@ -15,7 +15,7 @@
 [Supabase] ─→ テスト用 DB(TEST_DATABASE_URL)を共用(per-PR 自動ブランチは無し)
                        ↓ approve & merge
 [Vercel] ─→ Production deploy
-[Trigger.dev] ─→ Production jobs deploy
+[GitHub Actions] ─→ deploy.yml(DB migrate → seed → Trigger.dev deploy)
 ```
 
 ## 2. GitHub Actions ワークフロー
@@ -24,6 +24,7 @@
 |---|---|
 | `.github/workflows/ci.yml` | Lint / Typecheck / Test / Build / Audit |
 | `.github/workflows/db-check.yml` | スキーマ変更時の整合性チェック |
+| `.github/workflows/deploy.yml` | main 更新時の本番反映(DB マイグレーション / 企業マスタ / Trigger.dev) |
 | `.github/actions/setup/action.yml` | 各ジョブ共通の bun セットアップ(composite action) |
 
 ### 共通セットアップ
@@ -68,7 +69,15 @@
 
 - Vercel が `main` ブランチを監視
 - merge 時に自動デプロイ
-- Trigger.dev は Vercel とは別デプロイで、CI からは発火しない。タスク・DB クライアント・スキーマを変えたら `bun run trigger:deploy` を手動実行する(CLI は `scripts/trigger-cli.ts` が SDK と同じ版で起動する)
+- Vercel が面倒を見ない本番反映は `.github/workflows/deploy.yml` が `main` への push ごとに行う。関係するファイルが変わったジョブだけが、次の順に動く
+  1. **migrate**: `db/migrations/` が変わったら `bun run db:migrate`
+  2. **seed**: `scripts/seed.ts` が変わったら `bun run db:seed`(企業マスタの upsert)
+  3. **trigger**: docs・Markdown・テスト以外が変わったら `bun run trigger:deploy`(DB 反映が失敗したら出さない)
+- Actions タブから手動実行もできる(動かすジョブを選べる)
+- 必要な Secrets が未設定のジョブは、警告を出してスキップする
+- 手元から出す場合は従来どおり `bun run db:migrate` / `bun run db:seed` / `bun run trigger:deploy`(CLI は `scripts/trigger-cli.ts` が SDK と同じ版で起動する)
+- Trigger.dev のタスクが使う env(`DATABASE_URL` 等)は Trigger.dev ダッシュボード側の管理で、このワークフローでは更新されない
+- Vercel のデプロイとは順序を揃えていない。新しいカラムを前提にするコードは、マイグレーションより先に本番へ出ることがある
 
 ### Preview(PR毎)
 
@@ -110,6 +119,9 @@
 |---|---|
 | `TEST_DATABASE_URL` | CI / 統合テスト専用の Supabase DB |
 | `TEST_BETTER_AUTH_SECRET` | テスト用ダミー |
+| `PROD_DATABASE_URL` | `deploy.yml` の migrate / seed が使う本番 DB の接続文字列 |
+| `TRIGGER_ACCESS_TOKEN` | `deploy.yml` の Trigger.dev デプロイ用(Personal Access Token) |
+| `TRIGGER_PROJECT_REF` | 同上(Trigger.dev の project ref) |
 
 ## 6. デプロイ前チェックリスト
 
