@@ -31,7 +31,7 @@
     "prepare": "lefthook install"
   },
   "dependencies": {
-    "@ai-sdk/google": "^3.0.82",
+    "@ai-sdk/google": "^4.0.67",
     "@bprogress/next": "^3.2.12",
     "@heroui/react": "^3.1.0",
     "@heroui/styles": "^3.1.0",
@@ -44,7 +44,7 @@
     "@trigger.dev/sdk": "^4.4.6",
     "@vercel/analytics": "^2.0.1",
     "@vercel/speed-insights": "^2.0.0",
-    "ai": "^6.0.205",
+    "ai": "^7.0.97",
     "better-auth": "^1.6.11",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

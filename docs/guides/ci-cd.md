@@ -152,6 +152,8 @@ main merge 時(squash):
 ## 9. Renovate / Dependabot
 
 - **Dependabot** を使用(`.github/dependabot.yml`)
+- エコシステムは `bun`(`npm` だと `bun.lock` が更新されず `--frozen-lockfile` で CI が落ちる)
+- `typescript` のメジャー更新は ignore(dependency-cruiser が 7 系に未対応で depcruise が素通りするため)
 - 週次PR(月曜10時 JST)
 - グループ化: dev-dependencies / next / react / drizzle / better-auth / observability
 - minor / patch は autoMerge を将来検討(CI all green なら)

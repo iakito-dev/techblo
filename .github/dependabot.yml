@@ -1,8 +1,14 @@
 version: 2
 updates:
-  # npm/bun の依存(package.json)
-  - package-ecosystem: "npm"
+  # bun の依存(package.json + bun.lock)
+  # "npm" だと bun.lock が更新されず、CI の `bun install --frozen-lockfile` が必ず落ちる
+  - package-ecosystem: "bun"
     directory: "/"
+    ignore:
+      # dependency-cruiser が typescript >=7 を解釈できず、層境界の検証が素通りする(0 modules cruised)。
+      # 対応版が出るまでメジャー更新は止める
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
     schedule:
       interval: "weekly"
       day: "monday"

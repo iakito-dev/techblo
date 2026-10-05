@@ -51,7 +51,7 @@ class GeminiLlmClient implements LlmTextClient {
   async complete(input: LlmCompletionInput): Promise<string> {
     const { text } = await generateText({
       model: this.provider(this.model),
-      system: input.system,
+      instructions: input.system,
       prompt: input.prompt,
       maxOutputTokens: input.maxOutputTokens,
       providerOptions: {
