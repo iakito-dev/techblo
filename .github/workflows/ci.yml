@@ -41,7 +41,7 @@ jobs:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/setup
       # tsconfig は incremental: true。tsbuildinfo を持ち越すと 2 回目以降が数倍速い
-      - uses: actions/cache@v5
+      - uses: actions/cache@v6
         with:
           path: tsconfig.tsbuildinfo
           key: ${{ runner.os }}-tsbuildinfo-${{ github.sha }}
