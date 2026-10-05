@@ -35,6 +35,7 @@ auth (ログイン) ──┬→ subscriptions (購読企業のON/OFF)
 | 購読企業設定 | Draft | [subscriptions.md](./subscriptions.md) |
 | マイフィード(ユーザー登録RSS) | Draft | [user-feeds.md](./user-feeds.md) |
 | AI記事要約 | In Progress(骨格) | [ai-summary.md](./ai-summary.md) |
+| ヘルスチェック | Draft | [health.md](./health.md) |
 
 ## 仕様書のテンプレート
 

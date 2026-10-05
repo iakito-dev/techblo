@@ -96,6 +96,7 @@ techblo/
 │   │   └── web/                      # web/queries.ts, web/actions.ts(add/remove/list), components
 │   ├── favorites/                    # bookmarks と同形
 │   ├── subscriptions/                # 購読企業ON/OFF
+│   ├── health/                       # ヘルスチェック(GET /api/healthz)
 │   └── auth/
 │       ├── components/               # LoginButton, AuthGate
 │       ├── server.ts                 # getSession等のヘルパー
