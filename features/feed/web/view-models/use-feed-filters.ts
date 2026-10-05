@@ -27,9 +27,13 @@ export type FeedFilters = {
   userFeeds: string[];
 };
 
+/** ?tag=(タグ絞り込み)。絞り込みシートでは編集できないため FeedFilters / activeCount には含めない。 */
+
 export function useFeedFilters(): FeedFilters & {
   /** 適用中の条件数(バッジ用): status≠all で+1、period≠all で+1、企業 + マイフィードは選択数。 */
   activeCount: number;
+  /** 適用中のタグ(?tag=)。無ければ null。 */
+  tag: string | null;
   isPending: boolean;
   setStatus: (status: ReadFilterMode) => void;
   setPeriod: (period: PopularPeriod) => void;
@@ -39,6 +43,8 @@ export function useFeedFilters(): FeedFilters & {
   removeUserFeed: (id: string) => void;
   /** すべてのフィルタを既定(all / all / 空 / 空)に戻す(sort は変えない)。 */
   clearAll: () => void;
+  /** ?tag= だけを外す(他のフィルタ・並び替えは保つ)。 */
+  removeTag: () => void;
 } {
   const params = useSearchParams();
   const { navigate, isPending } = useFeedNav();
@@ -49,6 +55,8 @@ export function useFeedFilters(): FeedFilters & {
   const feedParam = params.get('feed');
   const companies = useMemo(() => parseListParam(companyParam), [companyParam]);
   const userFeeds = useMemo(() => parseListParam(feedParam), [feedParam]);
+
+  const tag = params.get('tag')?.trim() || null;
 
   const activeCount =
     (status !== 'all' ? 1 : 0) + (period !== 'all' ? 1 : 0) + companies.length + userFeeds.length;
@@ -108,7 +116,17 @@ export function useFeedFilters(): FeedFilters & {
     [apply],
   );
 
+  const removeTag = useCallback(() => {
+    const sp = new URLSearchParams(params);
+    sp.delete('tag');
+    sp.delete('page');
+    const qs = sp.toString();
+    navigate(qs ? `/?${qs}` : '/');
+  }, [params, navigate]);
+
   return {
+    tag,
+    removeTag,
     status,
     period,
     companies,

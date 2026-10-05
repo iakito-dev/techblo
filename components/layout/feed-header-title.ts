@@ -43,6 +43,7 @@ export function isFeedDefaultView(params: FeedHeaderParams): boolean {
 /**
  * トップ(/)の見出し(FeedHeader)のラベルを URL パラメータから決める純関数。
  * - ?category=<key> が有効なカテゴリキーなら、そのカテゴリの表示名(shared/categories.ts)
+ * - ?tag=<label> があれば「#<label>」(category が有効ならそちらが優先)
  * - category 未指定 かつ 他の絞り込みも無く sort=latest だけが指定された「新着一覧」なら「新着」
  * - それ以外(既定状態・検索・企業・既読・人気順など、または不正な category キー)は「フィード」
  */
@@ -54,6 +55,10 @@ export function resolveFeedHeaderTitle(params: FeedHeaderParams): string {
     // 不正なカテゴリキーは「フィード」に丸める(他フィルタと同じ既定へのフォールバック方針)。
     return 'フィード';
   }
+
+  // タグ絞り込み中は「#タグ名」(SNS のハッシュタグ表記)。category が有効ならそちらを優先する。
+  const tag = params.tag?.trim();
+  if (tag) return `#${tag}`;
 
   if (!hasOtherFilter(params) && params.sort?.trim() === 'latest') {
     return '新着';

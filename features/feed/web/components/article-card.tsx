@@ -112,14 +112,22 @@ export const ArticleCard = memo(function ArticleCard({
         {tags && tags.length > 0 && (
           <ul
             aria-label="AI生成タグ"
-            className="flex min-w-0 flex-1 flex-nowrap gap-1.5 overflow-hidden"
+            // overflow-hidden が ::before の当たり判定(上下に広げた分)を切らないよう、
+            // 上下 padding で余白を確保し同量の負マージンで行高は変えない。
+            className="-my-1.5 flex min-w-0 flex-1 flex-nowrap gap-1.5 overflow-hidden py-1.5"
           >
             {tags.slice(0, 3).map((tag) => (
-              <li
-                key={tag}
-                className="shrink-0 truncate rounded-full border border-border-default px-2 text-[11px] text-fg-muted leading-5"
-              >
-                {tag}
+              <li key={tag} className="shrink-0">
+                {/* タグ絞り込み(?tag=)への入口。一覧に数十個並ぶため prefetch しない。
+                    輪郭と文字だけ teal にし塗りは使わない(ADR-0035)。
+                    before は見た目の高さを変えずにタップ領域だけ上下へ広げる。 */}
+                <Link
+                  href={`/?tag=${encodeURIComponent(tag)}`}
+                  prefetch={false}
+                  className="relative block rounded-full border border-border-default px-2 text-[11px] text-fg-muted leading-5 transition-colors before:absolute before:inset-x-0 before:-inset-y-1.5 hover:border-accent hover:text-accent focus-visible:border-accent focus-visible:text-accent focus-visible:outline-none"
+                >
+                  {tag}
+                </Link>
               </li>
             ))}
           </ul>

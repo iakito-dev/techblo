@@ -1,4 +1,5 @@
 import { Check, Sparkles } from 'lucide-react';
+import Link from 'next/link';
 import type { ArticleSummaryBullet } from '@/features/ai-summary/domain/article-summary';
 
 /**
@@ -45,11 +46,15 @@ export function SummaryView({
       {tags.length > 0 && (
         <ul aria-label="AI生成タグ" className="mt-3 flex flex-wrap gap-1.5">
           {tags.map((tag) => (
-            <li
-              key={tag}
-              className="rounded-full border border-border-default px-2 text-[11px] text-fg-muted leading-5"
-            >
-              {tag}
+            <li key={tag}>
+              {/* 一覧カードのタグと同じ絞り込み入口(?tag=)。hover/focus は輪郭と文字だけ teal(ADR-0035) */}
+              <Link
+                href={`/?tag=${encodeURIComponent(tag)}`}
+                prefetch={false}
+                className="relative block rounded-full border border-border-default px-2 text-[11px] text-fg-muted leading-5 transition-colors before:absolute before:inset-x-0 before:-inset-y-1.5 hover:border-accent hover:text-accent focus-visible:border-accent focus-visible:text-accent focus-visible:outline-none"
+              >
+                {tag}
+              </Link>
             </li>
           ))}
         </ul>

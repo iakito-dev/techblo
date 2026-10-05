@@ -34,6 +34,7 @@ type MobileFeedHeaderViewProps = {
   period: PopularPeriod;
   companySlugs: string[];
   feedIds: string[];
+  tag: string | null;
   sort: FeedSort;
   activeCount: number;
   onOpenFilter: () => void;
@@ -41,6 +42,7 @@ type MobileFeedHeaderViewProps = {
   onRemovePeriod: () => void;
   onRemoveCompany: (slug: string) => void;
   onRemoveUserFeed: (id: string) => void;
+  onRemoveTag: () => void;
   onResetSort: () => void;
 };
 
@@ -71,6 +73,8 @@ export function MobileFeedControls({
     companies: companySlugs,
     userFeeds: feedIds,
     activeCount,
+    tag,
+    removeTag,
     setStatus,
     setPeriod,
     removeCompany,
@@ -90,6 +94,7 @@ export function MobileFeedControls({
         period={period}
         companySlugs={companySlugs}
         feedIds={feedIds}
+        tag={tag}
         sort={sort}
         activeCount={activeCount}
         onOpenFilter={() => setFilterOpen(true)}
@@ -97,6 +102,7 @@ export function MobileFeedControls({
         onRemovePeriod={() => setPeriod('all')}
         onRemoveCompany={removeCompany}
         onRemoveUserFeed={removeUserFeed}
+        onRemoveTag={removeTag}
         onResetSort={() => setSort('latest')}
       />
       <FeedFilterSheet
@@ -125,6 +131,7 @@ export function DefaultMobileFeedControls() {
       period="all"
       companySlugs={[]}
       feedIds={[]}
+      tag={null}
       sort="latest"
       activeCount={0}
       onOpenFilter={() => {}}
@@ -132,6 +139,7 @@ export function DefaultMobileFeedControls() {
       onRemovePeriod={() => {}}
       onRemoveCompany={() => {}}
       onRemoveUserFeed={() => {}}
+      onRemoveTag={() => {}}
       onResetSort={() => {}}
     />
   );
@@ -146,6 +154,7 @@ function MobileFeedHeaderView({
   period,
   companySlugs,
   feedIds,
+  tag,
   sort,
   activeCount,
   onOpenFilter,
@@ -153,11 +162,12 @@ function MobileFeedHeaderView({
   onRemovePeriod,
   onRemoveCompany,
   onRemoveUserFeed,
+  onRemoveTag,
   onResetSort,
 }: MobileFeedHeaderViewProps) {
-  // 人気順はフィルタではないがヘッダーの状態表示としてはチップ行に出す
-  // (絞り込みバッジの数=useFeedFilters の適用数には含めない)。
-  const showChips = activeCount > 0 || sort === 'popular';
+  // 人気順とタグは絞り込みシートで編集できないが、ヘッダーの状態表示としてチップ行に出す
+  // (絞り込みバッジの数=useFeedFilters の適用数には含めない。検索 ?q= と同じ扱い)。
+  const showChips = activeCount > 0 || sort === 'popular' || tag !== null;
 
   return (
     <div className="sticky top-0 z-30 bg-bg-app md:hidden">
@@ -217,6 +227,7 @@ function MobileFeedHeaderView({
           )}
         >
           {sort === 'popular' && <RemovableChip label="人気順" onRemove={onResetSort} />}
+          {tag !== null && <RemovableChip label={`タグ: ${tag}`} onRemove={onRemoveTag} />}
           {status !== 'all' && (
             <RemovableChip label={STATUS_CHIP[status]} onRemove={onRemoveStatus} />
           )}
