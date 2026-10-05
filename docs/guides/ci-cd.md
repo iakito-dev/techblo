@@ -68,7 +68,7 @@
 
 - Vercel が `main` ブランチを監視
 - merge 時に自動デプロイ
-- Trigger.dev は `bun run trigger:deploy:prod` を CI から発火(設定後)
+- Trigger.dev は Vercel とは別デプロイで、CI からは発火しない。タスク・DB クライアント・スキーマを変えたら `bun run trigger:deploy` を手動実行する(CLI は `scripts/trigger-cli.ts` が SDK と同じ版で起動する)
 
 ### Preview(PR毎)
 

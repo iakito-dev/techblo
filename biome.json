@@ -16,7 +16,7 @@
       "!**/coverage",
       "!**/.vercel",
       "!**/.agents",
-      "!**/.claude",
+      "!.claude",
       "!**/db/migrations",
       "!**/design",
       "!**/*.lock",

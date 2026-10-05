@@ -10,13 +10,14 @@ Claude Code 向けの指示。共通の指示は `AGENTS.md` を参照してく�
 
 ## ローカル実行環境(必読)
 
-このリポジトリは **Node 22** 前提(`.nvmrc` = `22`)。CI は bun ランタイムのみで動くため node 版は問わないが、ローカルの `bun run dev` / pre-commit フック(`depcruise`・lefthook)は内部で `next` / `depcruise` を **node** で起動する。マシン既定の node が古い(例: nvm 既定 v14)と `??=` 構文エラーや `node:path/posix` 未対応で落ちる。
+このリポジトリは **Node 22 以上** 前提(`.nvmrc` = `22` / `.tool-versions`)。CI は bun ランタイムのみで動くため node 版は問わないが、ローカルの `bun run dev` / pre-commit フック(`depcruise`・lefthook)は内部で `next` / `depcruise` を **node** で起動する。PATH 上の node が古いと `??=` 構文エラーや `node:path/posix` 未対応で落ちる。
 
-- 作業開始時に node 22 を有効化する: `nvm use`(`.nvmrc` を読む)
-- Bash ツールはコマンド間でシェル状態を保持しないため、node を使う各コマンドは node 22 を確実に通す。例:
-  - `export PATH="$HOME/.nvm/versions/node/v22.22.2/bin:$PATH"; <bun/git コマンド>`
-  - もしくは `nvm use >/dev/null && <コマンド>`
-- 症状: `git commit` 時に depcruise が `ERR_UNKNOWN_BUILTIN_MODULE: node:path/posix` で失敗 → node 版が古い。再コミットを node 22 で行えば通る(フックの実体は正常)
+- 作業開始時に `node --version` で 22 以上か確かめる。足りていれば追加の設定は不要
+- 古い場合、Bash ツールはコマンド間でシェル状態を保持しないので、node を使うコマンドごとに版を指定する(バージョンマネージャはマシン依存。パスを決め打ちせず、入っている版を確かめてから使う)
+  - asdf: `asdf list nodejs` で入っている 22 系を確認 → `ASDF_NODEJS_VERSION=<その版> <bun/git コマンド>`
+  - nvm: `nvm use >/dev/null && <コマンド>`
+- 症状: `git commit` 時に depcruise が `ERR_UNKNOWN_BUILTIN_MODULE: node:path/posix` で失敗 → node 版が古い。再コミットを node 22 以上で行えば通る(フックの実体は正常)
+- git worktree で開いたセッションは SessionStart フック(`.claude/hooks/session-start.sh`)が `.env.local` の symlink と `bun install` を済ませる。手動で揃える必要はない
 
 ## Claude固有の設定
 

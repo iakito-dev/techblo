@@ -109,7 +109,7 @@ components/layout/      # 横断UI(Header, MobileNav)
 db/schema/              # Drizzle schemas
 db/migrations/          # Drizzle migrations
 lib/                    # 横断的なinfrastructure(auth, rss, ogp, observability)
-jobs/                   # Trigger.dev tasks
+trigger/                # Trigger.dev tasks
 shared/                 # features横断の純粋ロジック(Result型, pagination)
 docs/                   # 設計ドキュメント
 ```
@@ -170,8 +170,8 @@ PR / 変更時の自己レビュー観点:
 
 ## 9. プロジェクトの現状
 
-- フェーズ: 設計確定済み、実装開始前
-- 次のステップ: データモデル設計 → 初期セットアップ → 機能実装
-- 完了済みドキュメント: REQUIREMENTS.md, FEATURES.md, TECH_STACK.md, ARCHITECTURE.md
+- フェーズ: MVP 実装済み・本番運用中(techblo.dev)。以降は機能追加と改善
+- 進行中・今後の計画は `ROADMAP.md`、機能ごとの現状は `docs/features/*.md` を参照
+- 変更前後の一括検証は `bun run check`(lint + depcruise + typecheck + unit test)
 
 何か不明点があれば、まず `docs/` を検索してから質問してください。

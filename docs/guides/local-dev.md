@@ -23,10 +23,10 @@ mise install
 gh repo clone iakito-dev/techblo
 cd techblo
 
-# 2. 依存インストール
+# 2. 依存インストール(prepare スクリプトが lefthook の git hooks も入れる)
 bun install
 
-# 3. lefthook 有効化(pre-commit hooks)
+# 3. hooks が入らなかった場合のみ手動で有効化
 bunx lefthook install
 
 # 4. 環境変数
@@ -65,7 +65,7 @@ bun run dev
 ```bash
 # 開発
 bun run dev                # Next.js dev server (Turbopack)
-bun run dev:all            # Next.js + Trigger.dev dev + Drizzle Studio
+bun run dev:all            # Next.js + Trigger.dev dev を同時起動
 
 # DB
 bun drizzle-kit generate   # スキーマからmigration生成
@@ -81,10 +81,10 @@ bun run typecheck          # tsc --noEmit
 bun run check              # lint + depcruise + typecheck + unit test(CI 相当を一括)
 
 # テスト
-bun run test               # 全テスト
+bun run test               # unit(test:unit と同じ設定で走る)
 bun run test:unit          # unit only
 bun run test:integration   # integration only(DBが必要)
-bun run test:e2e           # Playwright E2E
+bun run test:e2e           # Playwright E2E(未整備: playwright.config と e2e/ がまだ無い)
 bun run test:watch         # watch mode
 
 # ビルド

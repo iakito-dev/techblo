@@ -107,7 +107,7 @@ AIに任せる単位は **テスト or 目視で検証可能** な範囲にす�
 
 ### Hook の活用
 
-- **SessionStart** → Claude Code on the web(`CLAUDE_CODE_REMOTE=true`)のときだけ `bun install`。新規 clone で `node_modules` が無いため(`.claude/hooks/session-start.sh`)
+- **SessionStart** → Claude Code on the web(`CLAUDE_CODE_REMOTE=true`)では `bun install`、ローカルの git worktree では main 本体の `.env.local` を symlink し `node_modules` が無ければ `bun install`。どちらも新規チェックアウトで lint / test / dev が動かないのを防ぐ。main 本体では何もしない(`.claude/hooks/session-start.sh`)
 - **PostToolUse(Edit/Write)** → 編集ファイルだけ `biome check --write`。対象パスは stdin JSON の `tool_input.file_path` から取る(`.claude/hooks/biome-format.sh`)
 - **PreToolUse(Bash)** → 危険コマンドをブロック(ssh, scp 等)
 - **Stop** → セッション終了時にテスト・lint を自動実行
