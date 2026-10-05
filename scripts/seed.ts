@@ -346,7 +346,10 @@ async function main() {
   logger.info('seed complete');
 }
 
-main().catch((e) => {
-  logger.error('seed failed', { error: e instanceof Error ? e.message : String(e) });
-  process.exit(1);
-});
+main()
+  // postgres-js の接続が開いたままだとプロセスが終了しないため、成功時も明示的に終了する
+  .then(() => process.exit(0))
+  .catch((e) => {
+    logger.error('seed failed', { error: e instanceof Error ? e.message : String(e) });
+    process.exit(1);
+  });
