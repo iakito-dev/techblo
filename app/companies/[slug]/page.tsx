@@ -1,4 +1,4 @@
-import { ArrowRight, ExternalLink } from 'lucide-react';
+import { ArrowRight, ExternalLink, Rss } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -52,7 +52,14 @@ export async function generateMetadata({
   return {
     title,
     description,
-    alternates: { canonical: `/companies/${slug}` },
+    alternates: {
+      canonical: `/companies/${slug}`,
+      types: {
+        'application/rss+xml': [
+          { url: `/companies/${slug}/feed.xml`, title: `${company.name}の新着` },
+        ],
+      },
+    },
     openGraph: {
       type: 'website',
       url: `/companies/${slug}`,
@@ -147,10 +154,8 @@ async function CompanyContent({ params }: { params: Promise<{ slug: string }> })
       <header className="mb-8">
         <div className="flex items-center gap-2.5">
           <CompanyFavicon url={company.siteUrl} name={company.name} />
-          <h1
-            className="font-bold text-2xl tracking-tight md:text-3xl"
-            style={{ color: 'var(--brand)' }}
-          >
+          {/* ブランド色は黒など暗い色の企業があり、暗背景では読めなくなるためダーク時は本文色にする。 */}
+          <h1 className="font-bold text-(--brand) text-2xl tracking-tight md:text-3xl dark:text-fg-default">
             {company.name}の技術ブログ
           </h1>
         </div>
@@ -165,6 +170,13 @@ async function CompanyContent({ params }: { params: Promise<{ slug: string }> })
           >
             公式ブログを開く
             <ExternalLink className="size-3.5" />
+          </a>
+          <a
+            href={`/companies/${slug}/feed.xml`}
+            className="inline-flex items-center gap-1 font-medium text-fg-muted transition-colors hover:text-fg-default"
+          >
+            <Rss className="size-3.5" />
+            RSS
           </a>
         </div>
       </header>
