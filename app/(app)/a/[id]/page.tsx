@@ -106,14 +106,15 @@ export default function ArticlePage({ params }: { params: Promise<{ id: string }
   return (
     <div className="min-h-dvh pb-[calc(var(--mobile-nav-h)+1rem)] lg:pb-12 lg:pl-64">
       {/* 幅は 2xl(672px)。一覧の3列時のカード幅(約 490px)より少し広い「1枚を開いた」幅で、
-          和文 15px の本文が 40 字前後/行に収まり読みやすい。lg 以上のガター(lg:px-8)は
+          和文 15px の本文が 40 字前後/行に収まり読みやすい。xl 以上は右レール(18rem)を足した
+          66rem の2カラムにする(本文は 608px のまま)。lg 以上のガター(lg:px-8)は
           フィード(page.tsx)と揃え、戻る操作で左端が動かないようにする。 */}
       {/* 上部の余白は「共有 Header の mb-8 + main の上余白 + 戻る行」で三重に積み上がっていた。
           記事は上から読み始めるものなので、戻る行をヘッダー直下に寄せて本文の頭出しを早める。
           max-lg の -mt-4 は Header の mb-8 を半分食う分(lg+ は Header 自体が出ないため
           lg:pt-6 で自前の上余白を持つ)。 */}
       <main
-        className={`mx-auto max-w-2xl max-lg:-mt-4 ${MOBILE_GUTTER_CLASS} pb-8 md:px-6 md:pb-10 lg:px-8 lg:pt-6`}
+        className={`mx-auto max-w-2xl max-lg:-mt-4 xl:max-w-[66rem] ${MOBILE_GUTTER_CLASS} pb-8 md:px-6 md:pb-10 lg:px-8 lg:pt-6`}
       >
         <ArticleBackLink className="mb-1" />
         <Suspense fallback={<ArticleDetailSkeleton />}>
@@ -139,7 +140,9 @@ async function ArticleContent({ params }: { params: Promise<{ id: string }> }) {
       : undefined;
 
   return (
-    <>
+    // xl 以上は「本文 | 右レール(元記事 + 関連記事)」の2カラム。DOM は1つで、並びは CSS だけで
+    // 切り替える(xl 未満は従来どおり 本文 → 画像 → ドメイン → アクション行 → 関連記事 の1カラム)。
+    <div className="xl:grid xl:grid-cols-[minmax(0,1fr)_18rem] xl:items-start xl:gap-x-12">
       {/* 一覧のカード(ArticleCard)を「1枚開いた」続きに見せるため、カードと同じ上罫(1.5px の
         hairline)+ 見出し行 + タイトル + 抜粋 の骨格をそのまま拡大する。面・影・角丸は使わない
         (ADR-0035)。企業のブランド色は使わず、カードと同じくファビコンで出典を示す。 */}
@@ -200,39 +203,47 @@ async function ArticleContent({ params }: { params: Promise<{ id: string }> }) {
           </div>
         )}
 
-        {/* RSS 抜粋: カードの抜粋(13.5px・muted・1.75)と同じ声色で、本文として読める 15px に上げる。 */}
-        {article.description && (
+        {/* RSS 抜粋は要約が無い時だけ出す。RSS の description は目次をつなげただけの文字列に
+          なりがちで、要約の直下に置くとノイズになるため。カードの抜粋(13.5px・muted・1.75)と
+          同じ声色で、本文として読める 15px に上げる。 */}
+        {!summary && article.description && (
           <p className="mt-5 text-[15px] text-fg-muted leading-[1.8]">
-            {toExcerpt(article.description, 400)}
+            {toExcerpt(article.description, 200)}
           </p>
         )}
+      </article>
 
-        {/* 元記事のプレビュー画像(OGP、無ければ自前生成)。タイトル直下ではなく本文の後ろに置く:
-          一覧のカードは画像を持たない(ADR-0011)ので、タイトル直下に大きな面があると
-          「同じ紙面の続き」に見えなくなる。X の投稿のリンクカードと同じく、テキストを読み終えた
-          位置に「元記事へ」の入口として出す(画像全体が元記事へのリンク)。角丸・影は使わず、
-          白地の OGP が地色に溶けないよう hairline の輪郭だけ付ける。 */}
-        {/* 元記事ブロック: プレビュー画像 + 遷移先ドメイン + 主アクションを1つの塊にする。
-          以前は画像とボタンが罫線で分断され、ボタンが保存アイコンと同じ行に小さく並んでいて
-          「このページで一番したいこと」が読み取れなかった。読み終えた位置に入口をまとめ、
-          幅いっぱいの1つのボタンにすることで、主アクション(外部へ)と副アクション(共有・保存)の
-          優劣を形で示す。ドメインを出すのは遷移先が外部だと押す前に分かるようにするため。 */}
-        <div className="mt-6">
-          <ArticleHeroImage
-            article={article}
-            href={article.url}
-            className="aspect-[1200/630] w-full object-cover ring-1 ring-border-default ring-inset"
-          />
-          <p className="mt-2 truncate text-[11.5px] text-fg-subtle">{hostname(article.url)}</p>
+      {/* 右レール(xl 以上)/ 本文の続き(xl 未満)。xl では article の上罫と頭を揃えるため、
+        aside 側にも同じ上罫 + pt-4 を付け、元記事ブロックの mt-6 を外す。sticky にしないのは、
+        aside が viewport より高い時に下が見えなくなるため。 */}
+      <aside className="xl:border-border-default xl:border-t-[1.5px] xl:pt-4">
+        {/* 元記事ブロック: プレビュー画像(OGP がある時だけ)+ 遷移先ドメイン + アクション行を
+          1つの塊にする。画像は一覧のカードが持たない要素(ADR-0011)なので、タイトル直下ではなく
+          本文の後ろ(X のリンクカードの位置)に「元記事へ」の入口として出す(画像全体が
+          元記事へのリンク)。OGP が無い記事で自前生成カードを出すと、タイトルの繰り返しが
+          画面を占有するだけなので出さない。角丸・影は使わず、白地の OGP が地色に溶けないよう
+          hairline の輪郭だけ付ける。ドメインは遷移先が外部だと押す前に分かるようにするため。 */}
+        <div className="mt-6 xl:mt-0">
+          {article.ogImage && (
+            <ArticleHeroImage
+              article={article}
+              href={article.url}
+              className="aspect-[1200/630] w-full object-cover ring-1 ring-border-default ring-inset"
+            />
+          )}
+          <p className={`truncate text-[11.5px] text-fg-subtle ${article.ogImage ? 'mt-2' : ''}`}>
+            {hostname(article.url)}
+          </p>
         </div>
 
-        {/* アクション行: 左に保存・お気に入り・共有のアイコン、右端に「元記事を開く」。
-          旧ダイアログのフッターと同じ並びに戻している。アイコンだけの副アクションを左に溜めて
-          右端にラベル付きの主アクションを置く形は、読み終えた視線の終点(右下)に外部への出口が
-          来るので押しやすく、幅いっぱいのボタンより紙面も静かになる。
+        {/* アクション行: xl 未満は左に保存・お気に入り・共有のアイコン、右端に「元記事を開く」
+          (旧ダイアログのフッターと同じ並び。読み終えた視線の終点=右下に外部への出口が来る)。
+          xl 以上は右レール幅(288px)に収まらないので、「元記事を開く」を幅いっぱいで先頭に
+          出し、アイコン3つをその下の行に折り返す(order-first + flex-wrap)。上罫は xl では外す
+          (aside の上罫と二重になるため)。
           主アクションなので ink の塗りにする(design.md がプライマリボタンへの ink 塗りを
           許容する範囲。teal の塗りは引き続き使わない)。 */}
-        <div className="mt-6 flex items-center gap-1 border-border-default border-t pt-4">
+        <div className="mt-6 flex flex-wrap items-center gap-1 border-border-default border-t pt-4 xl:mt-3 xl:border-t-0 xl:pt-0">
           {/* 保存系だけがユーザー依存。ここだけをストリームさせ、本文は待たせない。
             fallback はボタン2つ分(size-11 + gap-1)の枠で、解決時に共有ボタンが動かないようにする。 */}
           <Suspense fallback={<div className="h-11 w-[5.75rem]" />}>
@@ -245,18 +256,18 @@ async function ArticleContent({ params }: { params: Promise<{ id: string }> }) {
             href={article.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="ml-auto inline-flex min-h-12 touch-manipulation items-center gap-2 rounded-md bg-primary px-5 font-semibold text-fg-inverse text-sm transition-colors hover:bg-primary-hover"
+            className="ml-auto inline-flex min-h-12 touch-manipulation items-center gap-2 rounded-md bg-primary px-5 font-semibold text-fg-inverse text-sm transition-colors hover:bg-primary-hover xl:order-first xl:ml-0 xl:w-full xl:justify-center"
           >
             元記事を開く
             <ExternalLink aria-hidden="true" className="size-4" />
           </a>
         </div>
-      </article>
-      {/* 関連記事は補助情報。本文・保存状態とは独立にストリームし、表示を待たせない。 */}
-      <Suspense fallback={null}>
-        <RelatedArticlesSection id={id} />
-      </Suspense>
-    </>
+        {/* 関連記事は補助情報。本文・保存状態とは独立にストリームし、表示を待たせない。 */}
+        <Suspense fallback={null}>
+          <RelatedArticlesSection id={id} />
+        </Suspense>
+      </aside>
+    </div>
   );
 }
 
