@@ -225,3 +225,11 @@ trackArticleView(input: { articleId: string }): Promise<Result<void, FeedError>>
 - キャッシュ: `getRelatedArticles` は `'use cache'` + `cacheTag(feed)` + `cacheLife('days')`。`tags` に索引は張らず、キャッシュで1記事1回の走査に抑える。失敗(Result err・例外)は `logger.warn` して `cacheLife('minutes')` で `[]` を返し、記事ページを落とさない。
 - シグネチャ: `listRelatedArticles(deps)(articleId, limit = RELATED_ARTICLES_LIMIT): Promise<Result<ArticleCard[], FeedError>>`(`features/feed/application/list-related-articles.ts`)。
 - id は呼び出し側(ページ)で UUID 検証済みのものだけを渡す(不正形式は DB エラーになる)。
+
+## 公開 RSS フィード(ADR-0039)
+
+- `/feed.xml`(全企業の新着50件。`?category=<key>` で職能カテゴリに絞り込み。不正キーは無視して全体)と `/companies/[slug]/feed.xml`(存在しない slug は404)を Route Handler で配信する。RSS 2.0 / `application/rss+xml`。
+- item の `link` は元記事 URL(元ブログへの送客を優先)、`guid`(isPermaLink=false)は Techblo の記事ページ URL。`dc:creator` と `source` は企業名、`category` は AI要約タグ、`description` は AI要約 overview を優先し、無ければ RSS 抜粋。
+- 合成は app 層(`app/_feed/public-feed.ts`)。XML 生成は `lib/rss/build-feed-xml.ts`(純粋関数、エスケープ・制御文字除去)。
+- `Cache-Control: public, s-maxage=600, stale-while-revalidate=3600`。データは `getFeed`(feed タグで無効化)を再利用。失敗時は 500 + `logger.error`。
+- ルートレイアウトの `alternates.types` で `/feed.xml` を自動検出用に宣言する。

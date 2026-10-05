@@ -51,6 +51,11 @@ export const metadata: Metadata = {
   // 検索結果(SERP)向けの説明文。JSON-LD と同じ真実源(lib/seo.ts)を使う。
   description: SITE_DESCRIPTION,
   metadataBase: new URL(resolveBaseUrl()),
+  // RSS リーダーの自動検出用(ADR-0039)。alternates はページ側で上書きされる(浅いマージ)ため、
+  // canonical を持つページでは出ない。
+  alternates: {
+    types: { 'application/rss+xml': [{ url: '/feed.xml', title: 'テクブロ 新着' }] },
+  },
   // アイコン(icon.svg / apple-icon)・manifest・opengraph-image は app/ のファイル規約で自動付与される。
   appleWebApp: {
     capable: true,

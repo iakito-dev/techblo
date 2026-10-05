@@ -45,6 +45,7 @@
 | [0035](./0035-sectioned-feed-and-editorial-cards.md) | セクション型フィードとエディトリアル(上罫)カード | Accepted |
 | [0036](./0036-article-detail-as-page-instead-of-dialog.md) | 記事詳細をダイアログから個別ページへ | Accepted |
 | [0037](./0037-related-articles-by-tag-overlap.md) | 関連記事は AI要約タグの重なり + 同企業新着で選ぶ | Accepted |
+| [0039](./0039-public-rss-feed-output.md) | 公開 RSS フィードを配信する(link は元記事) | Accepted |
 
 ※ 0013 と 0014 は同日に並行して採番され、番号が2件ずつ重複している。コードやドキュメントから
 参照済みのため改番はしない(既存ADRは変更しない)。**これらを参照する時は番号だけでなく
