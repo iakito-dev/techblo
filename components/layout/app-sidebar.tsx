@@ -7,6 +7,7 @@ import {
   CircleCheck,
   Hash,
   Heart,
+  Keyboard,
   Rss,
   Settings,
 } from 'lucide-react';
@@ -14,6 +15,7 @@ import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { type Ref, useEffect, useRef } from 'react';
 import { CompanyFavicon } from '@/components/article/company-favicon';
+import { useKeyboardShortcutsHelp } from '@/components/layout/keyboard-shortcuts';
 import { Logo } from '@/components/layout/logo';
 import { Badge } from '@/components/ui/badge';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -64,6 +66,7 @@ export function AppSidebar({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { openHelp } = useKeyboardShortcutsHelp();
   const activeCompany = searchParams.get('company');
   const activeCategory = searchParams.get('category');
   // タグ欄は廃止したが ?tag= の絞り込みは URL から使えるので、絞り込み中は「フィード」を選択中にしない。
@@ -252,6 +255,7 @@ export function AppSidebar({
           label="設定"
           active={pathname.startsWith('/settings')}
         />
+        <NavRow icon={Keyboard} label="キーボードショートカット" onClick={openHelp} />
       </div>
     </aside>
   );
@@ -280,6 +284,7 @@ function NavRow({
   active = false,
   count,
   linkRef,
+  onClick,
 }: {
   icon: typeof Rss;
   label: string;
@@ -289,6 +294,8 @@ function NavRow({
   count?: number;
   /** 選択中の行をスクロール領域内に寄せるための ref(カテゴリ行の scrollIntoView 用)。 */
   linkRef?: Ref<HTMLAnchorElement>;
+  /** 遷移ではなくダイアログを開く等の操作行。 */
+  onClick?: () => void;
 }) {
   const inner = (
     <>
@@ -320,6 +327,18 @@ function NavRow({
       >
         {inner}
       </Link>
+    );
+  }
+
+  if (onClick) {
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        className={cn(base, 'text-fg-muted before:bg-transparent hover:text-fg-default')}
+      >
+        {inner}
+      </button>
     );
   }
 

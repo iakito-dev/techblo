@@ -21,7 +21,7 @@
 - フォールバック条件: 棚が1つも作れない(カテゴリ分類のバックフィル前など)・全企業 OFF の場合は、既存のリスト表示にフォールバック
 - レイアウト(ADR-0020 で Dewey 風シェルへ刷新。ADR-0011 の配色・テキスト主体カードは維持):
   - デスクトップ(lg+):
-    - 左サイドバー(`components/layout/app-sidebar.tsx`): ロゴ + アカウント / ライブラリ(フィード・ブックマーク・お気に入り) / **カテゴリ**(セクション型フィード対応) / フィルタ(仮) / **フォルダ = 購読企業**(企業ファビコン `CompanyFavicon` + 実件数、クリックで `/?company=slug` 絞り込み・折りたたみ) / 下部ユーティリティ(キーボードショートカット〔仮〕・設定)
+    - 左サイドバー(`components/layout/app-sidebar.tsx`): ロゴ + アカウント / ライブラリ(フィード・ブックマーク・お気に入り) / **カテゴリ**(セクション型フィード対応) / フィルタ(仮) / **フォルダ = 購読企業**(企業ファビコン `CompanyFavicon` + 実件数、クリックで `/?company=slug` 絞り込み・折りたたみ) / 下部ユーティリティ(設定・キーボードショートカット一覧)
     - トップバー(`components/layout/feed-topbar.tsx`, sticky): 記事検索(`?q=`、⌘K でフォーカス。ADR-0022)+ 更新 + オーバーフロー(仮)
     - 見出し操作行(`FeedHeader`): タイトル + 並び替え(新着順 / 人気順。集計期間は独立 select ではなく**人気順チップに統合した分割ボタン**「人気順 ・期間 ▾」で、期間部分は常時表示)+ 表示切替/選択(仮)
     - 本体: `feed-grid` ユーティリティ(auto-fill grid、`--feed-card-min` 基準で 1〜4 カラム可変)
@@ -151,6 +151,24 @@ trackArticleView(input: { articleId: string }): Promise<Result<void, FeedError>>
 - 日付の TZ 補正: `companies.feedTimezone` を設定したフィードは、宣言 TZ を無視して `pubDate` の壁時計をその TZ で解釈する(TZ 欠落/誤記フィード対応。メルカリが実例)。取込時に「now+10分」を超えて未来の `publishedAt` は取込時刻にクランプし警告する(誤設定でも「たった今」固定を防ぐ)。詳細は ADR-0025 / `docs/guides/adding-a-company.md`
 - 未読/既読フィルタ(`?read=unread|read`、既定 all): 記事ページを開くと既読化(ログイン=DB / ゲスト=localStorage)。フィルタは feed クエリの `EXISTS`/`NOT EXISTS` で絞る(全件既読 ID を持たない)。ログインはサーバー絞り込み、ゲストは `FeedList` がクライアント側 hide。未読バッジは出さない。詳細は ADR-0021 / `docs/features/reads.md`
 - モバイルドック(<md): `MobileFeedDock` は `MobileNav` と共有 `bottom-chrome` Context を購読し、下スクロールで両者を同じ距離だけ一体退避する。企業/既読/期間フィルタ適用中(件数バッジ表示中)は退避させない。フィード末尾は `--mobile-nav-h` + ドック高ぶんの余白を確保する。詳細は ADR-0023。
+
+## キーボードショートカット
+
+デスクトップ向けのグローバルショートカット。`components/layout/keyboard-shortcuts.tsx`(Provider + 一覧ダイアログ)を `app/(app)/layout.tsx` にマウントし、キー判定の純粋ロジックは `components/layout/keyboard-shortcut-map.ts`(unit test 付き)に置く。
+
+| キー | 動作 |
+|---|---|
+| `j` / `k` | 次 / 前の記事カードのタイトルリンクへフォーカス移動(DOM 順、`display:none` のカードは除外、`scrollIntoView({ block: 'nearest' })`) |
+| `Enter` | 標準のリンク遷移(記事ページ `/a/[id]`) |
+| `o` | フォーカス中カード(無ければ記事ページの主記事)の元記事を新規タブで開く(`noopener`、http(s) のみ) |
+| `b` / `f` | あとで読む / お気に入りを切り替え(既存の保存ボタンを `click()`。optimistic・ゲスト保存・失敗時ロールバックは既存ロジックのまま) |
+| `/` | 検索ボックスへフォーカス(⌘K と同じ対象。検索ボックスが無いページでは何もしない) |
+| `g` → `h` / `b` / `f` / `s` | 1 秒以内の 2 打鍵で `/` / `/bookmarks` / `/favorites` / `/settings` へ遷移 |
+| `?` | ショートカット一覧ダイアログを開閉(`Esc` でも閉じる)。サイドバー下部の「キーボードショートカット」からも開ける |
+
+- 入力中(input / textarea / select / contenteditable)、IME 変換中(`isComposing`)、⌘/Ctrl/Alt 付きでは発火しない。ダイアログ表示中は `?` 以外を無視する。
+- 対象の目印は data 属性: カード `data-article-card` + `data-article-url`、タイトルリンク `data-article-link`、保存ボタン `data-shortcut-action="bookmark|favorite"`、記事ページの主記事 `data-article-main`、検索ボックス `data-feed-search`。
+- lg 未満では UI(サイドバー行)を出さないが、キー自体は動作する。
 
 ## エッジケース
 

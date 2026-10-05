@@ -1,6 +1,7 @@
 import { Suspense } from 'react';
 import { BottomChromeProvider } from '@/components/layout/bottom-chrome';
 import { Header } from '@/components/layout/header';
+import { KeyboardShortcutsProvider } from '@/components/layout/keyboard-shortcuts';
 import { MobileNav } from '@/components/layout/mobile-nav';
 import { MobileSwipeNavigation } from '@/components/layout/mobile-swipe-navigation';
 import { Sidebar } from '@/components/layout/sidebar';
@@ -23,7 +24,8 @@ import { Sidebar } from '@/components/layout/sidebar';
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <BottomChromeProvider>
-      {/*
+      <KeyboardShortcutsProvider>
+        {/*
         Header / MobileNav / MobileSwipeNavigation は現在地を usePathname() で判定する。
         動的セグメントを持つルート(/a/[id])では pathname がビルド時に分からないため、
         cacheComponents 下ではこれらを Suspense 境界に入れないとプリレンダが止まる
@@ -32,26 +34,27 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         fallback は実物と同じ高さ・位置の枠にして、解決時に本文が動かないようにする。
         Sidebar は自前で Suspense を持つためここでは包まない。
       */}
-      <Suspense
-        fallback={
-          <div className="sticky top-0 z-20 mb-8 h-16 border-border-default border-b bg-bg-surface/80 pt-[env(safe-area-inset-top)] lg:hidden" />
-        }
-      >
-        <Header />
-      </Suspense>
-      <Sidebar />
-      <div data-mobile-swipe-content>{children}</div>
-      {/* 表示物を持たない(スワイプの検知のみ)ので fallback は無し。 */}
-      <Suspense fallback={null}>
-        <MobileSwipeNavigation />
-      </Suspense>
-      <Suspense
-        fallback={
-          <div className="fixed inset-x-0 bottom-0 z-30 h-[var(--mobile-nav-h)] border-border-default border-t bg-bg-surface/80 lg:hidden" />
-        }
-      >
-        <MobileNav />
-      </Suspense>
+        <Suspense
+          fallback={
+            <div className="sticky top-0 z-20 mb-8 h-16 border-border-default border-b bg-bg-surface/80 pt-[env(safe-area-inset-top)] lg:hidden" />
+          }
+        >
+          <Header />
+        </Suspense>
+        <Sidebar />
+        <div data-mobile-swipe-content>{children}</div>
+        {/* 表示物を持たない(スワイプの検知のみ)ので fallback は無し。 */}
+        <Suspense fallback={null}>
+          <MobileSwipeNavigation />
+        </Suspense>
+        <Suspense
+          fallback={
+            <div className="fixed inset-x-0 bottom-0 z-30 h-[var(--mobile-nav-h)] border-border-default border-t bg-bg-surface/80 lg:hidden" />
+          }
+        >
+          <MobileNav />
+        </Suspense>
+      </KeyboardShortcutsProvider>
     </BottomChromeProvider>
   );
 }

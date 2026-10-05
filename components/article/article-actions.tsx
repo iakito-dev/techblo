@@ -158,6 +158,7 @@ export function ActionButtons({
             variant="ghost"
             size="lg"
             aria-label="あとで読む"
+            data-shortcut-action="bookmark"
             aria-pressed={bookmarked}
             isDisabled={disabled}
             onPress={(e) => {
@@ -178,6 +179,7 @@ export function ActionButtons({
             variant="ghost"
             size="lg"
             aria-label="お気に入り"
+            data-shortcut-action="favorite"
             aria-pressed={favorited}
             isDisabled={disabled}
             onPress={(e) => {

@@ -124,6 +124,7 @@ function SearchBoxView({
       <Search className="absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-fg-subtle" />
       <Input
         ref={inputRef}
+        data-feed-search
         type="search"
         value={value}
         placeholder="記事を検索"

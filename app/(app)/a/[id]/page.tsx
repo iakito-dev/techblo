@@ -142,7 +142,13 @@ async function ArticleContent({ params }: { params: Promise<{ id: string }> }) {
   return (
     // xl 以上は「本文 | 右レール(元記事 + 関連記事)」の2カラム。DOM は1つで、並びは CSS だけで
     // 切り替える(xl 未満は従来どおり 本文 → 画像 → ドメイン → アクション行 → 関連記事 の1カラム)。
-    <div className="xl:grid xl:grid-cols-[minmax(0,1fr)_18rem] xl:items-start xl:gap-x-12">
+    // data-article-main はキーボードショートカット(o / b / f)の対象。保存アクションは右レール(aside)に
+    // あるため、article ではなく両カラムを包むこの要素に付ける。
+    <div
+      data-article-main
+      data-article-url={article.url}
+      className="xl:grid xl:grid-cols-[minmax(0,1fr)_18rem] xl:items-start xl:gap-x-12"
+    >
       {/* 一覧のカード(ArticleCard)を「1枚開いた」続きに見せるため、カードと同じ上罫(1.5px の
         hairline)+ 見出し行 + タイトル + 抜粋 の骨格をそのまま拡大する。面・影・角丸は使わない
         (ADR-0035)。企業のブランド色は使わず、カードと同じくファビコンで出典を示す。 */}

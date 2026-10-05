@@ -48,7 +48,11 @@ export const ArticleCard = memo(function ArticleCard({
     // 罫線は頭(border-top)だけ。hover/focus は色と太さだけを変え、面・影は一切使わない(ADR-0011)。
     // フォーカスによる罫の強調はタイトルリンク(data-detail-trigger)にフォーカスがある時だけに限定する
     // (保存ボタンにフォーカスした時にまで上罫が太くなると、何にフォーカスしているか誤解を招くため)。
-    <div className="group relative flex cursor-pointer touch-manipulation flex-col border-border-default border-t-[1.5px] pt-4 transition-colors hover:border-accent has-[[data-detail-trigger]:focus-visible]:border-accent has-[[data-detail-trigger]:focus-visible]:border-t-[3px] has-[[data-detail-trigger]:focus-visible]:pt-[calc(1rem-1.5px)]">
+    <div
+      data-article-card
+      data-article-url={article.url}
+      className="group relative flex cursor-pointer touch-manipulation flex-col border-border-default border-t-[1.5px] pt-4 transition-colors hover:border-accent has-[[data-detail-trigger]:focus-visible]:border-accent has-[[data-detail-trigger]:focus-visible]:border-t-[3px] has-[[data-detail-trigger]:focus-visible]:pt-[calc(1rem-1.5px)]"
+    >
       {/* 見出し行: 企業ファビコン + 企業名 / 右端に日時。
           日時は「いつの記事か」をカードを読む前に判断する情報なので、フッターではなく
           企業名と同じ行の右端に出す(視線が最初に通る位置)。フッター行を1行減らせるため
@@ -80,6 +84,8 @@ export const ArticleCard = memo(function ArticleCard({
           href={`/a/${article.id}`}
           // 上罫とタイトルのフォーカス強調(has-[[data-detail-trigger]:focus-visible])の目印。
           data-detail-trigger
+          // j/k ショートカットが辿る対象の目印(keyboard-shortcuts.tsx)。
+          data-article-link
           className="transition-colors after:absolute after:inset-0 focus-visible:outline-none group-hover:text-accent group-has-[[data-detail-trigger]:focus-visible]:text-accent group-has-[[data-detail-trigger]:focus-visible]:underline group-has-[[data-detail-trigger]:focus-visible]:decoration-[1.5px] group-has-[[data-detail-trigger]:focus-visible]:underline-offset-4"
         >
           {article.title}
