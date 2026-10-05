@@ -334,6 +334,49 @@ export class DrizzleArticleRepository implements ArticleRepository {
   }
 
   /**
+   * 関連記事用に、対象記事と AI要約タグを共有する記事を共有タグ数の多い順で取得する(ADR-0037)。
+   * 対象タグを CTE に展開し、各候補の tags と lateral で突き合わせて重なり数を数える。
+   * tags に索引は張らず全 ready 要約を走査するが、記事ページ側が 'use cache'(days)で
+   * 1記事あたり実質1回に抑える前提(GIN は @> 向きで「重なり数」の集計には効かない)。
+   * 同一記事内でタグが重複しても二重計上しないよう distinct で数える。
+   */
+  async listByTagOverlap(id: ArticleId, limit: number): Promise<Article[]> {
+    const result = await this.db.execute(sql`
+      with target as (
+        select distinct jsonb_array_elements_text(s.tags) as tag
+        from ${articleSummaries} as s
+        where s.article_id = ${id}::uuid and s.status = 'ready'
+      )
+      select
+        a.id as "id", a.url as "url", a.title as "title", a.description as "description",
+        a.og_image as "ogImage", a.author as "author", a.published_at as "publishedAt",
+        a.view_count as "viewCount", a.bookmark_count as "bookmarkCount",
+        a.favorite_count as "favoriteCount", a.hatena_bookmark_count as "hatenaBookmarkCount",
+        a.company_id as "companyId", c.slug as "companySlug", c.name as "companyName",
+        c.brand_color as "companyBrandColor",
+        m.overlap as "overlap"
+      from ${articles} as a
+      join ${companies} as c on c.id = a.company_id
+      join ${articleSummaries} as s on s.article_id = a.id
+      cross join lateral (
+        select count(distinct t.tag)::int as overlap
+        from jsonb_array_elements_text(s.tags) as t(tag)
+        where t.tag in (select tag from target)
+      ) as m
+      where a.deleted_at is null
+        and s.status = 'ready'
+        and a.id <> ${id}::uuid
+        and m.overlap > 0
+      order by m.overlap desc, a.published_at desc, a.id desc
+      limit ${limit}
+    `);
+    // postgres-js は db.execute(raw) で行配列を直返しする。
+    const rows = result as unknown as ArticleRow[];
+
+    return rows.map(toArticle);
+  }
+
+  /**
    * カテゴリ別の記事数(モバイルの件数表示用)。article_summaries を status='ready' に絞って
    * category で group by し、削除済み記事は除外する(article_summaries_category_ready_idx が効く)。
    * companyIds 指定時は購読スコープ/企業フィルタと同じ絞り込みを適用する(既存の件数表示と揃える)。

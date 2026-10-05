@@ -40,6 +40,9 @@ const fakeRepo = (all: Article[]): ArticleRepository => ({
   async listLatestByCategories() {
     return [];
   },
+  async listByTagOverlap() {
+    return [];
+  },
   async countByCategory() {
     return {};
   },
@@ -74,6 +77,9 @@ const capturingRepo = (): { repo: ArticleRepository; listCalls: ListCriteria[] }
       return [];
     },
     async listLatestByCategories() {
+      return [];
+    },
+    async listByTagOverlap() {
       return [];
     },
     async countByCategory() {

@@ -101,6 +101,7 @@ getSidebarCompanies(): Promise<CompanyWithCount[]>          // サイドバー/�
 getCompanyBySlug(slug): Promise<CompanyDetailDto | null>    // 企業ページ(/companies/[slug])用。slug で1社+紹介文('use cache' tag=[companies,feed]。ADR-0030)
 getSitemapCompanies(): Promise<{ slug }[]>                   // sitemap 用の全企業 slug('use cache')
 getArticleById(id: string): Promise<ArticleCard | null>     // 単発参照(OGP プレースホルダー生成等)
+getRelatedArticles(id: string): Promise<ArticleCard[]>      // 記事ページの関連記事(最大6件。'use cache' tag=feed days、失敗時は空+minutes。ADR-0037)
 
 // components/article/feed-load-more.tsx(app 層の合成点・RSC から呼ぶ。ADR-0013)
 getCompanyArticles({ slug, page, limit }): Promise<{ items: ComposedArticle[]; hasMore; isGuest }>
@@ -193,3 +194,15 @@ trackArticleView(input: { articleId: string }): Promise<Result<void, FeedError>>
   - `loading.tsx` と本文の Suspense fallback は同じ `ArticleDetailSkeleton`(実レイアウトと同じ位置・高さ。上罫 → 見出し行 → タイトル → AI要約 → 抜粋 → 画像 → フッターの順で、デザインを変えたら必ず追従させる)。これが無いと `(app)/loading.tsx` のフィード用 skeleton が出て、遷移のたびに一覧の skeleton が一瞬見える。
 - 記事ページに着地すると `ArticleViewTracker` が `trackArticleView` で表示回数を加算(未ログインも計測)し、既読マークを付ける。クリック時ではなく着地側で行うのは、遷移でリクエストが中断されないようにするため。
 - 保存系は ADR-0013 の `actions` スロットで注入(feed は bookmark/favorite を import しない)。
+
+## 関連記事(記事ページ下部、ADR-0037)
+
+- 配置: `/a/[id]` の `</article>` の後ろ。独立した Suspense(`fallback={null}`)でストリームし、本文の表示を待たせない。`RelatedArticles`(Server Component)は空なら何も描画しない。
+- 選定ルール:
+  1. 対象記事の AI要約タグ(`article_summaries.tags`、`status='ready'` のみ有効)を1つ以上共有する他記事を「共有タグ数 降順 → publishedAt 降順 → id 降順」で最大6件(`ArticleRepository.listByTagOverlap`、1クエリ)
+  2. 足りなければ同じ企業の新着で補完(自身とタグ一致済みを除く。`list({ sort: 'latest', companyIds, limit: limit + 1 })`)
+  3. 対象記事が無ければ空配列
+- 自身・削除済み・要約が ready でない記事は含めない。タグの表記ゆれは取りこぼす(類義語展開はしない)。
+- キャッシュ: `getRelatedArticles` は `'use cache'` + `cacheTag(feed)` + `cacheLife('days')`。`tags` に索引は張らず、キャッシュで1記事1回の走査に抑える。失敗(Result err・例外)は `logger.warn` して `cacheLife('minutes')` で `[]` を返し、記事ページを落とさない。
+- シグネチャ: `listRelatedArticles(deps)(articleId, limit = RELATED_ARTICLES_LIMIT): Promise<Result<ArticleCard[], FeedError>>`(`features/feed/application/list-related-articles.ts`)。
+- id は呼び出し側(ページ)で UUID 検証済みのものだけを渡す(不正形式は DB エラーになる)。

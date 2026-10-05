@@ -95,6 +95,9 @@ export interface ArticleRepository {
   listLatestByCategories(criteria: ListLatestByCategoriesCriteria): Promise<CategorizedArticle[]>;
   // カテゴリ別の記事数(status='ready' の要約を持つ記事のみ、削除済み除外)。companyIds 指定時はその企業に絞る。
   countByCategory(companyIds?: CompanyId[]): Promise<CategoryCounts>;
+  // 対象記事と AI要約タグを1つ以上共有する記事を、共有タグ数の多い順(同数は新着順)で最大 limit 件。
+  // 対象記事自身・削除済み・要約が ready でない記事は含めない。対象に ready な要約/タグが無ければ空。
+  listByTagOverlap(id: ArticleId, limit: number): Promise<Article[]>;
   upsertMany(companyId: CompanyId, items: ArticleDraft[]): Promise<number>;
   incrementView(id: ArticleId): Promise<void>;
   // 直近 sinceDays 日に公開された記事の id/url(外部メトリクス再取得の対象)

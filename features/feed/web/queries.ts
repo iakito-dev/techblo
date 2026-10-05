@@ -16,6 +16,7 @@ import { toArticleCard } from '../application/dto';
 import { getCompany } from '../application/get-company';
 import { listCompanies } from '../application/list-companies';
 import { listFeed } from '../application/list-feed';
+import { listRelatedArticles } from '../application/list-related-articles';
 import {
   buildFeedSections,
   EVENTS_COUNT,
@@ -344,4 +345,29 @@ export async function getArticlesByIds(ids: string[]): Promise<ArticleCard[]> {
   const articles = await articleRepo.listByIds(ids.map(asArticleId));
   const byId = new Map(articles.map((a) => [a.id as string, toArticleCard(a)]));
   return ids.map((id) => byId.get(id)).filter((c): c is ArticleCard => c !== undefined);
+}
+
+/**
+ * 記事ページ下部の関連記事(AI要約タグの重なり順 + 同企業新着で補完。ADR-0037)。
+ * 補助情報なので、取得失敗で記事ページ全体を落とさず空で返す(失敗結果は短命キャッシュ)。
+ * id は呼び出し側(ページ)で UUID 検証済みのものだけを渡すこと(不正形式は DB エラーになる)。
+ */
+export async function getRelatedArticles(id: string): Promise<ArticleCard[]> {
+  'use cache';
+  cacheTag(CACHE_TAGS.feed);
+  cacheLife('days');
+
+  try {
+    const result = await listRelatedArticles({ articles: articleRepo })(id);
+    if (!result.ok) {
+      logger.warn('getRelatedArticles: 関連記事の取得に失敗(空で返す)', { error: result.error });
+      cacheLife('minutes');
+      return [];
+    }
+    return result.value;
+  } catch (error) {
+    logger.warn('getRelatedArticles: 関連記事の取得に失敗(空で返す)', { error });
+    cacheLife('minutes');
+    return [];
+  }
 }

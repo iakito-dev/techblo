@@ -14,8 +14,9 @@ import { articleFallbackImage } from '@/features/feed/web/article-image';
 import { ArticleBackLink } from '@/features/feed/web/components/article-back-link';
 import { ArticleDetailSkeleton } from '@/features/feed/web/components/article-detail-skeleton';
 import { ArticleHeroImage } from '@/features/feed/web/components/article-hero-image';
+import { RelatedArticles } from '@/features/feed/web/components/related-articles';
 import { ShareButton } from '@/features/feed/web/components/share-button';
-import { getArticleById } from '@/features/feed/web/queries';
+import { getArticleById, getRelatedArticles } from '@/features/feed/web/queries';
 import { toExcerpt } from '@/features/feed/web/strip-html';
 import { articleJsonLd } from '@/lib/seo';
 import { resolveBaseUrl } from '@/lib/site-url';
@@ -138,113 +139,128 @@ async function ArticleContent({ params }: { params: Promise<{ id: string }> }) {
       : undefined;
 
   return (
-    // 一覧のカード(ArticleCard)を「1枚開いた」続きに見せるため、カードと同じ上罫(1.5px の
-    // hairline)+ 見出し行 + タイトル + 抜粋 の骨格をそのまま拡大する。面・影・角丸は使わない
-    // (ADR-0035)。企業のブランド色は使わず、カードと同じくファビコンで出典を示す。
-    <article className="border-border-default border-t-[1.5px] pt-4">
-      {/* 表示回数の加算と既読マーク。ダイアログ起動時ではなく着地側で行う(ADR-0036)。 */}
-      <ArticleViewTracker articleId={article.id} />
-      <JsonLd
-        data={articleJsonLd(
-          {
-            url: `${baseUrl}/a/${article.id}`,
-            title: article.title,
-            description: jsonLdDescription,
-            imageUrl: `${baseUrl}${articleFallbackImage(article.id)}`,
-            publishedAt: article.publishedAt,
-            author: article.author ?? undefined,
-            companyName: article.company.name,
-          },
-          baseUrl,
-        )}
-      />
-      {/* 見出し行: カードと同じ「ファビコン 20px + 企業名 11.5px 太字 / 右端に相対日時」。
+    <>
+      {/* 一覧のカード(ArticleCard)を「1枚開いた」続きに見せるため、カードと同じ上罫(1.5px の
+        hairline)+ 見出し行 + タイトル + 抜粋 の骨格をそのまま拡大する。面・影・角丸は使わない
+        (ADR-0035)。企業のブランド色は使わず、カードと同じくファビコンで出典を示す。 */}
+      <article className="border-border-default border-t-[1.5px] pt-4">
+        {/* 表示回数の加算と既読マーク。ダイアログ起動時ではなく着地側で行う(ADR-0036)。 */}
+        <ArticleViewTracker articleId={article.id} />
+        <JsonLd
+          data={articleJsonLd(
+            {
+              url: `${baseUrl}/a/${article.id}`,
+              title: article.title,
+              description: jsonLdDescription,
+              imageUrl: `${baseUrl}${articleFallbackImage(article.id)}`,
+              publishedAt: article.publishedAt,
+              author: article.author ?? undefined,
+              companyName: article.company.name,
+            },
+            baseUrl,
+          )}
+        />
+        {/* 見出し行: カードと同じ「ファビコン 20px + 企業名 11.5px 太字 / 右端に相対日時」。
           企業名は企業ページへのリンク(下線は hover 時だけ。常時下線だとカードの見出し行と
           見た目が変わる)。著者は記事ページにしか無い情報で、企業名より従属的なので
           企業名の後ろに通常ウェイト・muted で添える。 */}
-      <div className="mb-3 flex items-center gap-[7px] font-semibold text-[11.5px] text-fg-default">
-        <CompanyFavicon url={article.url} name={article.company.name} size={20} />
-        <Link
-          href={`/companies/${article.company.slug}`}
-          className="min-w-0 truncate transition-colors hover:text-accent hover:underline hover:decoration-[1.5px] hover:underline-offset-4"
-        >
-          {article.company.name}
-        </Link>
-        {article.author && (
-          <span className="min-w-0 truncate font-normal text-fg-muted">
-            <span aria-hidden="true">・</span>
-            {article.author}
+        <div className="mb-3 flex items-center gap-[7px] font-semibold text-[11.5px] text-fg-default">
+          <CompanyFavicon url={article.url} name={article.company.name} size={20} />
+          <Link
+            href={`/companies/${article.company.slug}`}
+            className="min-w-0 truncate transition-colors hover:text-accent hover:underline hover:decoration-[1.5px] hover:underline-offset-4"
+          >
+            {article.company.name}
+          </Link>
+          {article.author && (
+            <span className="min-w-0 truncate font-normal text-fg-muted">
+              <span aria-hidden="true">・</span>
+              {article.author}
+            </span>
+          )}
+          <span className="ml-auto shrink-0 font-normal text-fg-muted">
+            {formatRelative(article.publishedAt)}
           </span>
-        )}
-        <span className="ml-auto shrink-0 font-normal text-fg-muted">
-          {formatRelative(article.publishedAt)}
-        </span>
-      </div>
-
-      {/* タイトル: カード(18px・3行クランプ)の拡大版。クランプは外し、字間・行送りは
-          カードと同じ比率(tracking -0.015em)にして「同じ活字の続き」に見せる。 */}
-      <h1 className="font-bold text-[1.375rem] text-fg-default leading-[1.4] tracking-[-0.015em] md:text-[1.625rem]">
-        {article.title}
-      </h1>
-
-      {/* AI要約。元記事の抜粋(複製)ではない独自テキストでページに価値を持たせる(ADR-0026/0031)。 */}
-      {summary && (
-        <div className="mt-5">
-          <SummaryView overview={summary.overview} bullets={summary.bullets} tags={summary.tags} />
         </div>
-      )}
 
-      {/* RSS 抜粋: カードの抜粋(13.5px・muted・1.75)と同じ声色で、本文として読める 15px に上げる。 */}
-      {article.description && (
-        <p className="mt-5 text-[15px] text-fg-muted leading-[1.8]">
-          {toExcerpt(article.description, 400)}
-        </p>
-      )}
+        {/* タイトル: カード(18px・3行クランプ)の拡大版。クランプは外し、字間・行送りは
+          カードと同じ比率(tracking -0.015em)にして「同じ活字の続き」に見せる。 */}
+        <h1 className="font-bold text-[1.375rem] text-fg-default leading-[1.4] tracking-[-0.015em] md:text-[1.625rem]">
+          {article.title}
+        </h1>
 
-      {/* 元記事のプレビュー画像(OGP、無ければ自前生成)。タイトル直下ではなく本文の後ろに置く:
+        {/* AI要約。元記事の抜粋(複製)ではない独自テキストでページに価値を持たせる(ADR-0026/0031)。 */}
+        {summary && (
+          <div className="mt-5">
+            <SummaryView
+              overview={summary.overview}
+              bullets={summary.bullets}
+              tags={summary.tags}
+            />
+          </div>
+        )}
+
+        {/* RSS 抜粋: カードの抜粋(13.5px・muted・1.75)と同じ声色で、本文として読める 15px に上げる。 */}
+        {article.description && (
+          <p className="mt-5 text-[15px] text-fg-muted leading-[1.8]">
+            {toExcerpt(article.description, 400)}
+          </p>
+        )}
+
+        {/* 元記事のプレビュー画像(OGP、無ければ自前生成)。タイトル直下ではなく本文の後ろに置く:
           一覧のカードは画像を持たない(ADR-0011)ので、タイトル直下に大きな面があると
           「同じ紙面の続き」に見えなくなる。X の投稿のリンクカードと同じく、テキストを読み終えた
           位置に「元記事へ」の入口として出す(画像全体が元記事へのリンク)。角丸・影は使わず、
           白地の OGP が地色に溶けないよう hairline の輪郭だけ付ける。 */}
-      {/* 元記事ブロック: プレビュー画像 + 遷移先ドメイン + 主アクションを1つの塊にする。
+        {/* 元記事ブロック: プレビュー画像 + 遷移先ドメイン + 主アクションを1つの塊にする。
           以前は画像とボタンが罫線で分断され、ボタンが保存アイコンと同じ行に小さく並んでいて
           「このページで一番したいこと」が読み取れなかった。読み終えた位置に入口をまとめ、
           幅いっぱいの1つのボタンにすることで、主アクション(外部へ)と副アクション(共有・保存)の
           優劣を形で示す。ドメインを出すのは遷移先が外部だと押す前に分かるようにするため。 */}
-      <div className="mt-6">
-        <ArticleHeroImage
-          article={article}
-          href={article.url}
-          className="aspect-[1200/630] w-full object-cover ring-1 ring-border-default ring-inset"
-        />
-        <p className="mt-2 truncate text-[11.5px] text-fg-subtle">{hostname(article.url)}</p>
-      </div>
+        <div className="mt-6">
+          <ArticleHeroImage
+            article={article}
+            href={article.url}
+            className="aspect-[1200/630] w-full object-cover ring-1 ring-border-default ring-inset"
+          />
+          <p className="mt-2 truncate text-[11.5px] text-fg-subtle">{hostname(article.url)}</p>
+        </div>
 
-      {/* アクション行: 左に保存・お気に入り・共有のアイコン、右端に「元記事を開く」。
+        {/* アクション行: 左に保存・お気に入り・共有のアイコン、右端に「元記事を開く」。
           旧ダイアログのフッターと同じ並びに戻している。アイコンだけの副アクションを左に溜めて
           右端にラベル付きの主アクションを置く形は、読み終えた視線の終点(右下)に外部への出口が
           来るので押しやすく、幅いっぱいのボタンより紙面も静かになる。
           主アクションなので ink の塗りにする(design.md がプライマリボタンへの ink 塗りを
           許容する範囲。teal の塗りは引き続き使わない)。 */}
-      <div className="mt-6 flex items-center gap-1 border-border-default border-t pt-4">
-        {/* 保存系だけがユーザー依存。ここだけをストリームさせ、本文は待たせない。
+        <div className="mt-6 flex items-center gap-1 border-border-default border-t pt-4">
+          {/* 保存系だけがユーザー依存。ここだけをストリームさせ、本文は待たせない。
             fallback はボタン2つ分(size-11 + gap-1)の枠で、解決時に共有ボタンが動かないようにする。 */}
-        <Suspense fallback={<div className="h-11 w-[5.75rem]" />}>
-          <div className="flex items-center gap-1">
-            <ArticleDetailActions articleId={article.id} />
-          </div>
-        </Suspense>
-        <ShareButton articleId={article.id} title={article.title} />
-        <a
-          href={article.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="ml-auto inline-flex min-h-12 touch-manipulation items-center gap-2 rounded-md bg-primary px-5 font-semibold text-fg-inverse text-sm transition-colors hover:bg-primary-hover"
-        >
-          元記事を開く
-          <ExternalLink aria-hidden="true" className="size-4" />
-        </a>
-      </div>
-    </article>
+          <Suspense fallback={<div className="h-11 w-[5.75rem]" />}>
+            <div className="flex items-center gap-1">
+              <ArticleDetailActions articleId={article.id} />
+            </div>
+          </Suspense>
+          <ShareButton articleId={article.id} title={article.title} />
+          <a
+            href={article.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="ml-auto inline-flex min-h-12 touch-manipulation items-center gap-2 rounded-md bg-primary px-5 font-semibold text-fg-inverse text-sm transition-colors hover:bg-primary-hover"
+          >
+            元記事を開く
+            <ExternalLink aria-hidden="true" className="size-4" />
+          </a>
+        </div>
+      </article>
+      {/* 関連記事は補助情報。本文・保存状態とは独立にストリームし、表示を待たせない。 */}
+      <Suspense fallback={null}>
+        <RelatedArticlesSection id={id} />
+      </Suspense>
+    </>
   );
+}
+
+async function RelatedArticlesSection({ id }: { id: string }) {
+  const articles = await getRelatedArticles(id);
+  return <RelatedArticles articles={articles} />;
 }

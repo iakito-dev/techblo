@@ -66,6 +66,7 @@ AIエージェントもこのファイルから辿れるように構成されて
 - [0012-subscription-initialization-on-signup.md](./adr/0012-subscription-initialization-on-signup.md)
 - [0013-offset-pagination-and-feed-cache.md](./adr/0013-offset-pagination-and-feed-cache.md)
 - [0014-user-private-rss-feeds.md](./adr/0014-user-private-rss-feeds.md)
+- [0037-related-articles-by-tag-overlap.md](./adr/0037-related-articles-by-tag-overlap.md)
 
 ### `features/` — 機能仕様
 
