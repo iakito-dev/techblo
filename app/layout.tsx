@@ -2,8 +2,8 @@ import { Analytics } from '@vercel/analytics/next';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import type { Metadata, Viewport } from 'next';
 import { Inter, Newsreader, Noto_Sans_JP, Outfit } from 'next/font/google';
-import { Toaster } from 'sonner';
 import { GuestSavesMigrator } from '@/components/article/guest-saves-migrator';
+import { ThemedToaster } from '@/components/layout/themed-toaster';
 import { SITE_DESCRIPTION, SITE_SOCIAL_DESCRIPTION } from '@/lib/seo';
 import { resolveBaseUrl } from '@/lib/site-url';
 import { Providers } from './providers';
@@ -89,7 +89,10 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: '#FAFAF8',
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#FAFAF8' },
+    { media: '(prefers-color-scheme: dark)', color: '#16181D' },
+  ],
   viewportFit: 'cover',
 };
 
@@ -106,11 +109,13 @@ export default function RootLayout({
     >
       <body className="min-h-dvh bg-bg-app text-fg-default antialiased">
         {/* 画面最上部のローディングバー等のクライアント provider(app/providers.tsx) */}
-        <Providers>{children}</Providers>
+        <Providers>
+          {children}
+          <ThemedToaster />
+        </Providers>
         <GuestSavesMigrator />
         <Analytics />
         <SpeedInsights />
-        <Toaster position="top-center" richColors />
       </body>
     </html>
   );

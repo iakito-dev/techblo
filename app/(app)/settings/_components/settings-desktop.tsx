@@ -1,7 +1,12 @@
 import { Suspense } from 'react';
 import { AccountCard } from '@/features/auth/components/account-card';
 import { SubscriptionListSkeleton } from '@/features/subscriptions/web/components/subscription-list-skeleton';
-import { SubscriptionSettings, SupportSettings, UserFeedSettings } from './settings-sections';
+import {
+  AppearanceSettings,
+  SubscriptionSettings,
+  SupportSettings,
+  UserFeedSettings,
+} from './settings-sections';
 
 /**
  * デスクトップ(lg+)の設定ページ。全セクションを1カラムで縦積みする(従来レイアウト)。
@@ -26,6 +31,9 @@ export function SettingsDesktop({ className }: { className?: string }) {
           <Suspense fallback={null}>
             <UserFeedSettings guestCta="inline" />
           </Suspense>
+        </div>
+        <div className="mt-10">
+          <AppearanceSettings />
         </div>
         <div className="mt-10">
           <SupportSettings />

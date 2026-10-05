@@ -1,4 +1,4 @@
-import { Building2, CircleHelp, Rss } from 'lucide-react';
+import { Building2, CircleHelp, Palette, Rss } from 'lucide-react';
 import { AccountCard } from '@/features/auth/components/account-card';
 import { getSession } from '@/features/auth/server';
 import { getCompanies } from '@/features/feed/web/queries';
@@ -11,7 +11,7 @@ import { SettingsMenuRow } from './settings-menu-row';
 /**
  * モバイル設定 index のメニュー(ドリルダウンの入口)。
  * 上部にアカウント(ゲストは登録CTA / ログイン時はアカウント情報)、続いて
- * 企業 / マイフィード / サポートの行を出す。各行の件数はここでサーバー取得する
+ * 企業 / マイフィード / 表示 / サポートの行を出す。各行の件数はここでサーバー取得する
  * (queries は 'use cache' 済みで、遷移先のサブページと取得が共有される)。
  * マイフィードはログイン専用機能だが、導線はゲストにも見せる
  * (ゲストは件数の代わりに「ログインで利用」を出し、遷移先でログイン案内する)。
@@ -49,6 +49,7 @@ export async function SettingsMobileMenu() {
           count={String(companyCount)}
         />
         <SettingsMenuRow href="/settings/feeds" icon={Rss} label="マイフィード" count={feedCount} />
+        <SettingsMenuRow href="/settings/appearance" icon={Palette} label="表示" />
         <SettingsMenuRow href="/settings/support" icon={CircleHelp} label="サポート" />
       </nav>
     </div>

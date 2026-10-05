@@ -31,7 +31,7 @@ export function FeedBottomSheet({
   return (
     <Drawer.Root open={open} onOpenChange={onOpenChange} repositionInputs={false}>
       <Drawer.Portal>
-        <Drawer.Overlay className="fixed inset-0 z-50 bg-black/40" />
+        <Drawer.Overlay className="fixed inset-0 z-50 bg-scrim" />
         <Drawer.Content
           className={`fixed inset-x-0 bottom-0 z-50 flex flex-col rounded-t-2xl bg-bg-surface shadow-xl outline-none ${
             contentClassName ?? ''

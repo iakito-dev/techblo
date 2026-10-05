@@ -1,6 +1,7 @@
 import { Button } from '@heroui/react';
 import { ChevronRight, Lock, Plus } from 'lucide-react';
 import Link from 'next/link';
+import { ThemeSegment } from '@/components/layout/theme-segment';
 import { SUPPORT_LINKS } from '@/components/legal/support-links';
 import { Button as LinkButton } from '@/components/ui/button';
 import { SettingsSection } from '@/components/ui/settings-section';
@@ -143,6 +144,18 @@ export function SupportSettings() {
           ))}
         </ul>
       </nav>
+    </SettingsSection>
+  );
+}
+
+/** 表示(テーマ)セクション。保存先はブラウザ(localStorage)でアカウントには紐づかない。 */
+export function AppearanceSettings() {
+  return (
+    <SettingsSection
+      title="表示"
+      description="画面の配色を選べます。システムを選ぶと端末の設定に合わせて切り替わります。"
+    >
+      <ThemeSegment />
     </SettingsSection>
   );
 }

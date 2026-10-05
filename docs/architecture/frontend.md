@@ -337,9 +337,9 @@ import { motion } from 'motion/react';
 
 shadcn/ui の theme variable と統合。design/mockup.html の token定義を反映。
 
-### ダークモード(将来)
+### ダークモード
 
-Tailwind v4 では `@variant dark` で対応。MVPは light 固定。
+実装済み(ADR-0038)。next-themes(`app/providers.tsx`)が `.dark` クラスを付け、`app/globals.css` の `.dark` がプリミティブトークンを上書きする。`dark:` variant は `@custom-variant dark` でクラス基準に統一している。
 
 ## 10. パフォーマンス指針
 

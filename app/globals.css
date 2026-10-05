@@ -1,6 +1,10 @@
 @import "tailwindcss";
 @import "@heroui/styles";
 
+/* next-themes が <html> に付ける .dark クラスで切り替える(ADR-0038)。HeroUI は
+   prefers-color-scheme も見る variant を持つため、クラスのみで判定する定義で上書きする。 */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* HeroUI のアクセント系状態をアプリのティールに揃える。 */
 :root {
   --accent: var(--color-accent);
@@ -49,15 +53,6 @@
   --color-danger: #d92d20;
   --color-success: #2f6b4f;
   --color-warning: #ba7517;
-
-  /* Dark counterparts are defined now so future theme switching has stable token names. */
-  --color-dark-ink: #fafaf8;
-  --color-dark-text: #f4f3f0;
-  --color-dark-text-muted: #c9c6bd;
-  --color-dark-text-faint: #8f918f;
-  --color-dark-bg: #16181d;
-  --color-dark-surface: #1f2126;
-  --color-dark-border: #34363b;
 
   /* ===== Primitive: brand (per company) ===== */
   --color-brand-lycorp: #06c755;
@@ -122,6 +117,109 @@
   --font-sans: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic UI", "Noto Sans JP",
     system-ui, sans-serif;
   --font-mono: ui-monospace, "SF Mono", Menlo, monospace;
+}
+
+/**
+ * ダークモード(ADR-0038)。プリミティブだけを .dark で上書きする。
+ * セマンティックトークンは @theme で var() 参照のまま実行時に解決される
+ * (ビルド出力の :root に var(--color-bg) 等のまま残ることを確認済み)ため、
+ * .dark でプリミティブを差し替えれば全面に波及する。
+ * accent は暗背景でのコントラスト確保のため明るいティールにする。
+ */
+.dark {
+  color-scheme: dark;
+  --color-ink: #fafaf8;
+  --color-text: #f4f3f0;
+  --color-text-muted: #b8b5ac;
+  --color-text-faint: #8f918f;
+  --color-accent: #34c5b0;
+  --color-accent-soft: #12332f;
+  --color-bg: #16181d;
+  --color-surface: #1f2126;
+  --color-surface-hover: #292c32;
+  --color-border: #34363b;
+  --color-rule: #2c2f35;
+  --color-rule-strong: #40434a;
+  --color-scrim: rgb(0 0 0 / 0.6);
+  --color-danger: #f87171;
+  --color-success: #5fbf8f;
+  --color-warning: #e0a23b;
+  --shadow-xs: 0px 0px 5px 0px rgb(0 0 0 / 0.2), 0px 2px 10px 0px rgb(0 0 0 / 0.3),
+    0px 0px 1px 0px rgb(255 255 255 / 0.1);
+  --shadow-sm: var(--shadow-xs);
+  --shadow-md: 0px 0px 15px 0px rgb(0 0 0 / 0.25), 0px 2px 30px 0px rgb(0 0 0 / 0.4),
+    0px 0px 1px 0px rgb(255 255 255 / 0.12);
+  --shadow-lg: 0px 0px 30px 0px rgb(0 0 0 / 0.3), 0px 30px 60px 0px rgb(0 0 0 / 0.5),
+    0px 0px 1px 0px rgb(255 255 255 / 0.14);
+  --shadow-xl: var(--shadow-lg);
+  --shadow-card: 0px 1px 2px 0px rgb(0 0 0 / 0.2), 0px 4px 16px 0px rgb(0 0 0 / 0.3);
+  --shadow-card-hover: 0px 2px 4px 0px rgb(0 0 0 / 0.25), 0px 12px 32px 0px rgb(0 0 0 / 0.4);
+
+  /* HeroUI のコンポーネント変数もアプリのパレットに揃える(未指定だと別系統の暗色になる) */
+  --background: var(--color-bg);
+  --foreground: var(--color-text);
+  --surface: var(--color-surface);
+  --overlay: var(--color-surface);
+  --field-background: var(--color-surface);
+  --border: var(--color-border);
+}
+
+/* LP は常にライト表示(暗色デザインを持たないため)。ルートに class="light" と
+   data-theme="light" を付ける。前者がアプリのプリミティブを、後者が HeroUI の変数を
+   ライトへ戻す(.dark の祖先から継承した値を打ち消す)。 */
+.light {
+  color-scheme: light;
+  --color-ink: #16181d;
+  --color-text: #1f2126;
+  --color-text-muted: #5f6368;
+  --color-text-faint: #9a9c9f;
+  --color-accent: #0f766e;
+  --color-accent-soft: #e1f5ee;
+  --color-bg: #fafaf8;
+  --color-surface: #ffffff;
+  --color-surface-hover: #f4f3f0;
+  --color-border: #e7e5e0;
+  --color-rule: #e9e6e0;
+  --color-rule-strong: #d6d2c8;
+  --color-scrim: rgb(22 24 29 / 0.42);
+  --color-danger: #d92d20;
+  --color-success: #2f6b4f;
+  --color-warning: #ba7517;
+  --shadow-xs: 0px 0px 5px 0px rgb(0 0 0 / 0.02), 0px 2px 10px 0px rgb(0 0 0 / 0.06),
+    0px 0px 1px 0px rgb(0 0 0 / 0.18);
+  --shadow-sm: 0px 0px 5px 0px rgb(0 0 0 / 0.02), 0px 2px 10px 0px rgb(0 0 0 / 0.06),
+    0px 0px 1px 0px rgb(0 0 0 / 0.2);
+  --shadow-md: 0px 0px 15px 0px rgb(0 0 0 / 0.03), 0px 2px 30px 0px rgb(0 0 0 / 0.08),
+    0px 0px 1px 0px rgb(0 0 0 / 0.22);
+  --shadow-lg: 0px 0px 30px 0px rgb(0 0 0 / 0.04), 0px 30px 60px 0px rgb(0 0 0 / 0.12),
+    0px 0px 1px 0px rgb(0 0 0 / 0.24);
+  --shadow-xl: 0px 0px 30px 0px rgb(0 0 0 / 0.05), 0px 30px 60px 0px rgb(0 0 0 / 0.14),
+    0px 0px 1px 0px rgb(0 0 0 / 0.26);
+  --shadow-card: 0px 1px 2px 0px rgb(0 0 0 / 0.02), 0px 4px 16px 0px rgb(0 0 0 / 0.04);
+  --shadow-card-hover: 0px 2px 4px 0px rgb(0 0 0 / 0.03), 0px 12px 32px 0px rgb(0 0 0 / 0.07);
+  /* セマンティックトークンは宣言した要素(:root)で var() が解決済みの値として継承されるため、
+     プリミティブを戻すだけでは追従しない。ここで同じ対応を宣言し直して再解決させる。 */
+  --color-bg-app: var(--color-bg);
+  --color-bg-surface: var(--color-surface);
+  --color-bg-surface-2: var(--color-surface-hover);
+  --color-bg-surface-3: var(--color-border);
+  --color-bg-inverse: var(--color-ink);
+  --color-fg-default: var(--color-text);
+  --color-fg-secondary: var(--color-text-muted);
+  --color-fg-muted: var(--color-text-muted);
+  --color-fg-subtle: var(--color-text-faint);
+  --color-fg-faint: var(--color-text-faint);
+  --color-fg-inverse: var(--color-surface);
+  --color-border-default: var(--color-rule);
+  --color-border-strong: var(--color-rule-strong);
+  --color-border-card: var(--color-border);
+  --color-primary: var(--color-ink);
+  --color-primary-hover: var(--color-text);
+  --color-primary-soft: var(--color-accent-soft);
+  --accent: var(--color-accent);
+  --accent-foreground: var(--color-surface);
+  background: var(--color-bg-app);
+  color: var(--color-fg-default);
 }
 
 /* ===== Feed grid =====
