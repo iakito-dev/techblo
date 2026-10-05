@@ -46,7 +46,7 @@ jobs:
       seed: ${{ steps.plan.outputs.seed }}
       trigger: ${{ steps.plan.outputs.trigger }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           # push 前後の差分を取るため履歴ごと取得する
           fetch-depth: 0
@@ -92,7 +92,7 @@ jobs:
       - name: Warn if secret is missing
         if: ${{ env.DATABASE_URL == '' }}
         run: echo "::warning::PROD_DATABASE_URL が未設定のためマイグレーションをスキップしました"
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         if: ${{ env.DATABASE_URL != '' }}
       - uses: ./.github/actions/setup
         if: ${{ env.DATABASE_URL != '' }}
@@ -115,7 +115,7 @@ jobs:
       - name: Warn if secret is missing
         if: ${{ env.DATABASE_URL == '' }}
         run: echo "::warning::PROD_DATABASE_URL が未設定のため企業マスタの反映をスキップしました"
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         if: ${{ env.DATABASE_URL != '' }}
       - uses: ./.github/actions/setup
         if: ${{ env.DATABASE_URL != '' }}
@@ -139,7 +139,7 @@ jobs:
       - name: Warn if secrets are missing
         if: ${{ env.TRIGGER_ACCESS_TOKEN == '' || env.TRIGGER_PROJECT_REF == '' }}
         run: echo "::warning::TRIGGER_ACCESS_TOKEN / TRIGGER_PROJECT_REF が未設定のため Trigger.dev のデプロイをスキップしました"
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         if: ${{ env.TRIGGER_ACCESS_TOKEN != '' && env.TRIGGER_PROJECT_REF != '' }}
       - uses: ./.github/actions/setup
         if: ${{ env.TRIGGER_ACCESS_TOKEN != '' && env.TRIGGER_PROJECT_REF != '' }}

@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/setup
       # biome check は formatter の差分も検出するので format:check は不要
       - run: bun run lint
@@ -38,7 +38,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/setup
       # tsconfig は incremental: true。tsbuildinfo を持ち越すと 2 回目以降が数倍速い
       - uses: actions/cache@v5
@@ -60,7 +60,7 @@ jobs:
       DATABASE_URL: ${{ secrets.TEST_DATABASE_URL }}
       BETTER_AUTH_SECRET: ${{ secrets.TEST_BETTER_AUTH_SECRET }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/setup
       - run: bun run test:unit
       - run: bun run test:integration
@@ -74,7 +74,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/setup
       - name: Restore .next cache
         uses: actions/cache@v6
@@ -104,7 +104,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/setup
       - name: Audit (critical のみ fail)
         run: bun audit --audit-level=critical
