@@ -293,6 +293,25 @@ const SEED_COMPANIES = [
     brandColor: '#16b364',
     description: '令和トラベル Engineering(Zenn)',
   },
+  {
+    slug: 'anthropic',
+    name: 'Anthropic',
+    // 公式 RSS が無いため、Anthropic 公式サイトを定期スクレイプして生成されるコミュニティ製フィードを使用
+    rssUrl:
+      'https://raw.githubusercontent.com/Olshansk/rss-feeds/main/feeds/feed_anthropic_news.xml',
+    siteUrl: 'https://www.anthropic.com/news',
+    brandColor: '#d97757',
+    description: 'Anthropic News',
+  },
+  {
+    slug: 'anthropic-engineering',
+    name: 'Anthropic Engineering',
+    rssUrl:
+      'https://raw.githubusercontent.com/Olshansk/rss-feeds/main/feeds/feed_anthropic_engineering.xml',
+    siteUrl: 'https://www.anthropic.com/engineering',
+    brandColor: '#d97757',
+    description: 'Anthropic Engineering Blog',
+  },
 ] as const;
 
 async function main() {
