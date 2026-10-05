@@ -4,7 +4,7 @@
 
 - macOS / Linux(Windowsは WSL2 推奨)
 - Bun 1.2+
-- Node.js 22+(Bunで代用可だが互換性のため入れる)
+- Node.js 22+(`next` の起動に使う。typecheck / depcruise / test と git hooks は `bunx --bun` で Bun 上で動くので node 版に依存しない)
 - Git
 - GitHub CLI (`gh`)
 - VS Code(推奨)

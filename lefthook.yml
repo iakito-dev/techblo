@@ -2,6 +2,10 @@
 # https://github.com/evilmartians/lefthook
 #
 # 人間でもAIエージェントでも、コミットを残す全員に同じ品質ゲートを通す。
+#
+# node 製ツール(biome / tsc / depcruise / vitest)は `bunx --bun` で Bun ランタイムに固定する。
+# フックは PATH 上の node を拾うため、古い node や別アーキテクチャの node が先頭にある環境
+# (GUI の git クライアント等)でも落ちないようにするため。package.json の scripts 側も同じ。
 
 pre-commit:
   parallel: true
@@ -31,7 +35,6 @@ pre-commit:
         done
 
     # 3. Biome で format + lint(自動修正)
-    # `--bun` で Bun ランタイム強制(Node arch 不整合を回避)
     biome:
       glob: "*.{ts,tsx,js,jsx,cjs,mjs,json,jsonc}"
       run: bunx --bun biome check --write --no-errors-on-unmatched {staged_files}
@@ -65,7 +68,6 @@ pre-push:
   parallel: true
   commands:
     # push前にテストを通す(時間かかるのでpre-commitではなくpre-push)
-    # `--bun` で Bun ランタイム強制(Node arch 不整合を回避)
     # `--passWithNoTests` でテストファイル未作成段階でもパス
     test:
       run: bunx --bun vitest run --passWithNoTests
