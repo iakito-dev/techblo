@@ -72,7 +72,7 @@
 - Vercel が面倒を見ない本番反映は `.github/workflows/deploy.yml` が `main` への push ごとに行う。関係するファイルが変わったジョブだけが、次の順に動く
   1. **migrate**: `db/migrations/` が変わったら `bun run db:migrate`
   2. **seed**: `scripts/seed.ts` が変わったら `bun run db:seed`(企業マスタの upsert)
-  3. **trigger**: docs・Markdown・テスト以外が変わったら `bun run trigger:deploy`(DB 反映が失敗したら出さない)
+  3. **trigger**: docs・Markdown・テスト・`scripts/seed.ts` 以外が変わったら `bun run trigger:deploy`(DB 反映が失敗したら出さない)
 - Actions タブから手動実行もできる(動かすジョブを選べる)
 - 必要な Secrets が未設定のジョブは、警告を出してスキップする
 - 手元から出す場合は従来どおり `bun run db:migrate` / `bun run db:seed` / `bun run trigger:deploy`(CLI は `scripts/trigger-cli.ts` が SDK と同じ版で起動する)

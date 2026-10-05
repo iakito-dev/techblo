@@ -65,8 +65,8 @@ jobs:
             migrate=false; seed=false; trigger=false
             if echo "$files" | grep -qE '^db/migrations/'; then migrate=true; fi
             if echo "$files" | grep -qx 'scripts/seed.ts'; then seed=true; fi
-            # docs・Markdown・テストだけの変更はタスクのバンドルに入らないので再デプロイしない
-            if echo "$files" | grep -qvE '^docs/|\.md$|\.test\.tsx?$'; then trigger=true; fi
+            # docs・Markdown・テスト・seed だけの変更はタスクのバンドルに入らないので再デプロイしない
+            if echo "$files" | grep -qvE '^docs/|\.md$|\.test\.tsx?$|^scripts/seed\.ts$'; then trigger=true; fi
           else
             # 差分が取れないとき(force push 等)は全部動かす。どのジョブも再実行して安全
             migrate=true; seed=true; trigger=true
