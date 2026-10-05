@@ -302,6 +302,8 @@ const SEED_COMPANIES = [
     siteUrl: 'https://www.anthropic.com/news',
     brandColor: '#d97757',
     description: 'Anthropic News',
+    // 投資・提携・事例など技術記事以外が大半のため取り込み停止(技術記事は anthropic-engineering で取得)
+    enabled: false,
   },
   {
     slug: 'anthropic-engineering',
@@ -311,6 +313,14 @@ const SEED_COMPANIES = [
     siteUrl: 'https://www.anthropic.com/engineering',
     brandColor: '#d97757',
     description: 'Anthropic Engineering Blog',
+  },
+  {
+    slug: 'linear',
+    name: 'Linear',
+    rssUrl: 'https://linear.app/rss/now.xml',
+    siteUrl: 'https://linear.app/now',
+    brandColor: '#5e6ad2',
+    description: 'Linear Blog(Now)',
   },
 ] as const;
 
