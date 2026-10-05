@@ -144,7 +144,7 @@ jobs:
       - uses: ./.github/actions/setup
         if: ${{ env.TRIGGER_ACCESS_TOKEN != '' && env.TRIGGER_PROJECT_REF != '' }}
       # trigger-cli.ts は CLI を npx で起動するので node も揃える
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         if: ${{ env.TRIGGER_ACCESS_TOKEN != '' && env.TRIGGER_PROJECT_REF != '' }}
         with:
           node-version-file: .nvmrc
