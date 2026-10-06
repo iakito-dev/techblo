@@ -8,7 +8,8 @@ export type ShortcutAction =
   | { type: 'toggle-favorite' }
   | { type: 'focus-search' }
   | { type: 'toggle-help' }
-  | { type: 'navigate'; href: string };
+  | { type: 'navigate'; href: string }
+  | { type: 'scroll-top' };
 
 const GO_TARGETS: Record<string, string> = {
   h: '/',
@@ -69,6 +70,7 @@ export function resolveShortcut(input: {
   if (pendingSince != null && now - pendingSince <= SEQUENCE_TIMEOUT_MS) {
     const href = GO_TARGETS[key];
     if (href) return { action: { type: 'navigate', href }, pendingSince: null };
+    if (key === 't') return { action: { type: 'scroll-top' }, pendingSince: null };
   }
   if (key === 'g') return { action: null, pendingSince: now };
   return { action: SINGLE_KEY_ACTIONS[key] ?? null, pendingSince: null };
@@ -117,6 +119,7 @@ export const SHORTCUT_GROUPS: ShortcutGroup[] = [
       { keys: ['g', 'b'], label: 'あとで読むへ', sequence: true },
       { keys: ['g', 'f'], label: 'お気に入りへ', sequence: true },
       { keys: ['g', 's'], label: '設定へ', sequence: true },
+      { keys: ['g', 't'], label: 'ページの先頭へ', sequence: true },
     ],
   },
   {

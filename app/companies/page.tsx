@@ -5,6 +5,8 @@ import { Suspense } from 'react';
 import { CompaniesFilter } from '@/components/article/companies-filter';
 import { CompanyFavicon } from '@/components/article/company-favicon';
 import { Header } from '@/components/layout/header';
+import { ScrollToTop } from '@/components/layout/scroll-to-top';
+import { SkipLink } from '@/components/layout/skip-link';
 import { JsonLd } from '@/components/seo/json-ld';
 import { getCompanies } from '@/features/feed/web/queries';
 import { companyListJsonLd } from '@/lib/seo';
@@ -38,11 +40,16 @@ export const metadata: Metadata = {
 export default function CompaniesPage() {
   return (
     <div className="min-h-dvh pb-24 lg:pb-12">
+      <SkipLink />
       <Suspense fallback={<div className="h-16 border-border-default border-b bg-bg-surface" />}>
         <Header />
       </Suspense>
 
-      <main className="mx-auto max-w-[84rem] px-4 py-8 md:px-6 lg:px-8">
+      <main
+        id="main-content"
+        tabIndex={-1}
+        className="mx-auto max-w-[84rem] px-4 py-8 focus:outline-none md:px-6 lg:px-8"
+      >
         <header className="mb-8">
           <h1 className="font-bold text-2xl tracking-tight md:text-3xl">{TITLE}</h1>
           <p className="mt-3 max-w-2xl text-fg-muted leading-relaxed">{DESCRIPTION}</p>
@@ -52,6 +59,7 @@ export default function CompaniesPage() {
           <CompaniesList />
         </Suspense>
       </main>
+      <ScrollToTop />
     </div>
   );
 }

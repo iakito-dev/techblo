@@ -65,6 +65,11 @@ export function BottomChromeProvider({ children }: { children: ReactNode }) {
   return <BottomChromeContext.Provider value={value}>{children}</BottomChromeContext.Provider>;
 }
 
+/** Provider 外(公開ページ)でも使える版。下部ナビが無い画面では null。 */
+export function useOptionalBottomChrome(): BottomChromeContextValue | null {
+  return useContext(BottomChromeContext);
+}
+
 export function useBottomChrome(): BottomChromeContextValue {
   const value = useContext(BottomChromeContext);
   if (!value) {

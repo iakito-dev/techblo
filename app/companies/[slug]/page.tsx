@@ -8,6 +8,8 @@ import { CompanyFavicon } from '@/components/article/company-favicon';
 import { COMPANY_PAGE_SIZE } from '@/components/article/company-page-size';
 import { getCompanyArticles } from '@/components/article/feed-load-more';
 import { Header } from '@/components/layout/header';
+import { ScrollToTop } from '@/components/layout/scroll-to-top';
+import { SkipLink } from '@/components/layout/skip-link';
 import { JsonLd } from '@/components/seo/json-ld';
 import { FeedGridSkeleton } from '@/features/feed/web/components/feed-grid';
 import { getCompanyBySlug } from '@/features/feed/web/queries';
@@ -82,15 +84,21 @@ export async function generateMetadata({
 export default function CompanyPage({ params }: { params: Promise<{ slug: string }> }) {
   return (
     <div className="min-h-dvh pb-24 lg:pb-12">
+      <SkipLink />
       <Suspense fallback={<div className="h-16 border-border-default border-b bg-bg-surface" />}>
         <Header />
       </Suspense>
 
-      <main className="mx-auto max-w-[84rem] px-4 py-8 md:px-6 lg:px-8">
+      <main
+        id="main-content"
+        tabIndex={-1}
+        className="mx-auto max-w-[84rem] px-4 py-8 focus:outline-none md:px-6 lg:px-8"
+      >
         <Suspense fallback={<CompanyPageSkeleton />}>
           <CompanyContent params={params} />
         </Suspense>
       </main>
+      <ScrollToTop />
     </div>
   );
 }

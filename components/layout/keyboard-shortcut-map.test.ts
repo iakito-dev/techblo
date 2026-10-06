@@ -68,6 +68,14 @@ describe('resolveShortcut', () => {
     }
   });
 
+  test('g の後の t でページ先頭へのスクロールに解決する', () => {
+    expect(resolveShortcut({ key: 't', pendingSince: 1000, now: 1500 })).toEqual({
+      action: { type: 'scroll-top' },
+      pendingSince: null,
+    });
+    expect(resolveShortcut({ key: 't', ...none }).action).toBeNull();
+  });
+
   test('時間切れ後は b を単独のブックマークとして扱う', () => {
     const result = resolveShortcut({
       key: 'b',

@@ -70,6 +70,8 @@ Component (component-specific)
 - フォーカスリングは `:focus-visible` で明示(`outline:none` だけは禁止)
 - 色のみで情報を伝えない(アイコン併用)
 - キーボードナビゲーション可能(Tab で全機能到達)
+- スキップリンク(`components/layout/skip-link.tsx`)を `(app)` レイアウト・企業ページ・legal シェルの先頭に置き、本文ラッパー `#main-content` へ飛べる
+- 「先頭へ戻る」ボタン(`components/layout/scroll-to-top.tsx`)はビューポート高の約1.5倍スクロールで右下にフェードイン。モバイルでは下部ナビの退避(`BottomChrome`)に追従し、`prefers-reduced-motion` ではスムーススクロールしない
 
 ## 5. アニメーション
 

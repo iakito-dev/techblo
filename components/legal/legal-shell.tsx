@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import { Suspense } from 'react';
 import { Header } from '@/components/layout/header';
+import { ScrollToTop } from '@/components/layout/scroll-to-top';
+import { SkipLink } from '@/components/layout/skip-link';
 
 /**
  * プライバシーポリシー / 利用規約 / 運営者情報 など、テキスト主体の静的ページの共有シェル。
@@ -17,11 +19,16 @@ export function LegalShell({
 }) {
   return (
     <div className="min-h-dvh pb-24 lg:pb-12">
+      <SkipLink />
       <Suspense fallback={<div className="h-16 border-border-default border-b bg-bg-surface" />}>
         <Header />
       </Suspense>
 
-      <main className="mx-auto max-w-3xl px-4 py-10 md:px-6 lg:px-8">
+      <main
+        id="main-content"
+        tabIndex={-1}
+        className="mx-auto max-w-3xl px-4 py-10 focus:outline-none md:px-6 lg:px-8"
+      >
         <header className="mb-8">
           <h1 className="font-bold text-2xl tracking-tight md:text-3xl">{title}</h1>
           {lastUpdated && <p className="mt-2 text-fg-muted text-sm">最終更新日: {lastUpdated}</p>}
@@ -43,6 +50,7 @@ export function LegalShell({
           </Link>
         </nav>
       </main>
+      <ScrollToTop />
     </div>
   );
 }

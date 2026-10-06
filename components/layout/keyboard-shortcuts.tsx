@@ -123,6 +123,15 @@ export function KeyboardShortcutsProvider({ children }: { children: ReactNode })
           event.preventDefault();
           setHelpOpen((v) => !v);
           return;
+        case 'scroll-top':
+          event.preventDefault();
+          window.scrollTo({
+            top: 0,
+            behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches
+              ? 'auto'
+              : 'smooth',
+          });
+          return;
         case 'navigate':
           event.preventDefault();
           router.push(action.href);

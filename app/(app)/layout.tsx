@@ -4,7 +4,9 @@ import { Header } from '@/components/layout/header';
 import { KeyboardShortcutsProvider } from '@/components/layout/keyboard-shortcuts';
 import { MobileNav } from '@/components/layout/mobile-nav';
 import { MobileSwipeNavigation } from '@/components/layout/mobile-swipe-navigation';
+import { ScrollToTop } from '@/components/layout/scroll-to-top';
 import { Sidebar } from '@/components/layout/sidebar';
+import { SkipLink } from '@/components/layout/skip-link';
 
 /**
  * 主要画面(フィード / ブックマーク / お気に入り / 設定)の共有シェル。
@@ -25,6 +27,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <BottomChromeProvider>
       <KeyboardShortcutsProvider>
+        <SkipLink />
         {/*
         Header / MobileNav / MobileSwipeNavigation は現在地を usePathname() で判定する。
         動的セグメントを持つルート(/a/[id])では pathname がビルド時に分からないため、
@@ -42,7 +45,16 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           <Header />
         </Suspense>
         <Sidebar />
-        <div data-mobile-swipe-content>{children}</div>
+        {/* スキップリンクの着地点。ページごとに <main> の有無が違うため、共有のラッパーで受ける。 */}
+        <div
+          data-mobile-swipe-content
+          id="main-content"
+          tabIndex={-1}
+          className="focus:outline-none"
+        >
+          {children}
+        </div>
+        <ScrollToTop />
         {/* 表示物を持たない(スワイプの検知のみ)ので fallback は無し。 */}
         <Suspense fallback={null}>
           <MobileSwipeNavigation />
