@@ -50,6 +50,7 @@ const setup = (f: Fixture) => {
     listForSitemap: unused,
     listLatestByCategories: unused,
     countByCategory: unused,
+    listPopularTags: unused,
     upsertMany: unused,
     incrementView: unused,
     listRecentForMetrics: unused,

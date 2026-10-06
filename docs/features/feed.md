@@ -126,6 +126,7 @@ trackArticleView(input: { articleId: string }): Promise<Result<void, FeedError>>
 - 記事検索(`?q=`、ADR-0022): title/description の ILIKE 部分一致(pg_trgm GIN。マイグレーション 0004)。他のフィルタ(企業/既読/期間/並び替え)と AND で併用可能
   - 入力は debounce(300ms)で URL へ commit(`router.replace`、履歴を汚さない)。IME 変換中は commit しない(`use-feed-search.ts` / `feed-search-box.tsx`)
   - Enter / 検索キー(`enterKeyHint="search"`)で debounce を待たず即 commit(`useFeedSearch.commitNow`)。スマホのインライン検索/タブレットツールバーは入力を blur してキーボードを閉じ、検索オーバーレイは閉じて結果フィードへ戻す
+  - 検索履歴(最近の検索): 明示確定(Enter / 検索キー / 履歴の選択)した語だけを端末内の localStorage(`techblo.search.history`)に最大8件保存する。debounce の途中入力は記録しない。trim・NFKC+小文字で同一視して重複は先頭へ移動、1語100文字上限。入力が空のときだけ、モバイルは検索オーバーレイ内のリスト、デスクトップは検索ボックス直下のポップオーバー(combobox/listbox、↑↓/Enter/Escape)に出し、個別削除と「すべて消去」ができる。localStorage が使えない環境では履歴なしで動く。静的シェル用 `DefaultFeedSearchBox` は履歴を読まない(純粋関数 `search-history.ts` / hook `use-search-history.ts`)
   - モバイル/タブレットの検索入力は 16px(`text-base`、lg+ のみ `text-sm`)。iOS のフォーカス時自動ズーム(16px 未満で発火)を防ぐ
   - デスクトップはトップバー(⌘K / Ctrl+K でフォーカス、Escape でクリア)、lg 未満は `FeedControls` の searchSlot に配置
   - 検索語の正規化(trim・100文字上限・空→検索なし)は application 層、LIKE メタ文字エスケープは infrastructure 層(`escape-like.ts`)
@@ -164,6 +165,7 @@ trackArticleView(input: { articleId: string }): Promise<Result<void, FeedError>>
 | `b` / `f` | あとで読む / お気に入りを切り替え(既存の保存ボタンを `click()`。optimistic・ゲスト保存・失敗時ロールバックは既存ロジックのまま) |
 | `/` | 検索ボックスへフォーカス(⌘K と同じ対象。検索ボックスが無いページでは何もしない) |
 | `g` → `h` / `b` / `f` / `s` | 1 秒以内の 2 打鍵で `/` / `/bookmarks` / `/favorites` / `/settings` へ遷移 |
+| `g` → `t` | 1 秒以内の 2 打鍵でページ先頭へスクロール(`prefers-reduced-motion` 時は即時) |
 | `?` | ショートカット一覧ダイアログを開閉(`Esc` でも閉じる)。サイドバー下部の「キーボードショートカット」からも開ける |
 
 - 入力中(input / textarea / select / contenteditable)、IME 変換中(`isComposing`)、⌘/Ctrl/Alt 付きでは発火しない。ダイアログ表示中は `?` 以外を無視する。
@@ -225,6 +227,16 @@ trackArticleView(input: { articleId: string }): Promise<Result<void, FeedError>>
 - キャッシュ: `getRelatedArticles` は `'use cache'` + `cacheTag(feed)` + `cacheLife('days')`。`tags` に索引は張らず、キャッシュで1記事1回の走査に抑える。失敗(Result err・例外)は `logger.warn` して `cacheLife('minutes')` で `[]` を返し、記事ページを落とさない。
 - シグネチャ: `listRelatedArticles(deps)(articleId, limit = RELATED_ARTICLES_LIMIT): Promise<Result<ArticleCard[], FeedError>>`(`features/feed/application/list-related-articles.ts`)。
 - id は呼び出し側(ページ)で UUID 検証済みのものだけを渡す(不正形式は DB エラーになる)。
+
+## タグ一覧ページ(/tags、ADR-0040)
+
+- 公開・SEO 対象のハブ(`app/tags/page.tsx`)。構成は `/companies` と同じ(Header / 静的シェル + `connection()` + Suspense でストリーム)。h1「タグから探す」、canonical は自己参照 `/tags`、JSON-LD は `breadcrumbJsonLd`(ホーム → タグから探す)。
+- 2セクション: 「最近よく書かれているタグ」(直近90日・上位40)と「すべてのタグ」(全期間・上位120)。各タグは `/?tag=<encodeURIComponent(tag)>` への輪郭バッジ + 件数(`text-fg-subtle`)。0件なら空状態メッセージ。直近セクションは0件なら出さない。
+- 集計: `ArticleRepository.listPopularTags(limit, sinceDays?)` が `article_summaries.tags`(jsonb)を `jsonb_array_elements_text` で展開し、削除済み除外・`status='ready'` で `group by tag`、`count(distinct a.id) desc, tag asc`。`sinceDays` 指定時は `articles.published_at` で絞る。空白タグは除外。
+- usecase `listPopularTags(deps)(limit = 120, sinceDays?)`(`features/feed/application/list-popular-tags.ts`): limit を 1..200 に丸め、空白タグを除外し `Result` で返す。
+- キャッシュ: `getPopularTags()` は `'use cache'` + `cacheTag(feed)` + `cacheLife('hours')`。失敗は `logger.warn` して `{ recent: [], all: [] }` を `cacheLife('minutes')` で返す。
+- タグは類義語展開しない(表記ゆれは別タグとして並ぶ)。リンク先の `?tag=` 側が `lib/tags/curated.ts` で類義語を展開する。
+- 導線: `app/sitemap.ts` に `/tags`、サイドバー「カテゴリ」セクション末尾に「タグから探す」行。
 
 ## 公開 RSS フィード(ADR-0039)
 

@@ -46,6 +46,9 @@ const fakeRepo = (all: Article[]): ArticleRepository => ({
   async countByCategory() {
     return {};
   },
+  async listPopularTags() {
+    return [];
+  },
   async upsertMany() {
     return 0;
   },
@@ -84,6 +87,9 @@ const capturingRepo = (): { repo: ArticleRepository; listCalls: ListCriteria[] }
     },
     async countByCategory() {
       return {};
+    },
+    async listPopularTags() {
+      return [];
     },
     async upsertMany() {
       return 0;

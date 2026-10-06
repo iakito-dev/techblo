@@ -16,6 +16,12 @@ import { toArticleCard } from '../application/dto';
 import { getCompany } from '../application/get-company';
 import { listCompanies } from '../application/list-companies';
 import { listFeed } from '../application/list-feed';
+import {
+  ALL_TAGS_LIMIT,
+  listPopularTags,
+  RECENT_TAGS_DAYS,
+  RECENT_TAGS_LIMIT,
+} from '../application/list-popular-tags';
 import { listRelatedArticles } from '../application/list-related-articles';
 import {
   buildFeedSections,
@@ -24,7 +30,7 @@ import {
   LATEST_COUNT,
   SHELF_ITEM_COUNT,
 } from '../application/list-sections';
-import type { CategoryCounts } from '../domain/article-repository';
+import type { CategoryCounts, PopularTag } from '../domain/article-repository';
 import { DrizzleArticleRepository } from '../infrastructure/drizzle-article-repository';
 import { DrizzleCompanyRepository } from '../infrastructure/drizzle-company-repository';
 
@@ -369,5 +375,38 @@ export async function getRelatedArticles(id: string): Promise<ArticleCard[]> {
     logger.warn('getRelatedArticles: 関連記事の取得に失敗(空で返す)', { error });
     cacheLife('minutes');
     return [];
+  }
+}
+
+export type TagIndex = { recent: PopularTag[]; all: PopularTag[] };
+
+/**
+ * タグ一覧ページ(/tags)用の集計。直近 RECENT_TAGS_DAYS 日の上位と全期間の上位を1エントリで返す(ADR-0040)。
+ * tags 全件走査の集計なので 'hours' でキャッシュし、feed タグで新着取り込み時に失効させる。
+ * 補助ページなので失敗時は logger.warn して空で返す(失敗結果は短命キャッシュ)。
+ */
+export async function getPopularTags(): Promise<TagIndex> {
+  'use cache';
+  cacheTag(CACHE_TAGS.feed);
+  cacheLife('hours');
+
+  try {
+    const run = listPopularTags({ articles: articleRepo });
+    const [recent, all] = await Promise.all([
+      run(RECENT_TAGS_LIMIT, RECENT_TAGS_DAYS),
+      run(ALL_TAGS_LIMIT),
+    ]);
+    if (!recent.ok || !all.ok) {
+      logger.warn('getPopularTags: タグ集計の取得に失敗(空で返す)', {
+        error: !recent.ok ? recent.error : !all.ok ? all.error : undefined,
+      });
+      cacheLife('minutes');
+      return { recent: [], all: [] };
+    }
+    return { recent: recent.value, all: all.value };
+  } catch (error) {
+    logger.warn('getPopularTags: タグ集計の取得に失敗(空で返す)', { error });
+    cacheLife('minutes');
+    return { recent: [], all: [] };
   }
 }

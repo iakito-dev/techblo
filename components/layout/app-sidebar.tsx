@@ -10,6 +10,7 @@ import {
   Keyboard,
   Rss,
   Settings,
+  Tags,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
@@ -242,6 +243,13 @@ export function AppSidebar({
                 />
               );
             })}
+            <NavRow
+              asLink
+              href="/tags"
+              icon={Tags}
+              label="タグから探す"
+              active={pathname.startsWith('/tags')}
+            />
           </Section>
         </div>
       </ScrollArea>

@@ -78,6 +78,9 @@ export type ListLatestByCategoriesCriteria = {
   companyIds?: CompanyId[];
 };
 
+/** タグ一覧ページ用の集計1行(タグ表記と、そのタグを持つ公開記事数)。 */
+export type PopularTag = { tag: string; count: number };
+
 /**
  * Driven Port。記事永続化に対するドメイン側のインターフェース。
  * 実装(Drizzle 等)は infrastructure 層に置き、ドメインは実装を知らない。
@@ -98,6 +101,9 @@ export interface ArticleRepository {
   // 対象記事と AI要約タグを1つ以上共有する記事を、共有タグ数の多い順(同数は新着順)で最大 limit 件。
   // 対象記事自身・削除済み・要約が ready でない記事は含めない。対象に ready な要約/タグが無ければ空。
   listByTagOverlap(id: ArticleId, limit: number): Promise<Article[]>;
+  // 公開記事(削除済み除外・要約 status='ready')の AI要約タグを集計し、記事数の多い順(同数はタグ昇順)に最大 limit 件。
+  // sinceDays 指定時は直近 N 日に公開された記事だけを数える。記事内でタグが重複しても1記事1回として数える。
+  listPopularTags(limit: number, sinceDays?: number): Promise<PopularTag[]>;
   upsertMany(companyId: CompanyId, items: ArticleDraft[]): Promise<number>;
   incrementView(id: ArticleId): Promise<void>;
   // 直近 sinceDays 日に公開された記事の id/url(外部メトリクス再取得の対象)

@@ -37,6 +37,7 @@ import type {
   ListCriteria,
   ListLatestByCategoriesCriteria,
   MetricSnapshotInput,
+  PopularTag,
   SitemapArticle,
 } from '../domain/article-repository';
 import { PERIOD_DAYS } from '../domain/feed-sort';
@@ -374,6 +375,35 @@ export class DrizzleArticleRepository implements ArticleRepository {
     const rows = result as unknown as ArticleRow[];
 
     return rows.map(toArticle);
+  }
+
+  /**
+   * タグ一覧ページ用の集計(ADR-0040)。ready な要約の tags(jsonb 配列)を展開して group by する。
+   * 全件走査になるが、呼び出し側(queries.ts)が 'use cache' で時間単位に1回へ抑える前提のため索引は張らない。
+   * 同一記事内でタグが重複しても二重計上しないよう distinct で記事数を数え、空白だけのタグは除く。
+   * limit / sinceDays は sql テンプレートでバインドパラメータ化される(文字列連結しない)。
+   */
+  async listPopularTags(limit: number, sinceDays?: number): Promise<PopularTag[]> {
+    const sinceCondition =
+      sinceDays === undefined
+        ? sql``
+        : sql`and a.published_at >= now() - make_interval(days => ${sinceDays}::int)`;
+
+    const result = await this.db.execute(sql`
+      select t.tag as "tag", count(distinct a.id)::int as "count"
+      from ${articles} as a
+      join ${articleSummaries} as s on s.article_id = a.id
+      cross join lateral jsonb_array_elements_text(s.tags) as t(tag)
+      where a.deleted_at is null
+        and s.status = 'ready'
+        and btrim(t.tag) <> ''
+        ${sinceCondition}
+      group by t.tag
+      order by count(distinct a.id) desc, t.tag asc
+      limit ${limit}
+    `);
+    // postgres-js は db.execute(raw) で行配列を直返しする。
+    return result as unknown as PopularTag[];
   }
 
   /**
