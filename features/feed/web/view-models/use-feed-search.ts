@@ -26,6 +26,8 @@ export function useFeedSearch(): {
   setInputValue: (value: string, options?: { composing?: boolean }) => void;
   /** debounce を待たず現在の入力値を即 commit する(Enter / 検索キー用)。 */
   commitNow: () => void;
+  /** 指定語を入力欄へ反映して即 commit する(検索履歴の候補選択用)。 */
+  commitValue: (value: string) => void;
   /** 即時クリア(debounce をキャンセルして URL から q を消す)。 */
   clear: () => void;
   isPending: boolean;
@@ -80,11 +82,20 @@ export function useFeedSearch(): {
     commit(inputValue);
   }, [commit, inputValue]);
 
+  const commitValue = useCallback(
+    (value: string) => {
+      clearTimeout(timerRef.current);
+      setValue(value);
+      commit(value);
+    },
+    [commit],
+  );
+
   const clear = useCallback(() => {
     clearTimeout(timerRef.current);
     setValue('');
     commit('');
   }, [commit]);
 
-  return { query: urlQuery, inputValue, setInputValue, commitNow, clear, isPending };
+  return { query: urlQuery, inputValue, setInputValue, commitNow, commitValue, clear, isPending };
 }

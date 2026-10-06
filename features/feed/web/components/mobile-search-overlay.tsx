@@ -1,9 +1,10 @@
 'use client';
 
-import { ArrowLeft, Loader2, Search, X } from 'lucide-react';
+import { ArrowLeft, Clock, Loader2, Search, X } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState, useTransition } from 'react';
 import { createPortal } from 'react-dom';
+import { useSearchHistory } from '../view-models/use-search-history';
 
 const DEBOUNCE_MS = 300;
 
@@ -24,6 +25,7 @@ export function MobileSearchOverlay({ open, onClose }: { open: boolean; onClose:
   const inputRef = useRef<HTMLInputElement | null>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const composingRef = useRef(false);
+  const { history, add, remove, clear: clearHistory } = useSearchHistory();
 
   const commit = useCallback(
     (q: string) => {
@@ -78,7 +80,17 @@ export function MobileSearchOverlay({ open, onClose }: { open: boolean; onClose:
   // (IME 変換確定の Enter は無視する)。
   function onSubmit() {
     clearTimeout(timerRef.current);
+    // 履歴に残すのは明示確定(Enter / 検索キー / 履歴タップ)だけ。debounce の途中入力は記録しない。
+    add(value);
     commit(value);
+    onClose();
+  }
+
+  function selectHistory(term: string) {
+    clearTimeout(timerRef.current);
+    add(term);
+    setValue(term);
+    commit(term);
     onClose();
   }
 
@@ -141,17 +153,54 @@ export function MobileSearchOverlay({ open, onClose }: { open: boolean; onClose:
         </div>
       </div>
 
-      {/* 背後のフィードが ?q= で更新されるため、結果はオーバーレイを閉じて確認する導線にする。 */}
-      <button
-        type="button"
-        onClick={onClose}
-        className="flex flex-1 flex-col items-center justify-start gap-1 px-6 pt-10 text-center"
-      >
-        <p className="text-fg-muted text-sm">
-          {value.trim() ? `「${value.trim()}」で絞り込み中` : 'キーワードを入力してください'}
-        </p>
-        {value.trim() && <p className="text-fg-subtle text-xs">タップして結果を表示</p>}
-      </button>
+      {value === '' && history.length > 0 ? (
+        <section aria-label="最近の検索" className="flex-1 overflow-y-auto px-3 pt-2">
+          <div className="flex items-center justify-between">
+            <h2 className="font-medium text-fg-muted text-xs">最近の検索</h2>
+            <button
+              type="button"
+              onClick={clearHistory}
+              className="min-h-11 touch-manipulation px-2 text-fg-subtle text-xs active:bg-bg-surface-2"
+            >
+              すべて消去
+            </button>
+          </div>
+          <ul>
+            {history.map((term) => (
+              <li key={term} className="flex items-center">
+                <button
+                  type="button"
+                  onClick={() => selectHistory(term)}
+                  className="flex min-h-11 min-w-0 flex-1 touch-manipulation items-center gap-3 rounded-md px-2 text-left text-fg-default text-sm active:bg-bg-surface-2"
+                >
+                  <Clock className="size-4 shrink-0 text-fg-subtle" />
+                  <span className="truncate">{term}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => remove(term)}
+                  aria-label={`「${term}」を履歴から削除`}
+                  className="grid size-11 shrink-0 touch-manipulation place-items-center rounded-full text-fg-subtle active:bg-bg-surface-2"
+                >
+                  <X className="size-4" />
+                </button>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : (
+        // 背後のフィードが ?q= で更新されるため、結果はオーバーレイを閉じて確認する導線にする。
+        <button
+          type="button"
+          onClick={onClose}
+          className="flex flex-1 flex-col items-center justify-start gap-1 px-6 pt-10 text-center"
+        >
+          <p className="text-fg-muted text-sm">
+            {value.trim() ? `「${value.trim()}」で絞り込み中` : 'キーワードを入力してください'}
+          </p>
+          {value.trim() && <p className="text-fg-subtle text-xs">タップして結果を表示</p>}
+        </button>
+      )}
     </div>,
     document.body,
   );

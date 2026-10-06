@@ -34,7 +34,9 @@ const PERIOD_OPTIONS: { value: PopularPeriod; label: string }[] = [
  */
 export function FeedTopbar() {
   return (
-    <div className="sticky top-0 z-10 hidden h-16 border-border-default border-b bg-bg-app lg:block">
+    // z-20: カード最終行(タグ・保存ボタン)が relative z-10 を持つため、同じ z-10 だと DOM 順で
+    // カード側が上に描画され、スクロール時にバーへ重なる(検索履歴のポップオーバーも隠れる)。
+    <div className="sticky top-0 z-20 hidden h-16 border-border-default border-b bg-bg-app lg:block">
       {/* 本体(コンテンツ)と同じ最大幅(1680px)・中央寄せにして検索バーの左端を揃える(ADR-0035) */}
       <div className="mx-auto flex h-16 max-w-[1680px] items-center gap-3 px-4 md:px-6 lg:px-8">
         {/*

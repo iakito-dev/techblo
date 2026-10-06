@@ -48,7 +48,7 @@ export function MobileFeedHeaderSkeleton() {
  */
 export function FeedTopbarSkeleton() {
   return (
-    <div className="sticky top-0 z-10 hidden h-16 border-border-default border-b bg-bg-app/80 backdrop-blur-xl backdrop-saturate-150 lg:block">
+    <div className="sticky top-0 z-20 hidden h-16 border-border-default border-b bg-bg-app/80 backdrop-blur-xl backdrop-saturate-150 lg:block">
       {/* FeedTopbar と同じ最大幅(1680px)にそろえる(解決時のレイアウトシフト防止。ADR-0035)。 */}
       <div className="mx-auto flex h-16 max-w-[1680px] items-center gap-3 px-4 md:px-6 lg:px-8">
         <div className="relative max-w-md flex-1">
