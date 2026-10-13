@@ -294,6 +294,14 @@ const SEED_COMPANIES = [
     description: '令和トラベル Engineering(Zenn)',
   },
   {
+    slug: 'enechain',
+    name: 'enechain',
+    rssUrl: 'https://techblog.enechain.com/rss',
+    siteUrl: 'https://techblog.enechain.com/',
+    brandColor: '#0046c8',
+    description: 'enechain Tech Blog',
+  },
+  {
     slug: 'anthropic',
     name: 'Anthropic',
     // 公式 RSS が無いため、Anthropic 公式サイトを定期スクレイプして生成されるコミュニティ製フィードを使用
