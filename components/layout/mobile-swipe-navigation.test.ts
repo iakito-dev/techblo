@@ -2,6 +2,7 @@ import { describe, expect, test } from 'vitest';
 import {
   getSwipeNavigationHref,
   isBackSwipe,
+  isBrowserEdgeGesture,
   isHorizontalScroller,
   shouldIgnoreSwipeTarget,
 } from './mobile-swipe-navigation';
@@ -165,5 +166,20 @@ describe('isHorizontalScroller', () => {
     expect(isHorizontalScroller({ overflowX: 'hidden', scrollWidth: 948, clientWidth: 390 })).toBe(
       false,
     );
+  });
+});
+
+describe('isBrowserEdgeGesture', () => {
+  test('左右端 24px 以内で始まった指はブラウザの端スワイプとして扱う', () => {
+    expect(isBrowserEdgeGesture(0, 390)).toBe(true);
+    expect(isBrowserEdgeGesture(24, 390)).toBe(true);
+    expect(isBrowserEdgeGesture(366, 390)).toBe(true);
+    expect(isBrowserEdgeGesture(390, 390)).toBe(true);
+  });
+
+  test('端から離れた位置はアプリのスワイプとして扱う', () => {
+    expect(isBrowserEdgeGesture(25, 390)).toBe(false);
+    expect(isBrowserEdgeGesture(195, 390)).toBe(false);
+    expect(isBrowserEdgeGesture(365, 390)).toBe(false);
   });
 });

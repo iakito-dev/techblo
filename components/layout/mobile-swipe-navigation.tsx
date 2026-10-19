@@ -29,6 +29,15 @@ const BACK_ANIMATION_MS = 260;
 const BACK_EASING = 'cubic-bezier(0.32, 0.72, 0, 1)';
 const RESET_ANIMATION_MS = 220;
 const TRANSITION_EASING = 'cubic-bezier(0.2, 0, 0, 1)';
+/**
+ * 画面の左右端から始まった指は OS / ブラウザの「戻る・進む」ジェスチャー(iOS Safari・ホーム画面の
+ * Web アプリの端スワイプ、Android のジェスチャーナビ)の領域として、アプリ側では扱わない。
+ * ブラウザは前ページのスナップショットごと画面全体を動かすので、アプリも本文を動かすと
+ * 本文だけが二重にずれて見える(ヘッダーと本文が離れ、前ページの一覧が左にのぞく)。
+ * touchcancel はブラウザがジェスチャーを確定してからしか来ず、それまでの touchmove で
+ * 本文はもう動いてしまうため、開始位置で弾く。
+ */
+const BROWSER_EDGE_GESTURE_PX = 24;
 const MOBILE_QUERY = '(max-width: 1023px)';
 const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
 const CONTENT_SELECTOR = '[data-mobile-swipe-content]';
@@ -92,6 +101,11 @@ export function isBackSwipe(input: SwipeNavigationInput): boolean {
   if (!isDetailRoute(input.pathname)) return false;
   if (!isHorizontalSwipe(input)) return false;
   return input.endX - input.startX > 0;
+}
+
+/** 指の開始位置がブラウザの端スワイプ(戻る・進む)の領域か。 */
+export function isBrowserEdgeGesture(startX: number, viewportWidth: number): boolean {
+  return startX <= BROWSER_EDGE_GESTURE_PX || startX >= viewportWidth - BROWSER_EDGE_GESTURE_PX;
 }
 
 export function shouldIgnoreSwipeTarget(tagName: string): boolean {
@@ -279,7 +293,9 @@ export function MobileSwipeNavigation() {
         startX: touch.clientX,
         startY: touch.clientY,
         mode: 'pending',
-        ignored: shouldIgnoreSwipeStart(event.target),
+        ignored:
+          isBrowserEdgeGesture(touch.clientX, viewportWidthRef.current) ||
+          shouldIgnoreSwipeStart(event.target),
       };
     };
 
