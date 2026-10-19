@@ -67,6 +67,7 @@ AIエージェントもこのファイルから辿れるように構成されて
 - [0013-offset-pagination-and-feed-cache.md](./adr/0013-offset-pagination-and-feed-cache.md)
 - [0014-user-private-rss-feeds.md](./adr/0014-user-private-rss-feeds.md)
 - [0037-related-articles-by-tag-overlap.md](./adr/0037-related-articles-by-tag-overlap.md)
+- [0041-reading-history-from-reads.md](./adr/0041-reading-history-from-reads.md)
 
 ### `features/` — 機能仕様
 
@@ -76,7 +77,7 @@ AIエージェントもこのファイルから辿れるように構成されて
 - [feed.md](./features/feed.md) — 記事フィード(トップ画面)
 - [bookmarks.md](./features/bookmarks.md) — ブックマーク
 - [favorites.md](./features/favorites.md) — お気に入り
-- [reads.md](./features/reads.md) — 既読管理(未読/既読フィルタ)
+- [reads.md](./features/reads.md) — 既読管理(未読/既読フィルタ・閲覧履歴)
 - [subscriptions.md](./features/subscriptions.md) — 購読企業設定
 - [user-feeds.md](./features/user-feeds.md) — マイフィード(ユーザー登録RSS)
 - [auth.md](./features/auth.md) — 認証(Google OAuth)

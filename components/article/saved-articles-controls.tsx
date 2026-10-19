@@ -18,9 +18,11 @@ const SORT_OPTIONS: { value: SavedSort; label: string }[] = [
 export function SavedSearchInput({
   value,
   onChange,
+  ariaLabel = '保存した記事を絞り込む',
 }: {
   value: string;
   onChange: (next: string) => void;
+  ariaLabel?: string;
 }) {
   return (
     <div className="relative w-full lg:max-w-md">
@@ -29,7 +31,7 @@ export function SavedSearchInput({
         type="search"
         value={value}
         placeholder="タイトル・企業名・タグで絞り込み"
-        aria-label="保存した記事を絞り込む"
+        aria-label={ariaLabel}
         enterKeyHint="search"
         onChange={(e) => onChange(e.target.value)}
         onKeyDown={(e) => {

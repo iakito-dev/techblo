@@ -15,6 +15,7 @@ const GO_TARGETS: Record<string, string> = {
   h: '/',
   b: '/bookmarks',
   f: '/favorites',
+  r: '/history',
   s: '/settings',
 };
 
@@ -118,6 +119,7 @@ export const SHORTCUT_GROUPS: ShortcutGroup[] = [
       { keys: ['g', 'h'], label: 'フィードへ', sequence: true },
       { keys: ['g', 'b'], label: 'あとで読むへ', sequence: true },
       { keys: ['g', 'f'], label: 'お気に入りへ', sequence: true },
+      { keys: ['g', 'r'], label: '閲覧履歴へ', sequence: true },
       { keys: ['g', 's'], label: '設定へ', sequence: true },
       { keys: ['g', 't'], label: 'ページの先頭へ', sequence: true },
     ],

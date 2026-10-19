@@ -7,6 +7,7 @@ import {
   CircleCheck,
   Hash,
   Heart,
+  History,
   Keyboard,
   Rss,
   Settings,
@@ -44,6 +45,7 @@ const LIBRARY = [
   { icon: Rss, label: 'フィード', href: '/' },
   { icon: Bookmark, label: 'あとで読む', href: '/bookmarks' },
   { icon: Heart, label: 'お気に入り', href: '/favorites' },
+  { icon: History, label: '閲覧履歴', href: '/history' },
 ];
 
 // 既読状態フィルタ(?read=unread|read)。再クリックで解除して「すべて」に戻る。

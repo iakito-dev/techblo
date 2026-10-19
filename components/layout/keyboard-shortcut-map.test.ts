@@ -59,7 +59,7 @@ describe('resolveShortcut', () => {
   });
 
   test('g の後の2打鍵目で遷移し、待ち状態を解除する', () => {
-    const cases = { h: '/', b: '/bookmarks', f: '/favorites', s: '/settings' };
+    const cases = { h: '/', b: '/bookmarks', f: '/favorites', r: '/history', s: '/settings' };
     for (const [key, href] of Object.entries(cases)) {
       expect(resolveShortcut({ key, pendingSince: 1000, now: 1500 })).toEqual({
         action: { type: 'navigate', href },

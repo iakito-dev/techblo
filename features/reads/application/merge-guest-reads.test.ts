@@ -4,7 +4,7 @@ import type { ReadRepository } from '../domain/read-repository';
 import { mergeGuestReads } from './merge-guest-reads';
 
 function fakeRepo(): ReadRepository {
-  return { markRead: vi.fn(), addMany: vi.fn() };
+  return { markRead: vi.fn(), addMany: vi.fn(), listRecent: vi.fn() };
 }
 
 describe('mergeGuestReads', () => {

@@ -1,20 +1,21 @@
-import { Bookmark, Heart } from 'lucide-react';
+import { Bookmark, Heart, History } from 'lucide-react';
 import { FeedGridSkeleton } from '@/features/feed/web/components/feed-grid';
 
 const KIND_CONFIG = {
   bookmark: { Icon: Bookmark, title: 'あとで読む' },
   favorite: { Icon: Heart, title: 'お気に入り' },
+  history: { Icon: History, title: '閲覧履歴' },
 } as const;
 
 /**
- * 保存記事(ブックマーク/お気に入り)一覧のローディング skeleton。
- * SavedArticlesView と同じ外形(見出し行 → 件数行 → feed-grid)に揃え、データ解決時の
+ * 保存記事(ブックマーク/お気に入り)・閲覧履歴の一覧のローディング skeleton。
+ * SavedArticlesView / ReadingHistoryView と同じ外形(見出し行 → 件数行 → feed-grid)に揃え、データ解決時の
  * レイアウトシフトを 0 にする。Suspense fallback と loading.tsx の両方で使う。
  *
  * 見出し(アイコン + タイトル)はデータ非依存なので skeleton でも実物を出す(即時表示)。
  * 件数とソートはデータ依存なのでプレースホルダにする。
  */
-export function SavedArticlesSkeleton({ kind }: { kind: 'bookmark' | 'favorite' }) {
+export function SavedArticlesSkeleton({ kind }: { kind: keyof typeof KIND_CONFIG }) {
   const { Icon, title } = KIND_CONFIG[kind];
   return (
     <section>

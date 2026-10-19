@@ -48,6 +48,7 @@
 | [0038](./0038-dark-mode-via-class-and-token-override.md) | ダークモードは .dark クラス + プリミティブトークン上書きで実現する | Accepted |
 | [0039](./0039-public-rss-feed-output.md) | 公開 RSS フィードを配信する(link は元記事) | Accepted |
 | [0040](./0040-tags-index-page.md) | タグ一覧ページ(/tags)を都度集計 + キャッシュで提供する | Accepted |
+| [0041](./0041-reading-history-from-reads.md) | 閲覧履歴(/history)を既読テーブルの readAt から提供する | Accepted |
 
 ※ 0013 と 0014 は同日に並行して採番され、番号が2件ずつ重複している。コードやドキュメントから
 参照済みのため改番はしない(既存ADRは変更しない)。**これらを参照する時は番号だけでなく

@@ -71,13 +71,14 @@ function writeGuestSaves(kind: GuestSaveKind, ids: string[]): void {
 
 /**
  * ゲストの集合に ID を1件追加する(冪等)。既読マーク(記事ページを開いた時)用。
+ * 既にあれば末尾へ移す(配列順 = 最後に開いた順にして、閲覧履歴の並びに使う。ADR-0041)。
  * hook 外から呼べる純関数。storage イベントは同一タブには発火しないので、購読中の hook には
  * 反映されない(リロード時に反映)— 既読フィルタの即時性は要らないので許容。
  */
 export function addGuestSave(kind: GuestSaveKind, id: string): void {
   const current = readGuestSaves(kind);
-  if (current.includes(id)) return;
-  writeGuestSaves(kind, [...current, id]);
+  if (current.at(-1) === id) return;
+  writeGuestSaves(kind, [...current.filter((v) => v !== id), id]);
 }
 
 /**
