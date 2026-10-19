@@ -4,17 +4,26 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useRef, useTransition } from 'react';
 
 const MAIN_ROUTES = ['/', '/bookmarks', '/favorites', '/settings'] as const;
-const MIN_SWIPE_DISTANCE = 64;
 const INTENT_DISTANCE = 12;
 const MAX_VERTICAL_RATIO = 0.65;
-const DRAG_RESISTANCE = 0.42;
 const EDGE_RESISTANCE = 0.18;
 /**
- * 戻る(詳細 → 一覧)は指に 1:1 で追従させる。タブ間の移動は「隣の画面へ滑らせる」操作なので
- * 抵抗を掛けて軽く見せるが、戻るは iOS / X の pop と同じく「掴んだ紙を右へ退かす」操作で、
- * 指と紙がずれると手応えが嘘になる。
+ * 行き先がある方向(隣のタブ / 戻る)へのドラッグは指に 1:1 で追従させる。
+ * 以前はタブ移動だけ 0.42 倍の抵抗を掛けていたが、指と画面がずれると「掴んでいる」感覚が無く、
+ * さらに 64px を越えた瞬間に追従量が 0.18 → 0.42 倍へ跳ねて画面がガクッと動いていた。
+ * iOS のページ送り / X のタブ移動と同じく、最初のピクセルから指に貼り付ける。
  */
-const BACK_DRAG_FOLLOW = 1;
+const DRAG_FOLLOW = 1;
+/** ゆっくり引いた時に遷移を確定させる距離(画面幅比)。3割引けば「めくる」意思とみなす。 */
+const COMMIT_DISTANCE_RATIO = 0.3;
+/** 素早く払った(フリック)とみなす速度(px/ms)。これ以上なら短い距離でも遷移する。 */
+const FLICK_VELOCITY = 0.35;
+/** フリックでも、これ未満の移動はタップのぶれとして遷移させない。 */
+const FLICK_MIN_DISTANCE = 32;
+/** 指を戻しながら離した(逆向きの速度がこれ以上)なら、距離が足りていても取り消す。 */
+const CANCEL_VELOCITY = 0.2;
+/** 速度を測る直近の時間窓(ms)。離す直前の動きだけを見る。 */
+const VELOCITY_WINDOW_MS = 100;
 /**
  * 戻ったあと、下から現れる一覧が視差でついてくる距離(画面幅比)。
  * タブ移動は左右の画面が横一列に並ぶ世界観なので新ページは全幅(-100%)から入るが、戻るでは
@@ -23,6 +32,12 @@ const BACK_DRAG_FOLLOW = 1;
  */
 const BACK_SLIDE_IN_RATIO = 0.28;
 const COMMIT_ANIMATION_MS = 180;
+/**
+ * 指を離した位置から画面外まで滑らせる時間の範囲。残り距離に比例させる
+ * (たくさん引いてから離したのに、毎回同じ時間を掛けて抜けると間延びして見える)。
+ */
+const MIN_EXIT_MS = 110;
+const MAX_EXIT_MS = 240;
 /** 戻るの方が移動距離が長く見えるので、少しだけ時間を掛けて減速を効かせる。 */
 const BACK_ANIMATION_MS = 260;
 /** pop の減速カーブ(iOS の戻るに近い、終わりを長く引く ease-out)。 */
@@ -46,20 +61,37 @@ const BLOCKING_SELECTOR = ['[role="dialog"]', '[data-vaul-drawer]', '[data-swipe
   ',',
 );
 
-export type SwipeNavigationInput = {
-  pathname: string;
-  startX: number;
-  startY: number;
-  endX: number;
-  endY: number;
-};
-
 type SwipeSession = {
   startX: number;
   startY: number;
   mode: 'pending' | 'horizontal' | 'vertical';
   ignored: boolean;
+  /** 速度計算用の直近の位置(時刻つき)。VELOCITY_WINDOW_MS より古いものは捨てる。 */
+  samples: { x: number; t: number }[];
+  /** 行き先の本文を先読み済みか(1ジェスチャーで1回だけ)。 */
+  prefetched: boolean;
+  /** 指に追従させた現在の translate 量。離した位置から画面外までの残り距離の計算に使う。 */
+  offset: number;
 };
+
+/** 直近の位置から横速度(px/ms)を求める。点が足りなければ 0。 */
+function velocityFromSamples(samples: { x: number; t: number }[]): number {
+  if (samples.length < 2) return 0;
+  const first = samples[0];
+  const last = samples[samples.length - 1];
+  if (!first || !last) return 0;
+  const dt = last.t - first.t;
+  return dt > 0 ? (last.x - first.x) / dt : 0;
+}
+
+/**
+ * 隣のタブを本文まで先読みする(router.prefetch の full)。既定の先読みは動的ルートの枠
+ * (loading の skeleton)までなので、ドラッグ中に本文の取得を始めておき、抜けた直後に中身が出るようにする。
+ * App Router の prefetch は kind に enum(PrefetchKind)を取るが公開 export が無いため、値で渡す。
+ */
+const FULL_PREFETCH = { kind: 'full' } as unknown as Parameters<
+  ReturnType<typeof useRouter>['prefetch']
+>[1];
 
 function getRouteIndex(pathname: string): number {
   return MAIN_ROUTES.findIndex((href) =>
@@ -76,36 +108,52 @@ function isDetailRoute(pathname: string): boolean {
   return pathname.startsWith('/a/');
 }
 
-/** 横スワイプとして成立するか(距離と角度のしきい値)。移動量が足りない/縦寄りなら false。 */
-function isHorizontalSwipe({ startX, startY, endX, endY }: SwipeNavigationInput): boolean {
-  const horizontalDistance = Math.abs(endX - startX);
-  const verticalDistance = Math.abs(endY - startY);
-  if (horizontalDistance < MIN_SWIPE_DISTANCE) return false;
-  return verticalDistance <= horizontalDistance * MAX_VERTICAL_RATIO;
-}
-
-export function getSwipeNavigationHref(input: SwipeNavigationInput): string | null {
-  const currentIndex = getRouteIndex(input.pathname);
-  if (currentIndex === -1) return null;
-  if (!isHorizontalSwipe(input)) return null;
-
-  const nextIndex = input.endX - input.startX > 0 ? currentIndex - 1 : currentIndex + 1;
-  return MAIN_ROUTES[nextIndex] ?? null;
-}
-
-/**
- * 詳細ページでの右スワイプ(= 戻る)か。左スワイプには何も割り当てない
- * (進む先が無く、記事ページから「次の記事へ」の概念も無いため)。
- */
-export function isBackSwipe(input: SwipeNavigationInput): boolean {
-  if (!isDetailRoute(input.pathname)) return false;
-  if (!isHorizontalSwipe(input)) return false;
-  return input.endX - input.startX > 0;
-}
-
 /** 指の開始位置がブラウザの端スワイプ(戻る・進む)の領域か。 */
 export function isBrowserEdgeGesture(startX: number, viewportWidth: number): boolean {
   return startX <= BROWSER_EDGE_GESTURE_PX || startX >= viewportWidth - BROWSER_EDGE_GESTURE_PX;
+}
+
+/**
+ * その方向へ行き先があるか(距離は問わない)。主要4画面は隣のタブ、記事ページは右(= 戻る)だけ。
+ * ドラッグ中の追従量もこれで決める。以前のように距離しきい値込みで判定すると、しきい値を越えた
+ * 瞬間に追従量が変わって画面が跳ねるため、方向だけで決める。
+ */
+export function hasSwipeDestination(pathname: string, deltaX: number): boolean {
+  if (deltaX === 0) return false;
+  if (isDetailRoute(pathname)) return deltaX > 0;
+  const currentIndex = getRouteIndex(pathname);
+  if (currentIndex === -1) return false;
+  const nextIndex = deltaX > 0 ? currentIndex - 1 : currentIndex + 1;
+  return MAIN_ROUTES[nextIndex] !== undefined;
+}
+
+/**
+ * 指を離した時に遷移を確定するか。iOS のページ送りと同じく「十分引いた」か「素早く払った」で決め、
+ * 指を戻しながら離したら取り消す。velocityX は離す直前の横速度(px/ms、右が正)。
+ */
+export function shouldCommitSwipe({
+  deltaX,
+  velocityX,
+  viewportWidth,
+}: {
+  deltaX: number;
+  velocityX: number;
+  viewportWidth: number;
+}): boolean {
+  const direction = Math.sign(deltaX);
+  if (direction === 0) return false;
+  const distance = Math.abs(deltaX);
+  const forwardVelocity = velocityX * direction;
+  if (forwardVelocity <= -CANCEL_VELOCITY) return false;
+  if (distance >= viewportWidth * COMMIT_DISTANCE_RATIO) return true;
+  return distance >= FLICK_MIN_DISTANCE && forwardVelocity >= FLICK_VELOCITY;
+}
+
+/** 画面外へ抜けるまでの時間。残り距離に比例させ、上下限で丸める。 */
+export function exitDurationMs(remaining: number, viewportWidth: number): number {
+  if (viewportWidth <= 0) return MAX_EXIT_MS;
+  const ratio = Math.min(Math.max(remaining / viewportWidth, 0), 1);
+  return Math.round(MIN_EXIT_MS + (MAX_EXIT_MS - MIN_EXIT_MS) * ratio);
 }
 
 export function shouldIgnoreSwipeTarget(tagName: string): boolean {
@@ -293,6 +341,9 @@ export function MobileSwipeNavigation() {
         startX: touch.clientX,
         startY: touch.clientY,
         mode: 'pending',
+        samples: [{ x: touch.clientX, t: event.timeStamp }],
+        prefetched: false,
+        offset: 0,
         ignored:
           isBrowserEdgeGesture(touch.clientX, viewportWidthRef.current) ||
           shouldIgnoreSwipeStart(event.target),
@@ -306,6 +357,13 @@ export function MobileSwipeNavigation() {
 
       const deltaX = touch.clientX - start.startX;
       const deltaY = touch.clientY - start.startY;
+      start.samples.push({ x: touch.clientX, t: event.timeStamp });
+      while (
+        start.samples.length > 2 &&
+        event.timeStamp - (start.samples[0]?.t ?? 0) > VELOCITY_WINDOW_MS
+      ) {
+        start.samples.shift();
+      }
       const horizontalDistance = Math.abs(deltaX);
       const verticalDistance = Math.abs(deltaY);
 
@@ -315,26 +373,23 @@ export function MobileSwipeNavigation() {
       }
       if (start.mode !== 'horizontal') return;
 
-      const input = {
-        pathname,
-        startX: start.startX,
-        startY: start.startY,
-        endX: touch.clientX,
-        endY: touch.clientY,
-      };
-      // 指を追従させる量で「離せば遷移する」かを予告する(行き先が無い方向は重くする)。
-      // 詳細ページの右方向は最初から 1:1 で追従させる。しきい値(64px)を越えてから追従量を
-      // 上げると紙が指に追いつく段差が出るし、iOS / X の pop は最初のピクセルから指に貼り付く。
-      const follow = isDetailRoute(pathname)
-        ? deltaX > 0
-          ? BACK_DRAG_FOLLOW
-          : EDGE_RESISTANCE
-        : getSwipeNavigationHref(input) !== null
-          ? DRAG_RESISTANCE
-          : EDGE_RESISTANCE;
+      // 行き先がある方向は指に 1:1、無い方向(端のタブ・記事ページの左)は重くして「行けない」と伝える。
+      const hasDestination = hasSwipeDestination(pathname, deltaX);
+      const follow = hasDestination ? DRAG_FOLLOW : EDGE_RESISTANCE;
+
+      // 隣のタブへ引き始めたら、離す前から本文の取得を始める(戻るは履歴から復帰するので不要)。
+      if (hasDestination && !start.prefetched && !isDetailRoute(pathname)) {
+        const nextIndex = getRouteIndex(pathname) + (deltaX > 0 ? -1 : 1);
+        const nextHref = MAIN_ROUTES[nextIndex];
+        if (nextHref) {
+          start.prefetched = true;
+          router.prefetch(nextHref, FULL_PREFETCH);
+        }
+      }
 
       event.preventDefault();
-      setSwipeOffset(deltaX * follow, false);
+      start.offset = deltaX * follow;
+      setSwipeOffset(start.offset, false);
     };
 
     const onTouchEnd = (event: TouchEvent) => {
@@ -343,16 +398,22 @@ export function MobileSwipeNavigation() {
       const touch = event.changedTouches[0];
       if (!start || start.ignored || !touch || !isMobile()) return;
 
-      const input = {
-        pathname,
-        startX: start.startX,
-        startY: start.startY,
-        endX: touch.clientX,
-        endY: touch.clientY,
-      };
-      const href = getSwipeNavigationHref(input);
-      const back = isBackSwipe(input);
-      if ((!href || href === pathname) && !back) {
+      // 縦スクロールとして始まった/横に動いていない指は、遷移もリセットもしない(何も動かしていない)。
+      if (start.mode !== 'horizontal') return;
+
+      const deltaX = touch.clientX - start.startX;
+      const width = viewportWidthRef.current || window.innerWidth;
+      const commit =
+        hasSwipeDestination(pathname, deltaX) &&
+        shouldCommitSwipe({
+          deltaX,
+          velocityX: velocityFromSamples(start.samples),
+          viewportWidth: width,
+        });
+      const back = commit && isDetailRoute(pathname);
+      const href =
+        commit && !back ? MAIN_ROUTES[getRouteIndex(pathname) + (deltaX > 0 ? -1 : 1)] : null;
+      if (!back && (!href || href === pathname)) {
         resetSwipeOffset(true);
         return;
       }
@@ -379,12 +440,13 @@ export function MobileSwipeNavigation() {
       // 古いコンテンツを画面外(direction 側)へ滑らせ、抜けきってから遷移する。
       // 遷移後のスライドインは {href, direction} を arm し、pathname 確定後に effect 側で発火する。
       // 戻るは着地先が履歴次第で事前に確定できないため href=null(= どこへ着いても発火)にする。
-      const direction = touch.clientX > start.startX ? 1 : -1;
-      // 戻るは指の位置から画面外までの残りを滑らせるので、距離に見合う時間と減速カーブにする。
+      const direction = deltaX > 0 ? 1 : -1;
+      // 指の位置から画面外までの残りを滑らせるので、残り距離に見合う時間にする
+      // (たくさん引いてから離したら短く、フリックで少しだけ動かした時は長め)。戻るは pop の減速カーブ。
+      const exitMs = exitDurationMs(width - Math.abs(start.offset), width);
       const motion = back
-        ? { durationMs: BACK_ANIMATION_MS, easing: BACK_EASING }
-        : { durationMs: COMMIT_ANIMATION_MS, easing: TRANSITION_EASING };
-      const width = viewportWidthRef.current || window.innerWidth;
+        ? { durationMs: exitMs, easing: BACK_EASING }
+        : { durationMs: exitMs, easing: TRANSITION_EASING };
       setSwipeOffset(direction * width, true, motion);
       commitTimerRef.current = window.setTimeout(() => {
         pendingSlideInRef.current = {
