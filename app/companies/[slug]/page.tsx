@@ -21,14 +21,12 @@ import { resolveBaseUrl } from '@/lib/site-url';
 const PAGE_SIZE = COMPANY_PAGE_SIZE;
 
 /**
- * 企業の説明文を決める。マスタの description を優先し、無ければ一般的な紹介文で補う
- * (meta description / ページ本文 / JSON-LD で共有)。
+ * 企業ページの説明文(meta description / ページ本文 / JSON-LD で共有)。
+ * マスタの description はブログ名そのもの(「DevelopersIO」「Blog on DeNA Engineering」等)で
+ * 説明文として機能しないため使わず、検索語(テックブログ / 技術ブログ)を含む文を組み立てる。
  */
-function companyDescription(name: string, description: string | null): string {
-  return (
-    description ??
-    `${name}の公式技術ブログの新着記事をまとめてチェック。テクブロなら気になる記事を保存して、あとからじっくり読めます。`
-  );
+function companyDescription(name: string): string {
+  return `${name}のテックブログ(技術ブログ)の新着記事を毎日自動で集約。AI要約で要点をつかんでから、気になる記事だけ元記事で読めます。`;
 }
 
 /**
@@ -48,8 +46,8 @@ export async function generateMetadata({
   const company = await loadCompany(slug);
   if (!company) return { title: '企業が見つかりません' };
 
-  const title = `${company.name}の技術ブログ記事まとめ`;
-  const description = companyDescription(company.name, company.description);
+  const title = `${company.name}のテックブログ新着記事まとめ`;
+  const description = companyDescription(company.name);
 
   return {
     title,
@@ -121,7 +119,7 @@ async function CompanyContent({ params }: { params: Promise<{ slug: string }> })
   if (!company) notFound();
 
   const baseUrl = resolveBaseUrl();
-  const description = companyDescription(company.name, company.description);
+  const description = companyDescription(company.name);
   const { items, hasMore, isGuest } = await getCompanyArticles({ slug, page: 1, limit: PAGE_SIZE });
 
   return (

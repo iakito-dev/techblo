@@ -10,18 +10,20 @@ const SITE_ALTERNATE_NAME = 'techblo';
 
 /**
  * サイト共通の説明文(SERP 向け)。JSON-LD と `metadata.description` の真実源。
- * 先頭にブランド名 + 別名、続けて RSS リーダーである旨と主要機能、末尾に行動喚起を置く。
- * スマホの SERP は全角50字前後で切れるため、差別化要素(自動集約・AI要約)を前半に寄せている。
+ * 社数(「40社以上」)を先頭に置き、続けて差別化要素(AI要約・人気順)、末尾に行動喚起。
+ * スマホの SERP は全角50字前後で切れるため、「何が読めるか」を前半で言い切る。
+ * 個別の企業名は出さない(提携・公認と誤解されないため。企業名は各企業ページが持つ)。
+ * ブランド名はタイトルが持つので説明文では繰り返さない(指名検索は JSON-LD の alternateName が担う)。
  * 機能の網羅的な列挙は LP(`app/lp/page.tsx`)側の説明文に持たせ、ここでは重複させない。
  */
 export const SITE_DESCRIPTION =
-  'テクブロ(techblo)は、有名テック企業の公式技術ブログを毎日自動で集約するRSSリーダーです。AI要約とはてなブックマーク人気順で、今読むべき記事がひと目でわかります。気になる記事は保存して、あとからじっくり読めます。';
+  '国内外40社以上の企業テックブログを毎日自動で集約。AI要約で開く前に要点がわかり、はてブで話題の記事も見逃しません。登録なしですぐ読めます。';
 
 /**
  * SNS カード(OGP / Twitter)向けの説明文。SERP 用より短く訴求寄りにする。
  */
 export const SITE_SOCIAL_DESCRIPTION =
-  '有名テック企業の技術ブログを毎日自動集約。AI要約と人気順で、今読むべき記事がひと目でわかるエンジニア向けWebサービス「テクブロ(techblo)」。';
+  '40社以上のテックブログを、ひとつのタイムラインで。AI要約つきで、読むべき記事がすぐ見つかります。';
 
 /**
  * サイト全体を表す WebSite スキーマ。
@@ -103,7 +105,7 @@ export function companyCollectionJsonLd(
   return {
     '@context': 'https://schema.org',
     '@type': 'CollectionPage',
-    name: `${input.companyName}の技術ブログ記事まとめ`,
+    name: `${input.companyName}のテックブログ新着記事まとめ`,
     url: input.url,
     description: input.description,
     inLanguage: 'ja-JP',
@@ -141,7 +143,7 @@ export function companyListJsonLd(input: CompanyListJsonLdInput): Record<string,
   return {
     '@context': 'https://schema.org',
     '@type': 'CollectionPage',
-    name: '技術ブログを持つ企業一覧',
+    name: '企業テックブログ一覧',
     url: input.url,
     inLanguage: 'ja-JP',
     isPartOf: { '@type': 'WebSite', name: SITE_NAME },

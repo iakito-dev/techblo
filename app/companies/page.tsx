@@ -12,9 +12,9 @@ import { getCompanies } from '@/features/feed/web/queries';
 import { companyListJsonLd } from '@/lib/seo';
 import { resolveBaseUrl } from '@/lib/site-url';
 
-const TITLE = '技術ブログを持つ企業一覧';
+const TITLE = '企業テックブログ一覧';
 const DESCRIPTION =
-  '有名テック企業の公式技術ブログを一覧でチェック。企業ごとの新着記事まとめへ。テクブロなら気になる記事を保存して、あとからじっくり読めます。';
+  '公式テックブログを持つ国内外40社以上を一覧で。企業を選ぶと、そのブログの新着記事をまとめて読めます。';
 
 export const metadata: Metadata = {
   title: TITLE,

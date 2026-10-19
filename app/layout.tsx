@@ -44,7 +44,7 @@ const notoSansJp = Noto_Sans_JP({
 
 export const metadata: Metadata = {
   title: {
-    default: 'テクブロ｜テック企業の技術ブログを毎日まとめて読む',
+    default: 'テクブロ｜企業テックブログまとめ。40社以上の新着を毎日更新',
     template: '%s｜テクブロ',
   },
   applicationName: 'テクブロ',
@@ -65,7 +65,7 @@ export const metadata: Metadata = {
   // OGP/Twitter は SNS カード向けに、SERP 用とは別の訴求寄りタイトル・説明文を持たせる。
   // 区切りは title.template と同じ全角｜に揃える。
   openGraph: {
-    title: 'テクブロ｜テック企業の技術ブログを毎日集約、AI要約で速く読む',
+    title: 'テクブロ｜企業テックブログを、AI要約つきでまとめ読み',
     description: SITE_SOCIAL_DESCRIPTION,
     siteName: 'テクブロ',
     locale: 'ja_JP',
@@ -73,7 +73,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'テクブロ｜テック企業の技術ブログを毎日集約、AI要約で速く読む',
+    title: 'テクブロ｜企業テックブログを、AI要約つきでまとめ読み',
     description: SITE_SOCIAL_DESCRIPTION,
   },
   robots: {

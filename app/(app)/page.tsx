@@ -80,7 +80,9 @@ export default function HomePage({ searchParams }: { searchParams: Promise<FeedS
       <JsonLd data={websiteJsonLd(baseUrl)} />
       <JsonLd data={organizationJsonLd(baseUrl)} />
       {/* トップは内容ファースト。見出しは SEO/スクリーンリーダー用に sr-only で保持。 */}
-      <p className="sr-only">有名テック企業の技術ブログを、ひとつのフィードで。</p>
+      <p className="sr-only">
+        国内外40社以上の企業テックブログの新着記事を、毎日自動でまとめています。
+      </p>
 
       {/*
         ツールバー(モバイル)・見出し(デスクトップ)・本文を同じ FeedNavProvider で囲み、
