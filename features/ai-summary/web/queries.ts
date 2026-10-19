@@ -23,16 +23,19 @@ const summaryRepo = new DrizzleArticleSummaryRepository(db);
 export async function getSummaryByArticleId(articleId: string): Promise<ArticleSummaryDto | null> {
   'use cache: remote';
   cacheTag(CACHE_TAGS.article(articleId));
-  cacheLife('hours');
 
   const result = await getSummary({ summaries: summaryRepo })({
     articleId: asArticleId(articleId),
   });
   if (!result.ok) {
     logger.error('getSummary failed', { error: result.error, articleId });
-    return null;
   }
-  return result.value;
+  const summary = result.ok ? result.value : null;
+  // 要約は取込の約10分後に生成される。生成前に開かれた記事の null をインスタンス間共有の
+  // remote キャッシュに数時間残すと、/api/revalidate が届かない限り新着記事に要約が出ないので、
+  // null(未生成 / failed / 取得失敗)のときだけ短く持つ。
+  cacheLife(summary ? 'hours' : 'minutes');
+  return summary;
 }
 
 /**

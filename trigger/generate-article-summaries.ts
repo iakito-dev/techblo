@@ -85,7 +85,21 @@ export const generateArticleSummaries = schedules.task({
     const summaries = new DrizzleArticleSummaryRepository(db);
     const fetcher = new HtmlContentFetcher();
     const generator = new LlmSummaryGenerator(createLlmClient());
-    const generateOne = generateSummary({ summaries, fetcher, generator });
+    const generate = generateSummary({ summaries, fetcher, generator });
+    // LLM 呼び出しの例外は generatePendingSummaries が握りつぶして failed 件数にしか残らないため、
+    // 原因(モデル廃止・クォータ超過・キー不正など)を追えるようここで記録してから投げ直す。
+    const generateOne: typeof generate = async (input) => {
+      try {
+        return await generate(input);
+      } catch (error) {
+        logger.error('generate-article-summaries: 要約生成で例外', {
+          articleId: input.articleId,
+          model: generator.model,
+          error: error instanceof Error ? error.message : String(error),
+        });
+        throw error;
+      }
+    };
 
     const result = await generatePendingSummaries({
       summaries,

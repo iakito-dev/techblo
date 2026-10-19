@@ -129,7 +129,7 @@ ADR-0035 でカードのタグを AI バッジに置き換えたが、その後�
 
 ```ts
 // features/ai-summary/web/queries.ts(RSC から呼ぶ)
-getSummaryByArticleId(articleId: string): Promise<ArticleSummary | null>  // 'use cache: remote' + cacheTag(ADR-0042)。記事ページ表示とカードのタグ表示の両方がこれを使う
+getSummaryByArticleId(articleId: string): Promise<ArticleSummary | null>  // 'use cache: remote' + cacheTag(ADR-0042)。要約ありは cacheLife('hours')、null(未生成/failed)は 'minutes'。記事ページ表示とカードのタグ表示の両方がこれを使う
 
 // features/ai-summary/application(取込バッチから呼ぶ usecase)
 generateSummary(input: { articleId, url, title, rssExcerpt }): Promise<Result<ArticleSummary, SummaryError>>
