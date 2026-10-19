@@ -1,8 +1,9 @@
 import { ChevronRight, type LucideIcon } from 'lucide-react';
 import Link from 'next/link';
+import type { ReactNode } from 'react';
 
 /**
- * モバイル設定 index のドリル行。アイコン + ラベル + 任意の件数 + シェブロンで、
+ * モバイル設定 index のドリル行。アイコン + ラベル + 任意の現在値(件数・テーマ名など)+ シェブロンで、
  * 各領域(企業 / マイフィード / サポート)の専用画面へ遷移する。
  * iOS 設定アプリの行に寄せる。デスクトップでは index 自体が lg:hidden で隠れる。
  */
@@ -10,12 +11,12 @@ export function SettingsMenuRow({
   href,
   icon: Icon,
   label,
-  count,
+  value,
 }: {
   href: string;
   icon: LucideIcon;
   label: string;
-  count?: string;
+  value?: ReactNode;
 }) {
   return (
     <Link
@@ -24,7 +25,7 @@ export function SettingsMenuRow({
     >
       <Icon className="size-5 shrink-0 text-accent" aria-hidden="true" />
       <span className="min-w-0 flex-1 truncate font-medium text-fg-default text-sm">{label}</span>
-      {count !== undefined && <span className="shrink-0 text-fg-subtle text-sm">{count}</span>}
+      {value !== undefined && <span className="shrink-0 text-fg-subtle text-sm">{value}</span>}
       <ChevronRight className="size-4 shrink-0 text-fg-subtle" aria-hidden="true" />
     </Link>
   );

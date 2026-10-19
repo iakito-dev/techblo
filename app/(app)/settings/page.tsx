@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 
 /**
  * 設定ページ(index)。
- * - デスクトップ(lg+): 左セクションナビ + 全セクションの単一ページ(SettingsDesktop)。
+ * - デスクトップ(lg+): 全セクションの単一ページ(SettingsDesktop)。xl+ は右に目次を出す。
  * - モバイル(<lg): iOS 設定アプリ風のメニュー。企業 / マイフィード / サポートは
  *   各サブルート(/settings/companies など)へドリルダウンする。
  *

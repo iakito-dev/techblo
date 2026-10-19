@@ -76,7 +76,9 @@ function UserFeedLockedPreview({ variant }: { variant: 'full' | 'inline' }) {
       }
       description="好きなブログやサイトの RSS / Atom を登録すると、新着記事がフィード画面に表示されるようになります。"
     >
-      <div className="relative overflow-hidden rounded-lg">
+      {/* プレビューは入力欄 + 2行。min-h と合わせて、ロックオーバーレイ(鍵・文言・CTA)が
+          プレビュー内に収まるだけの高さを確保する(1行だとモバイル幅で入力欄に重なる)。 */}
+      <div className="relative min-h-44 overflow-hidden rounded-lg">
         {/* ログイン後の登録UIプレビュー(操作不可・ぼかし)。inert でフォーカス・操作を無効化する */}
         <div className="select-none blur-[0.8px]" inert aria-hidden="true">
           <div className="flex flex-wrap items-center gap-2">
@@ -87,6 +89,13 @@ function UserFeedLockedPreview({ variant }: { variant: 'full' | 'inline' }) {
               <Plus aria-hidden="true" className="size-4" />
               登録
             </Button>
+          </div>
+          <div className="mt-2.5 flex items-center gap-3 rounded-lg border border-border-default bg-bg-surface px-3.5 py-3 shadow-xs">
+            <span className="size-6 shrink-0 rounded-full bg-bg-surface-2" />
+            <span className="flex flex-1 flex-col gap-1.5">
+              <span className="h-3.5 w-32 rounded bg-bg-surface-2" />
+              <span className="h-3 w-48 rounded bg-bg-surface-2" />
+            </span>
           </div>
           <div className="mt-2.5 flex items-center gap-3 rounded-lg border border-border-default bg-bg-surface px-3.5 py-3 shadow-xs">
             <span className="size-6 shrink-0 rounded-full bg-bg-surface-2" />

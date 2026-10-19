@@ -49,3 +49,17 @@ export function ThemeSegment() {
     </fieldset>
   );
 }
+
+/**
+ * 現在のテーマ名(システム / ライト / ダーク)のテキスト。モバイル設定メニューの「表示」行に
+ * 今の値を出すために使う。マウント前は保存値が分からないので何も出さない(hydration 対策)。
+ */
+export function CurrentThemeLabel() {
+  const { theme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+  if (!mounted) return null;
+  return <>{OPTIONS.find((o) => o.value === theme)?.label ?? 'システム'}</>;
+}
