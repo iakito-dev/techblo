@@ -1,19 +1,25 @@
 'use client';
 
 import { ListFilter, Loader2, Search, X } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { FilterCompany, FilterUserFeed } from '@/components/article/feed-load-more';
 import { LogoMark } from '@/components/layout/logo';
 import { MOBILE_GUTTER_CLASS } from '@/shared/layout';
 import { cn } from '@/shared/utils';
 import type { FeedSort, PopularPeriod, ReadFilterMode } from '../../domain/feed-sort';
+import {
+  buildCategoryTabHref,
+  type CategoryTabKey,
+  categoryTabLabel,
+  parseCategoryTab,
+} from '../view-models/category-tabs';
 import { useFeedNav } from '../view-models/feed-nav-context';
 import { useFeedFilters } from '../view-models/use-feed-filters';
 import { useFeedSearch } from '../view-models/use-feed-search';
 import { useFeedSort } from '../view-models/use-feed-sort';
 import { RemovableChip } from './feed-chip';
 import { FeedFilterSheet } from './feed-filter-sheet';
-import { DefaultMobileCategoryTabs, MobileCategoryTabs } from './mobile-category-tabs';
 
 const STATUS_CHIP: Record<Exclude<ReadFilterMode, 'all'>, string> = {
   unread: '未読のみ',
@@ -29,7 +35,7 @@ type MobileFeedHeaderViewProps = {
   companies: FilterCompany[];
   userFeeds: FilterUserFeed[];
   searchField: React.ReactNode;
-  categoryTabs: React.ReactNode;
+  category: CategoryTabKey;
   status: ReadFilterMode;
   period: PopularPeriod;
   companySlugs: string[];
@@ -43,14 +49,19 @@ type MobileFeedHeaderViewProps = {
   onRemoveCompany: (slug: string) => void;
   onRemoveUserFeed: (id: string) => void;
   onRemoveTag: () => void;
+  onRemoveCategory: () => void;
   onResetSort: () => void;
 };
 
 /**
  * モバイル(<md)のフィードヘッダー。
  * - 1 行目: 検索バー(flex-1) + 絞り込みアイコンボタン(44px 角丸・適用時は塗り+バッジ)
- * - 2 行目: カテゴリタブ(横スクロール)
- * - 3 行目: 適用中フィルタ / 人気順の削除可能チップ(1 つ以上あるときだけ)
+ * - 2 行目: 適用中フィルタ / カテゴリ / 人気順の削除可能チップ(1 つ以上あるときだけ)
+ *
+ * カテゴリは以前ここに横スクロールのタブ行として常設していたが、上部クロームを1行占める割に
+ * 画面外に隠れるタブが多く使いにくかったため廃止した(モバイルでカテゴリを選ぶ入口は無い)。
+ * 共有リンクやデスクトップの棚から `?category=` 付きで来た場合だけ、タグと同じくチップで
+ * 状態を見せて ✕ で解除できるようにする(絞り込みバッジの数には含めない)。
  *
  * 以前は最下段に「件数 + 並び替えトグル」を常設していたが、件数は絞り込みシートのフッター
  * (「N件の記事を表示」)と重複しており、並び替えもシートに移した(FeedFilterSheet の
@@ -81,6 +92,9 @@ export function MobileFeedControls({
     removeUserFeed,
   } = useFeedFilters();
   const { sort, setSort } = useFeedSort();
+  const { navigate } = useFeedNav();
+  const params = useSearchParams();
+  const category = parseCategoryTab(params.get('category'));
   const [filterOpen, setFilterOpen] = useState(false);
 
   return (
@@ -89,7 +103,7 @@ export function MobileFeedControls({
         companies={companies}
         userFeeds={userFeeds}
         searchField={<MobileSearchField />}
-        categoryTabs={<MobileCategoryTabs />}
+        category={category}
         status={status}
         period={period}
         companySlugs={companySlugs}
@@ -103,6 +117,7 @@ export function MobileFeedControls({
         onRemoveCompany={removeCompany}
         onRemoveUserFeed={removeUserFeed}
         onRemoveTag={removeTag}
+        onRemoveCategory={() => navigate(buildCategoryTabHref(params, 'latest'))}
         onResetSort={() => setSort('latest')}
       />
       <FeedFilterSheet
@@ -126,7 +141,7 @@ export function DefaultMobileFeedControls() {
       companies={[]}
       userFeeds={[]}
       searchField={<DefaultMobileSearchField />}
-      categoryTabs={<DefaultMobileCategoryTabs />}
+      category="latest"
       status="all"
       period="all"
       companySlugs={[]}
@@ -140,6 +155,7 @@ export function DefaultMobileFeedControls() {
       onRemoveCompany={() => {}}
       onRemoveUserFeed={() => {}}
       onRemoveTag={() => {}}
+      onRemoveCategory={() => {}}
       onResetSort={() => {}}
     />
   );
@@ -149,7 +165,7 @@ function MobileFeedHeaderView({
   companies,
   userFeeds,
   searchField,
-  categoryTabs,
+  category,
   status,
   period,
   companySlugs,
@@ -163,11 +179,13 @@ function MobileFeedHeaderView({
   onRemoveCompany,
   onRemoveUserFeed,
   onRemoveTag,
+  onRemoveCategory,
   onResetSort,
 }: MobileFeedHeaderViewProps) {
-  // 人気順とタグは絞り込みシートで編集できないが、ヘッダーの状態表示としてチップ行に出す
+  // 人気順・タグ・カテゴリは絞り込みシートで編集できないが、ヘッダーの状態表示としてチップ行に出す
   // (絞り込みバッジの数=useFeedFilters の適用数には含めない。検索 ?q= と同じ扱い)。
-  const showChips = activeCount > 0 || sort === 'popular' || tag !== null;
+  const showChips = activeCount > 0 || sort === 'popular' || tag !== null || category !== 'latest';
+  // 検索行の下罫はヘッダーとリストの境目。チップ行があるときはチップ行が下端になる。
 
   return (
     <div className="sticky top-0 z-30 bg-bg-app md:hidden">
@@ -180,6 +198,7 @@ function MobileFeedHeaderView({
       <div
         className={cn(
           'flex items-center gap-2 pt-[calc(env(safe-area-inset-top,0px)+0.625rem)] pb-2.5',
+          !showChips && 'border-border-default border-b-[0.5px]',
           MOBILE_GUTTER_CLASS,
         )}
       >
@@ -208,17 +227,7 @@ function MobileFeedHeaderView({
         </button>
       </div>
 
-      {/*
-        カテゴリタブ(新着 + 職能軸7種)。検索行の下・sticky ヘッダーの中に置き、
-        ヘッダーと一緒に上部へ固定する(横スクロールの1行。ADR-0034 のカテゴリ定義を使う)。
-        下罫は sticky ヘッダーとリストの境目。以前は最下段の件数行が持っていたが、
-        その行を廃止したのでチップが無いときはここが下端になる。
-      */}
-      <div className={cn(!showChips && 'border-border-default border-b-[0.5px]')}>
-        {categoryTabs}
-      </div>
-
-      {/* 3 行目: 適用中フィルタ + 人気順のチップ(1 つ以上のときだけ。0 件なら行ごと非表示) */}
+      {/* 2 行目: 適用中フィルタ + カテゴリ + 人気順のチップ(1 つ以上のときだけ。0 件なら行ごと非表示) */}
       {showChips && (
         <div
           className={cn(
@@ -226,6 +235,9 @@ function MobileFeedHeaderView({
             MOBILE_GUTTER_CLASS,
           )}
         >
+          {category !== 'latest' && (
+            <RemovableChip label={categoryTabLabel(category)} onRemove={onRemoveCategory} />
+          )}
           {sort === 'popular' && <RemovableChip label="人気順" onRemove={onResetSort} />}
           {tag !== null && <RemovableChip label={`タグ: ${tag}`} onRemove={onRemoveTag} />}
           {status !== 'all' && (

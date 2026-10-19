@@ -18,7 +18,7 @@ export function MobileFeedHeaderSkeleton() {
     <div className="sticky top-0 z-30 bg-bg-app md:hidden">
       {/* 1 行目: ロゴマーク + 検索 + 絞り込みアイコン(実物と同じ枠を出し、中身だけ静止させる) */}
       <div
-        className={`flex items-center gap-2 ${MOBILE_GUTTER_CLASS} pt-[calc(env(safe-area-inset-top,0px)+0.625rem)] pb-2.5`}
+        className={`flex items-center gap-2 border-border-default border-b-[0.5px] ${MOBILE_GUTTER_CLASS} pt-[calc(env(safe-area-inset-top,0px)+0.625rem)] pb-2.5`}
       >
         {/* ロゴマークはデータ非依存なので skeleton でも実物を出す(遷移中も消えない)。 */}
         <LogoMark />
@@ -30,14 +30,6 @@ export function MobileFeedHeaderSkeleton() {
           <ListFilter className="size-[18px]" />
         </div>
       </div>
-
-      {/*
-        2 行目(カテゴリタブ)は loading.tsx では出さず、下罫だけを実物と同じ位置に引く。
-        タブのラベルは URL 非依存だが、選択中タブの下線が ?category= 依存で、遷移中に
-        誤った選択状態を見せたくないため(高さは実物のタブ行 = h-11 + pb-2.5 に合わせる)。
-        3 行目(チップ行)は既定=フィルタ無しのとき実物も出ないため置かない。
-      */}
-      <div className="h-11 border-border-default border-b-[0.5px] pb-2.5" />
     </div>
   );
 }

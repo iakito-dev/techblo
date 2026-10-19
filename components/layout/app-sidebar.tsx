@@ -91,7 +91,7 @@ export function AppSidebar({
   const onFeed = pathname === '/';
 
   // 選択中のカテゴリ行がスクロール領域外にあるとき(別経路からの遷移直後・カテゴリ切替直後)は
-  // 見える位置へ寄せる(モバイルのカテゴリタブと同じ考え方。mobile-category-tabs.tsx)。
+  // 見える位置へ寄せる。
   const activeCategoryRef = useRef<HTMLAnchorElement | null>(null);
   useEffect(() => {
     if (onFeed && activeCategory) {
