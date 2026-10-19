@@ -15,6 +15,8 @@ export default defineConfig({
     include: ['**/*.integration.test.ts'],
     exclude: ['**/node_modules/**', '**/.next/**', '**/db/migrations/**', 'e2e/**'],
     passWithNoTests: true,
+    // 変換結果を node_modules/.vitest-cache に永続化し、2回目以降の実行で transform を省く。
+    fsModuleCache: true,
     // unit 側と同じ理由(zod 4 の barrel 初期化対策)。
     server: {
       deps: {

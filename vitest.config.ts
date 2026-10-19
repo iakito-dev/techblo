@@ -19,6 +19,8 @@ export default defineConfig({
       '**/*.integration.test.ts',
     ],
     passWithNoTests: true,
+    // 変換結果を node_modules/.vitest-cache に永続化し、2回目以降の実行で transform を省く。
+    fsModuleCache: true,
     // zod 4 を vite の依存最適化に任せると barrel 初期化で z が undefined になる。
     // inline 指定で変換パイプラインに通して回避。
     server: {

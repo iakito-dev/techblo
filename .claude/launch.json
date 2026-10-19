@@ -1,33 +1,24 @@
 {
   "version": "0.0.1",
-  "_comment": "worktree には gitignore された .env.local が引き継がれず DATABASE_URL エラーになるため、各 dev 起動前に main リポジトリ(git-common-dir の親)の .env.local を自動 symlink する。main 本体では .env.local が既存なので何もしない。",
+  "_comment": "起動は scripts/dev.sh に寄せる(worktree への .env.local の symlink と、Node 22 以上の選択を担う)。ポート違いの構成は同時起動用。",
   "configurations": [
     {
       "name": "Techblo-dev",
       "runtimeExecutable": "bash",
-      "runtimeArgs": [
-        "-c",
-        "[ -e .env.local ] || ln -sf \"$(git rev-parse --git-common-dir)/../.env.local\" .env.local; exec bun run dev"
-      ],
+      "runtimeArgs": ["scripts/dev.sh"],
       "port": 3000,
       "autoPort": true
     },
     {
       "name": "Techblo-preview",
       "runtimeExecutable": "bash",
-      "runtimeArgs": [
-        "-c",
-        "[ -e .env.local ] || ln -sf \"$(git rev-parse --git-common-dir)/../.env.local\" .env.local; PATH=$HOME/.nvm/versions/node/v22.22.2/bin:$PATH exec bun run dev --port 3217"
-      ],
+      "runtimeArgs": ["scripts/dev.sh", "--port", "3217"],
       "port": 3217
     },
     {
       "name": "Techblo-claude",
       "runtimeExecutable": "bash",
-      "runtimeArgs": [
-        "-c",
-        "[ -e .env.local ] || ln -sf \"$(git rev-parse --git-common-dir)/../.env.local\" .env.local; ASDF_NODEJS_VERSION=22.21.0 exec bun run dev --port 3219"
-      ],
+      "runtimeArgs": ["scripts/dev.sh", "--port", "3219"],
       "port": 3219
     }
   ]

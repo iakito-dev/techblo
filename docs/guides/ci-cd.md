@@ -42,7 +42,9 @@
 | typecheck | `bun run typecheck` | < 60s |
 | test | `bun run test:unit && bun run test:integration` | < 3分 |
 | build | `bun run build` | < 3分 |
-| audit | `bun audit` | < 30s(continue-on-error) |
+| audit | `bun audit --audit-level=critical`(全件レポートは警告のみ) | < 30s |
+
+上の5ジョブは `all-checks`(All checks passed)の `needs` に全部入れる。ブランチ保護で必須にするのはこの1ジョブで足りるようにするため。`needs` から漏れたジョブは、落ちても All checks passed は緑のままになる。
 
 ローカルでは `bun run check` で lint / depcruise / typecheck / unit test をまとめて実行できる(integration と build は除く)。
 
@@ -166,7 +168,7 @@ main merge 時(squash):
 | typecheck 失敗 | エラー箇所修正 |
 | test 失敗 | ローカルで `bun run test:unit` 再現 → 修正 |
 | build 失敗 | ローカルで `bun run build` 再現 → 修正 |
-| audit 失敗(continue-on-error) | 脆弱性内容確認、必要なら依存更新 |
+| audit 失敗(critical のみ fail) | 脆弱性内容確認、必要なら依存更新 |
 | db-check 失敗 | `bun drizzle-kit generate` で migration 同期 |
 
 ## 11. パフォーマンスゲート(将来)
