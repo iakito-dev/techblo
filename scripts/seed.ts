@@ -302,6 +302,15 @@ const SEED_COMPANIES = [
     description: 'enechain Tech Blog',
   },
   {
+    slug: 'ivry',
+    name: 'IVRy',
+    // note のマガジン単位 RSS(/m/{key}/rss)。アカウント全体の RSS は採用広報なども混ざるため技術マガジンに絞る
+    rssUrl: 'https://note.com/ivry/m/m975eb5b0b0d2/rss',
+    siteUrl: 'https://note.com/ivry/m/m975eb5b0b0d2',
+    brandColor: '#4f46e5',
+    description: 'IVRy のエンジニアブログ(note マガジン)',
+  },
+  {
     slug: 'anthropic',
     name: 'Anthropic',
     // 公式 RSS が無いため、Anthropic 公式サイトを定期スクレイプして生成されるコミュニティ製フィードを使用
