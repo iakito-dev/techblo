@@ -1,4 +1,8 @@
-import { FEED_COLUMNS_CLASS, FEED_GAP_CLASS } from '@/features/feed/web/feed-grid-classes';
+import {
+  FEED_COLUMNS_CLASS,
+  FEED_FIRST_RULE_CLASS,
+  FEED_GAP_CLASS,
+} from '@/features/feed/web/feed-grid-classes';
 
 /**
  * フィードのローディング skeleton。Suspense fallback で使う。
@@ -23,7 +27,7 @@ export function FeedGridSkeleton({
     <div
       className={
         variant === 'columns'
-          ? `grid grid-cols-1 ${FEED_GAP_CLASS} ${FEED_COLUMNS_CLASS}`
+          ? `grid grid-cols-1 ${FEED_GAP_CLASS} ${FEED_COLUMNS_CLASS} ${FEED_FIRST_RULE_CLASS}`
           : `feed-grid ${FEED_GAP_CLASS}`
       }
     >

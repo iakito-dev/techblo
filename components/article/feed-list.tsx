@@ -3,7 +3,11 @@
 import { memo, useCallback, useEffect, useRef, useState, useTransition } from 'react';
 import type { FeedSort, PopularPeriod, ReadFilterMode } from '@/features/feed/domain/feed-sort';
 import { ArticleCard } from '@/features/feed/web/components/article-card';
-import { FEED_COLUMNS_CLASS, FEED_GAP_CLASS } from '@/features/feed/web/feed-grid-classes';
+import {
+  FEED_COLUMNS_CLASS,
+  FEED_FIRST_RULE_CLASS,
+  FEED_GAP_CLASS,
+} from '@/features/feed/web/feed-grid-classes';
 import { useFeedNav } from '@/features/feed/web/view-models/feed-nav-context';
 import { ArticleActions } from './article-actions';
 import { loadMoreFeed } from './feed-actions';
@@ -202,7 +206,7 @@ export function FeedList({
       */}
       <div
         aria-busy={navPending}
-        className={`grid grid-cols-1 ${FEED_GAP_CLASS} ${FEED_COLUMNS_CLASS} transition-opacity duration-200 ${
+        className={`grid grid-cols-1 ${FEED_GAP_CLASS} ${FEED_COLUMNS_CLASS} ${FEED_FIRST_RULE_CLASS} transition-opacity duration-200 ${
           navPending ? 'opacity-50' : ''
         }`}
       >

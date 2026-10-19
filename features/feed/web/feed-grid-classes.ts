@@ -16,6 +16,13 @@
 export const FEED_COLUMNS_CLASS =
   'md:@[600px]:grid-cols-2 md:@[900px]:grid-cols-3 md:@[1360px]:grid-cols-4';
 
+/**
+ * モバイル(<md)の一覧で、先頭カードの上罫を消す。sticky ヘッダーの下罫の直下に先頭カードの
+ * 上罫が来るため、罫が2本平行に走って見えていた(カード間の区切りは2枚目以降の上罫が担う)。
+ * md+ は複数列で先頭行のカードが横に並ぶため、ここだけ消すと揃わなくなるので触らない。
+ */
+export const FEED_FIRST_RULE_CLASS = 'max-md:[&>:first-child]:border-t-0';
+
 /** flex(モバイルの横スクロール)から md+ で grid に切り替える版(feed-section.tsx 用)。 */
 export const FEED_COLUMNS_DISPLAY_CLASS = `md:grid md:grid-cols-1 ${FEED_COLUMNS_CLASS}`;
 
