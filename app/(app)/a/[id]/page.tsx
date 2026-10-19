@@ -116,7 +116,7 @@ export default function ArticlePage({ params }: { params: Promise<{ id: string }
       <main
         className={`mx-auto max-w-2xl max-lg:-mt-4 xl:max-w-[66rem] ${MOBILE_GUTTER_CLASS} pb-8 md:px-6 md:pb-10 lg:px-8 lg:pt-6`}
       >
-        <ArticleBackLink className="mb-1" />
+        <ArticleBackLink className="mb-1 max-lg:hidden" />
         <Suspense fallback={<ArticleDetailSkeleton />}>
           <ArticleContent params={params} />
         </Suspense>

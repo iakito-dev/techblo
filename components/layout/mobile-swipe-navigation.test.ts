@@ -2,6 +2,7 @@ import { describe, expect, test } from 'vitest';
 import {
   getSwipeNavigationHref,
   isBackSwipe,
+  isHorizontalScroller,
   shouldIgnoreSwipeTarget,
 } from './mobile-swipe-navigation';
 
@@ -139,6 +140,29 @@ describe('isBackSwipe', () => {
       isBackSwipe({ pathname: '/favorites', startX: 40, startY: 120, endX: 142, endY: 128 }),
     ).toBe(false);
     expect(isBackSwipe({ pathname: '/', startX: 40, startY: 120, endX: 142, endY: 128 })).toBe(
+      false,
+    );
+  });
+});
+
+describe('isHorizontalScroller', () => {
+  test('treats an overflowing overflow-x:auto row (category tabs) as a scroller', () => {
+    expect(isHorizontalScroller({ overflowX: 'auto', scrollWidth: 948, clientWidth: 390 })).toBe(
+      true,
+    );
+  });
+
+  test('ignores a scrollable row whose content already fits', () => {
+    expect(isHorizontalScroller({ overflowX: 'auto', scrollWidth: 390, clientWidth: 390 })).toBe(
+      false,
+    );
+  });
+
+  test('ignores overflowing content that cannot be scrolled', () => {
+    expect(isHorizontalScroller({ overflowX: 'visible', scrollWidth: 948, clientWidth: 390 })).toBe(
+      false,
+    );
+    expect(isHorizontalScroller({ overflowX: 'hidden', scrollWidth: 948, clientWidth: 390 })).toBe(
       false,
     );
   });

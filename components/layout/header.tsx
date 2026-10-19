@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useSession } from '@/features/auth/client';
 import { UserMenu } from '@/features/auth/components/user-menu';
+import { ArticleBackLink } from '@/features/feed/web/components/article-back-link';
 import { MobileSearchOverlay } from '@/features/feed/web/components/mobile-search-overlay';
 import { MOBILE_GUTTER_CLASS } from '@/shared/layout';
 import { Logo } from './logo';
@@ -28,6 +29,10 @@ export function Header() {
   // 検索はフィード(/)専用。他ページではアイコンを出さない。
   const isFeed = pathname === '/';
   const showSearch = isFeed;
+  // 記事ページ(/a/[id])はロゴの代わりに「戻る」を置く。本文側の戻るはスクロールで画面外へ
+  // 消えるため、関連記事まで読み進めた後に一覧へ戻る手段が端のスワイプだけになっていた。
+  // ヘッダーは sticky なので、ここに置けばどこまで読んでも親指を伸ばさず戻れる。
+  const isDetail = pathname.startsWith('/a/');
 
   // フィードの <md は専用ヘッダー(MobileFeedControls: 検索行 + チップ行)がロゴバーを
   // 置き換えるため、ここでは出さない(md〜lg のタブレットでは従来どおり表示する)。
@@ -40,7 +45,7 @@ export function Header() {
       <div
         className={`mx-auto flex h-16 max-w-[1200px] items-center ${MOBILE_GUTTER_CLASS} md:px-6`}
       >
-        <Logo />
+        {isDetail ? <ArticleBackLink /> : <Logo />}
         <div className="ml-auto flex items-center gap-1">
           {showSearch && (
             <button

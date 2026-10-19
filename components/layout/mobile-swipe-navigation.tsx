@@ -98,9 +98,48 @@ export function shouldIgnoreSwipeTarget(tagName: string): boolean {
   return ['button', 'input', 'textarea', 'select'].includes(tagName.toLowerCase());
 }
 
+/**
+ * 横スクロールできる要素か(overflow-x が auto/scroll で、中身が幅からはみ出している)。
+ * はみ出していない(= 実際には横に動かない)要素は対象外にし、スワイプ遷移を妨げない。
+ */
+export function isHorizontalScroller({
+  overflowX,
+  scrollWidth,
+  clientWidth,
+}: {
+  overflowX: string;
+  scrollWidth: number;
+  clientWidth: number;
+}): boolean {
+  return (overflowX === 'auto' || overflowX === 'scroll') && scrollWidth > clientWidth + 1;
+}
+
+/**
+ * 指を置いた位置から祖先を辿り、横スクロール領域(カテゴリタブ・適用中フィルタのチップ行など)の
+ * 中かを調べる。その中で始まった横スワイプは「隠れたタブを見る」操作なので、タブ間遷移に
+ * 奪ってはいけない(奪うと touchmove の preventDefault でスクロール自体も止まり、画面外の
+ * カテゴリに一生届かない上、隣の画面へ飛ばされる)。
+ */
+function isInsideHorizontalScroller(target: Element): boolean {
+  for (let el: Element | null = target; el && el !== document.body; el = el.parentElement) {
+    const { overflowX } = window.getComputedStyle(el);
+    if (
+      isHorizontalScroller({
+        overflowX,
+        scrollWidth: el.scrollWidth,
+        clientWidth: el.clientWidth,
+      })
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
+
 function shouldIgnoreSwipeStart(target: EventTarget | null): boolean {
   if (!(target instanceof Element)) return false;
   if (target.closest(BLOCKING_SELECTOR)) return true;
+  if (isInsideHorizontalScroller(target)) return true;
 
   const control = target.closest(CONTROL_SELECTOR);
   if (!control) return false;
@@ -342,15 +381,24 @@ export function MobileSwipeNavigation() {
       }, motion.durationMs);
     };
 
+    // touchcancel は指を離した操作ではない(iOS Safari の端スワイプ = ブラウザ自身の戻る が
+    // ジェスチャーを奪った時などに来る)。ここで遷移を確定すると、ブラウザの戻ると二重に
+    // 遷移してしまうので、引っ張った分を元に戻すだけにする。
+    const onTouchCancel = () => {
+      const start = startRef.current;
+      startRef.current = null;
+      if (start && !start.ignored) resetSwipeOffset(true);
+    };
+
     window.addEventListener('touchstart', onTouchStart, { passive: true });
     window.addEventListener('touchmove', onTouchMove, { passive: false });
     window.addEventListener('touchend', onTouchEnd, { passive: true });
-    window.addEventListener('touchcancel', onTouchEnd, { passive: true });
+    window.addEventListener('touchcancel', onTouchCancel, { passive: true });
     return () => {
       window.removeEventListener('touchstart', onTouchStart);
       window.removeEventListener('touchmove', onTouchMove);
       window.removeEventListener('touchend', onTouchEnd);
-      window.removeEventListener('touchcancel', onTouchEnd);
+      window.removeEventListener('touchcancel', onTouchCancel);
       // この effect は pathname 変更(=遷移 commit)ごとに再実行される。ここで transform を消すと
       // commit 後のスライドインの直前に新コンテンツが中央へ一瞬出てちらつくため、消去はしない。
       // スタイルは onTouchEnd 系(cancel/reduced-motion/slide-in effect)が必ず後始末する。
