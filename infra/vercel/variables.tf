@@ -61,7 +61,7 @@ variable "gemini_api_key" {
 variable "ai_summary_model" {
   description = "Gemini model ID used for AI article summary generation."
   type        = string
-  default     = "gemini-3.5-flash"
+  default     = "gemini-3.1-flash-lite"
 }
 
 variable "ai_summary_batch_limit" {
