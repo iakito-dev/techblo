@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { memo, type ReactNode } from 'react';
 import { CompanyFavicon } from '@/components/article/company-favicon';
 import type { ArticleCard as ArticleCardType } from '../../application/dto';
+import { ARTICLE_LINK_PREFETCH } from '../article-link-prefetch';
 import { stripHtml } from '../strip-html';
 import { RelativeTime } from './relative-time';
 
@@ -77,11 +78,14 @@ export const ArticleCard = memo(function ArticleCard({
 
       {/* タイトル(stretched link)。記事ページへ遷移する。
           prefetch は Link の既定(auto)に任せる: ビューポートに入ったカードだけが静的シェルを
-          先読みするので、24枚の一覧でも先読みは画面内の数枚に収まる。記事本体は 'use cache'
-          なので、着地後の本文解決も DB 往復なしで返る。 */}
+          先読みするので、24枚の一覧でも先読みは画面内の数枚に収まる。
+          ただし auto の先読みは記事ページの枠(skeleton)までなので、hover / touchstart で
+          本文まで含めた full prefetch に切り替える(unstable_dynamicOnHover。ADR-0042)。
+          本文は 'use cache: remote' なので、この先読みもほぼ DB 往復なしで返る。 */}
       <h2 className="mb-2 line-clamp-3 font-bold text-[1.125rem] text-fg-default leading-[1.46] tracking-[-0.015em]">
         <Link
           href={`/a/${article.id}`}
+          {...ARTICLE_LINK_PREFETCH}
           // 上罫とタイトルのフォーカス強調(has-[[data-detail-trigger]:focus-visible])の目印。
           data-detail-trigger
           // j/k ショートカットが辿る対象の目印(keyboard-shortcuts.tsx)。

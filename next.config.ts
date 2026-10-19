@@ -26,6 +26,12 @@ const config: NextConfig = {
       dynamic: 30,
       static: 180,
     },
+    // 記事ページへのリンクに付ける unstable_dynamicOnHover を有効化する(ADR-0042)。
+    // 既定の prefetch(auto)は動的ルート /a/[id] の枠(skeleton)までしか先読みしないので、
+    // hover / touchstart の時点で本文まで含めた full prefetch に切り替え、タップ後に本文が即出るようにする。
+    // 画面内の全カードを full prefetch(prefetch={true})すると、スクロールするだけで
+    // カードの数だけサーバー呼び出しが走るため、操作の意図が見えた1件だけに絞る。
+    dynamicOnHover: true,
   },
 
   // OGP画像のホットリンク許可ドメイン(対象6社)

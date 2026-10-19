@@ -1,8 +1,8 @@
 import type { ArticleCategory } from '@/shared/categories';
 import {
-  articleCategorySchema,
   CATEGORY_DEFINITIONS,
   getCategoryDefinition,
+  isArticleCategory,
 } from '@/shared/categories';
 
 /**
@@ -38,8 +38,7 @@ export function categoryTabLabel(key: CategoryTabKey): string {
  */
 export function parseCategoryTab(value: string | null | undefined): CategoryTabKey {
   if (!value) return 'latest';
-  const parsed = articleCategorySchema.safeParse(value);
-  return parsed.success ? parsed.data : 'latest';
+  return isArticleCategory(value) ? value : 'latest';
 }
 
 /**

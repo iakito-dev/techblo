@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { CompanyFavicon } from '@/components/article/company-favicon';
 import { formatRelative } from '@/shared/date';
 import type { ArticleCard } from '../../application/dto';
+import { ARTICLE_LINK_PREFETCH } from '../article-link-prefetch';
 
 /**
  * 記事ページ下部の関連記事(ADR-0037)。記事ページと同じ「面・影・角丸なし、hairline の罫」の
@@ -24,6 +25,7 @@ export function RelatedArticles({ articles }: { articles: ArticleCard[] }) {
           <li key={article.id} className="border-border-default border-b">
             <Link
               href={`/a/${article.id}`}
+              {...ARTICLE_LINK_PREFETCH}
               className="group flex min-h-11 touch-manipulation flex-col gap-1.5 py-3.5 focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2 xl:py-3"
             >
               <span className="flex items-center gap-[7px] font-semibold text-[11.5px] text-fg-default">

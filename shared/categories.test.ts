@@ -1,10 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import {
-  articleCategorySchema,
   CATEGORY_DEFINITIONS,
   getCategoryDefinition,
+  isArticleCategory,
   SHELF_CATEGORIES,
 } from './categories';
+import { articleCategorySchema } from './category-schema';
 
 describe('articleCategorySchema', () => {
   it('7カテゴリすべてを受理する', () => {
@@ -15,6 +16,17 @@ describe('articleCategorySchema', () => {
 
   it('未知の値は拒否する', () => {
     expect(articleCategorySchema.safeParse('unknown').success).toBe(false);
+  });
+});
+
+describe('isArticleCategory', () => {
+  it('7カテゴリすべてを受理し、未知の値・文字列以外は拒否する', () => {
+    for (const key of ['ai', 'infra', 'devex', 'app', 'security', 'org', 'event']) {
+      expect(isArticleCategory(key)).toBe(true);
+    }
+    expect(isArticleCategory('unknown')).toBe(false);
+    expect(isArticleCategory(undefined)).toBe(false);
+    expect(isArticleCategory(1)).toBe(false);
   });
 });
 

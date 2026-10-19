@@ -1,17 +1,19 @@
-import { z } from 'zod';
-
 /**
  * 記事カテゴリ(職能軸)の定義(ADR-0034)。単一の真実の源(ADR-0034)。
  *
  * 軸は「その記事は会社の中のどの職能領域(チーム)の仕事の話か」。1記事は必ず1カテゴリにのみ所属する。
  * `event` だけは棚(フィード上のセクション)ではなく、ページ下部のリスト表示に使う(§7参照)。
  *
- * I/O を持たない純粋な定数 + Zod なので `shared/` に置く。domain 層は `lib/` を import できない
+ * I/O を持たない純粋な定数なので `shared/` に置く。domain 層は `lib/` を import できない
  * (depcruise `domain-no-io`)が `shared/` は import できるため、ここに置くことで
  * `features/ai-summary/domain` と将来の `features/feed`(棚の表示)の両方が同じ定義を参照でき、
  * カテゴリ定義の二重管理を避けられる。
+ *
+ * このモジュールは zod を import しない。サイドバーや見出しなどクライアントコンポーネントからも
+ * 読まれるため、ここで zod を使うと zod 全体(約 65KB gzip)が全ページの JS に載る(ADR-0042)。
+ * Zod スキーマが要るサーバー側(AI 出力の検証など)は `shared/category-schema.ts` を使う。
  */
-export const articleCategorySchema = z.enum([
+export const ARTICLE_CATEGORIES = [
   'ai',
   'infra',
   'devex',
@@ -19,9 +21,16 @@ export const articleCategorySchema = z.enum([
   'security',
   'org',
   'event',
-]);
+] as const;
 
-export type ArticleCategory = z.infer<typeof articleCategorySchema>;
+export type ArticleCategory = (typeof ARTICLE_CATEGORIES)[number];
+
+const CATEGORY_SET: ReadonlySet<string> = new Set(ARTICLE_CATEGORIES);
+
+/** 生値がカテゴリキーか(URL パラメータなど、クライアントでの判定用)。 */
+export function isArticleCategory(value: unknown): value is ArticleCategory {
+  return typeof value === 'string' && CATEGORY_SET.has(value);
+}
 
 export type CategoryDefinition = {
   key: ArticleCategory;

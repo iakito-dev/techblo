@@ -41,13 +41,27 @@ function hostname(url: string): string {
 
 /**
  * 記事取得。cacheComponents 下では generateMetadata からの取得も「キャッシュ済み」である
- * 必要があるため 'use cache' でキャッシュする(id ごと。記事内容はほぼ不変)。
+ * 必要があるためキャッシュする(id ごと。記事内容はほぼ不変)。
+ *
+ * 記事ページはリクエスト時に描画される(id が動的で静的シェルに入らない)ので、in-memory の
+ * 'use cache' はサーバーレスのインスタンスごとに空から始まり、ほぼ毎回 Supabase まで往復していた。
+ * インスタンス間で共有される 'use cache: remote'(Vercel Runtime Cache)にする(ADR-0042)。
  */
 async function loadArticle(id: string) {
-  'use cache';
+  'use cache: remote';
   cacheLife('hours');
-  if (!UUID_RE.test(id)) return null;
   return getArticleById(id);
+}
+
+/**
+ * 記事と AI要約を並列に取得する。どちらも id だけで引けるので、記事の取得を待ってから
+ * 要約を引く直列(キャッシュミス時は DB 往復2回ぶん)にしない。
+ * 不正な id は DB エラーになるため、どちらも呼ぶ前に弾く(要約側には UUID 検証が無い)。
+ */
+async function loadArticleWithSummary(id: string) {
+  if (!UUID_RE.test(id)) return { article: null, summary: null };
+  const [article, summary] = await Promise.all([loadArticle(id), getSummaryByArticleId(id)]);
+  return { article, summary };
 }
 
 export async function generateMetadata({
@@ -56,12 +70,11 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
 }): Promise<Metadata> {
   const { id } = await params;
-  const article = await loadArticle(id);
+  const { article, summary } = await loadArticleWithSummary(id);
   if (!article) return { title: '記事が見つかりません' };
 
   // 説明文は AI要約(独自テキスト)を最優先し、無ければ RSS 抜粋で代替する。
   // アグリゲータの薄い複製ページにならないよう、要約があればそれを meta description にする。
-  const summary = await getSummaryByArticleId(id);
   const description = summary?.overview
     ? toExcerpt(summary.overview, 160)
     : article.description
@@ -98,7 +111,7 @@ export async function generateMetadata({
  * (X / Threads と同じ「タイムライン → 個別ページ」の形。ADR-0036)。
  *
  * シェル(Header / Sidebar / MobileNav)は (app)/layout.tsx が保持するため、遷移で
- * 差し替わるのはこのコンテンツ領域だけになる。記事本体はユーザーに依存せず 'use cache' で
+ * 差し替わるのはこのコンテンツ領域だけになる。記事本体はユーザーに依存せず 'use cache: remote' で
  * 取得するので、カード側の prefetch でほぼ即時に描画できる。保存状態(ユーザー依存)だけを
  * 別の Suspense 境界に隔離し、本文の表示を待たせない。
  */
@@ -127,10 +140,13 @@ export default function ArticlePage({ params }: { params: Promise<{ id: string }
 
 async function ArticleContent({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const article = await loadArticle(id);
+  // 関連記事は本文の下(右レール)で別にストリームするが、本文の取得を待ってから引き始めると
+  // 往復が直列に積まれる。ここで先に投げて、表示側(Suspense の内側)では結果を待つだけにする。
+  // getRelatedArticles は失敗時も [] を返す(reject しない)ので、notFound で捨てても安全。
+  const relatedPromise = UUID_RE.test(id) ? getRelatedArticles(id) : Promise.resolve([]);
+  const { article, summary } = await loadArticleWithSummary(id);
   if (!article) notFound();
 
-  const summary = await getSummaryByArticleId(id);
   const baseUrl = resolveBaseUrl();
   // JSON-LD/meta の説明文も AI要約を優先(generateMetadata と同方針)。
   const jsonLdDescription = summary?.overview
@@ -270,14 +286,17 @@ async function ArticleContent({ params }: { params: Promise<{ id: string }> }) {
         </div>
         {/* 関連記事は補助情報。本文・保存状態とは独立にストリームし、表示を待たせない。 */}
         <Suspense fallback={null}>
-          <RelatedArticlesSection id={id} />
+          <RelatedArticlesSection articles={relatedPromise} />
         </Suspense>
       </aside>
     </div>
   );
 }
 
-async function RelatedArticlesSection({ id }: { id: string }) {
-  const articles = await getRelatedArticles(id);
-  return <RelatedArticles articles={articles} />;
+async function RelatedArticlesSection({
+  articles,
+}: {
+  articles: ReturnType<typeof getRelatedArticles>;
+}) {
+  return <RelatedArticles articles={await articles} />;
 }

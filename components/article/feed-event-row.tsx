@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { ARTICLE_LINK_PREFETCH } from '@/features/feed/web/article-link-prefetch';
 import { RelativeTime } from '@/features/feed/web/components/relative-time';
 import type { ComposedArticle } from './feed-load-more';
 
@@ -22,6 +23,7 @@ export function FeedEventRow({ item }: { item: ComposedArticle }) {
       {/* ArticleCard のタイトルリンクと同じ遷移先(記事ページ)。 */}
       <Link
         href={`/a/${article.id}`}
+        {...ARTICLE_LINK_PREFETCH}
         data-article-link
         className="min-w-0 flex-1 truncate font-medium text-fg-default transition-colors hover:text-accent"
       >

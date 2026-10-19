@@ -357,9 +357,13 @@ export async function getArticlesByIds(ids: string[]): Promise<ArticleCard[]> {
  * 記事ページ下部の関連記事(AI要約タグの重なり順 + 同企業新着で補完。ADR-0037)。
  * 補助情報なので、取得失敗で記事ページ全体を落とさず空で返す(失敗結果は短命キャッシュ)。
  * id は呼び出し側(ページ)で UUID 検証済みのものだけを渡すこと(不正形式は DB エラーになる)。
+ *
+ * タグ重なりの集計は ready 要約を全件走査する重いクエリなので、インスタンス間で共有される
+ * 'use cache: remote' にして「1記事1回の走査」を実際に成り立たせる(in-memory だとインスタンスの
+ * 数だけ走査が走る。ADR-0042)。
  */
 export async function getRelatedArticles(id: string): Promise<ArticleCard[]> {
-  'use cache';
+  'use cache: remote';
   cacheTag(CACHE_TAGS.feed);
   cacheLife('days');
 

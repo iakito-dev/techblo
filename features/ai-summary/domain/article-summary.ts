@@ -1,5 +1,6 @@
 import { z } from 'zod';
-import { type ArticleCategory, articleCategorySchema } from '@/shared/categories';
+import type { ArticleCategory } from '@/shared/categories';
+import { articleCategorySchema } from '@/shared/category-schema';
 import type { ArticleId } from '@/shared/type-utils';
 
 /**

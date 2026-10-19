@@ -1,4 +1,4 @@
-import { articleCategorySchema, getCategoryDefinition } from '@/shared/categories';
+import { getCategoryDefinition, isArticleCategory } from '@/shared/categories';
 
 /**
  * トップ(/)の見出し行(FeedHeader)の表示判定に使う URL パラメータ。
@@ -50,8 +50,7 @@ export function isFeedDefaultView(params: FeedHeaderParams): boolean {
 export function resolveFeedHeaderTitle(params: FeedHeaderParams): string {
   const rawCategory = params.category?.trim();
   if (rawCategory) {
-    const parsed = articleCategorySchema.safeParse(rawCategory);
-    if (parsed.success) return getCategoryDefinition(parsed.data).label;
+    if (isArticleCategory(rawCategory)) return getCategoryDefinition(rawCategory).label;
     // 不正なカテゴリキーは「フィード」に丸める(他フィルタと同じ既定へのフォールバック方針)。
     return 'フィード';
   }

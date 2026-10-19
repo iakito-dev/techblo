@@ -15,9 +15,13 @@ const summaryRepo = new DrizzleArticleSummaryRepository(db);
 /**
  * 記事ページ / カードのタグ用の要約取得。要約が無い / 失敗なら null(UI はセクションを出さない)。
  * 記事単位タグでキャッシュし、生成バッチ完了時に updateTag(article) で無効化する想定(ADR-0016)。
+ *
+ * 'use cache: remote'(Vercel Runtime Cache)にする(ADR-0042)。記事ページと「もっと読む」は
+ * リクエスト時に描画されるため、in-memory の 'use cache' だとサーバーレスのインスタンスごとに
+ * 空から始まり、1画面で最大 24 本の要約クエリが Supabase に飛んでいた。
  */
 export async function getSummaryByArticleId(articleId: string): Promise<ArticleSummaryDto | null> {
-  'use cache';
+  'use cache: remote';
   cacheTag(CACHE_TAGS.article(articleId));
   cacheLife('hours');
 

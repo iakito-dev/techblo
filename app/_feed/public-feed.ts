@@ -3,7 +3,8 @@ import { getFeed } from '@/features/feed/web/queries';
 import { logger } from '@/lib/observability/logger';
 import { buildFeedXml, type RssFeedItem } from '@/lib/rss/build-feed-xml';
 import { resolveBaseUrl } from '@/lib/site-url';
-import { articleCategorySchema, CATEGORY_DEFINITIONS } from '@/shared/categories';
+import { CATEGORY_DEFINITIONS } from '@/shared/categories';
+import { articleCategorySchema } from '@/shared/category-schema';
 
 /**
  * 公開 RSS フィードの合成点(app 層)。

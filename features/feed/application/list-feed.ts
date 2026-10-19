@@ -1,4 +1,4 @@
-import { articleCategorySchema } from '@/shared/categories';
+import { articleCategorySchema } from '@/shared/category-schema';
 import { ok, type Result } from '@/shared/result';
 import { asCompanyId, asUserId } from '@/shared/type-utils';
 import type { ArticleRepository } from '../domain/article-repository';
