@@ -19,7 +19,6 @@
 | アニメーション | **motion** (旧 Framer Motion) + **View Transitions API** |
 | Drawer/Modal | **vaul** |
 | Toast | **sonner** |
-| Command Palette | **cmdk** |
 | アイコン | **Lucide React** |
 
 ### データ層

@@ -37,7 +37,6 @@
     "@heroui/styles": "^3.1.0",
     "@radix-ui/react-collapsible": "^1.1.13",
     "@radix-ui/react-scroll-area": "^1.2.11",
-    "@radix-ui/react-separator": "^1.1.9",
     "@radix-ui/react-slot": "^1.2.5",
     "@radix-ui/react-tooltip": "^1.2.9",
     "@t3-oss/env-nextjs": "^0.13.11",
@@ -48,7 +47,6 @@
     "better-auth": "^1.7.7",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "cmdk": "^1.1.1",
     "date-fns-tz": "^3.2.0",
     "embla-carousel-react": "^8.6.0",
     "drizzle-orm": "^0.45.3",
@@ -61,12 +59,10 @@
     "postgres": "^3.4.5",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
-    "sanitize-html": "^2.17.4",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.6.0",
     "vaul": "^1.1.2",
-    "zod": "^4.4.3",
-    "zustand": "^5.0.14"
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.15",
@@ -76,7 +72,6 @@
     "@types/node": "^26.5.1",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
-    "@types/sanitize-html": "^2.16.1",
     "babel-plugin-react-compiler": "^1.0.0",
     "concurrently": "^10.0.6",
     "dependency-cruiser": "^18.2.0",
