@@ -80,7 +80,7 @@ PostHog のイベント(一覧と規約は [observability.md §4](../architectur
 
 実装済み(ADR-0013)。bookmarks と同型。
 - `features/favorites`(4層): `setFavorite` / `listFavoritedArticleIds`、`setFavoriteAction`、`getFavoritedArticleIds`。
-- 記事カードの♥は `components/article/article-actions.tsx`。`/favorites`(`app/favorites/page.tsx`)で追加順に表示。空状態あり。
+- 記事カードの♥は `components/article/article-actions.tsx`。`/favorites`(`app/(app)/favorites/page.tsx`。ゲストは localStorage の保存を表示)で追加順に表示。空状態あり。
 
 ## 一覧の絞り込み・並び替え
 

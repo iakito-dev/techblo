@@ -62,53 +62,38 @@ const handleError = (error: ActionError) => {
 
 ## 4. error boundary
 
-```tsx
-// app/error.tsx
-'use client';
-import * as Sentry from '@sentry/nextjs';
-import { useEffect } from 'react';
+- `app/error.tsx`: shell を持たないルートの error boundary。リトライ導線を出す
+- `app/(app)/error.tsx`: アプリ画面(サイドバー付き)用
+- `app/global-error.tsx`: root layout ごと落ちたときの最後の受け皿
 
-export default function GlobalError({ error, reset }) {
-  useEffect(() => { Sentry.captureException(error); }, [error]);
-  return (
-    <div>
-      <h1>エラーが発生しました</h1>
-      <button onClick={reset}>再試行</button>
-    </div>
-  );
-}
-```
-
-各ルートにも `error.tsx` を配置(`/bookmarks/error.tsx` 等)。
+Sentry は未導入なので、現状クライアント側の例外はどこにも送っていない(導入時にここで capture する)。
 
 ## 5. RSS取得失敗の扱い
 
 ```ts
-// jobs/refresh-company-feed.ts
-const result = await safeFetch(company.rss_url);
-if (!result.ok) {
-  await db.update(companies)
+// lib/rss/ingest.ts(抜粋)
+async function recordFailure(companyId: string, message: string): Promise<void> {
+  await db
+    .update(companies)
     .set({
-      last_error: result.error,
-      last_error_at: new Date(),
-      consecutive_failures: sql`consecutive_failures + 1`,
+      lastError: message,
+      lastErrorAt: new Date(),
+      consecutiveFailures: sql`${companies.consecutiveFailures} + 1`,
     })
-    .where(eq(companies.id, company.id));
-
-  if (companyAfter.consecutive_failures >= 10) {
-    Sentry.captureMessage(`Company ${company.slug} failing for 10 hours`, 'warning');
-  }
-  return; // throw しない、次回試行
+    .where(eq(companies.id, companyId));
+  logger.warn('ingest failed', { companyId, error: message });
 }
 ```
+
+throw せず `IngestResult` を返し、次の cron で再試行する。連続失敗は `/api/healthz` で見える(`docs/features/health.md`)。
 
 ## 6. リトライ戦略
 
 | 操作 | 戦略 |
 |---|---|
-| HTTP取得 | 指数バックオフ 3回(1s, 2s, 4s) |
+| HTTP取得 | `lib/http/fetcher.ts`: 5xx とネットワーク例外を指数バックオフで最大3回再試行(1s, 2s, 4s)。4xx は即失敗 |
 | DB INSERT 重複 | upsert で吸収、リトライ不要 |
-| Trigger.dev ジョブ失敗 | `retry: { maxAttempts: 3 }` |
+| Trigger.dev ジョブ失敗 | タスク内で失敗を吸収し、次の cron で再試行 |
 | ユーザー操作のServer Action | リトライしない(ユーザー判断) |
 
 ## 7. ログ送信
@@ -117,8 +102,8 @@ if (!result.ok) {
 |---|---|
 | 期待される失敗(UnauthorizedFromUser) | ログ送信しない |
 | 期待されるが追跡したい(RSS取得失敗) | logger.warn |
-| 予想外の失敗(DB制約違反など) | logger.error + Sentry |
-| 致命的(env欠落) | throw、Sentry 自動キャプチャ |
+| 予想外の失敗(DB制約違反など) | logger.error |
+| 致命的(env欠落) | 起動時に t3-env が throw |
 
 ## 関連
 

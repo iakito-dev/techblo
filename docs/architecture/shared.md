@@ -7,7 +7,7 @@
 | ディレクトリ | 内容 | 依存制限 |
 |---|---|---|
 | `shared/` | **純粋なロジック・型・ユーティリティ** | 外部ライブラリ依存ゼロ(Zodはオプション) |
-| `lib/` | **外部サービスへのアダプター** | 各種SDK(Drizzle, Sentry, RSS等)を内包 |
+| `lib/` | **外部サービスへのアダプター** | 各種SDK(Drizzle, Better Auth, AI SDK, PostHog 等)を内包 |
 
 判断基準:
 - ブラウザでもサーバーでも動く + 副作用なし → `shared/`
@@ -19,14 +19,14 @@
 shared/
 ├── result.ts              ← Result<T, E> 型と ok/err ヘルパー
 ├── error.ts               ← BaseError 階層
-├── pagination.ts          ← Cursor based pagination 型
 ├── date.ts                ← 日付フォーマット(JSTタイムゾーン)
-├── url.ts                 ← URL正規化、相対→絶対
-├── string.ts              ← truncate, slugify
 ├── type-utils.ts          ← Branded types, etc.
-└── constants.ts           ← UI定数(MAX_TITLE_LENGTH 等)
+├── categories.ts          ← 記事カテゴリの定義(ADR-0034)
+├── category-schema.ts     ← カテゴリの Zod スキーマ
+├── layout.ts              ← レイアウト定数(モバイルのガター等)
+├── og-fonts.ts            ← OG 画像生成用のフォントローダー
+└── utils.ts               ← cn()(shadcn/ui のクラス結合)
 ```
-
 ### `shared/result.ts`
 
 ```ts
@@ -79,33 +79,6 @@ export type CommonError =
   | InternalError;
 ```
 
-### `shared/pagination.ts`
-
-```ts
-import { z } from 'zod';
-
-export const cursorPaginationSchema = z.object({
-  cursor: z.string().optional(),
-  limit: z.number().int().positive().max(50).default(20),
-});
-
-export type CursorPagination = z.infer<typeof cursorPaginationSchema>;
-
-export type PaginatedResult<T> = {
-  items: T[];
-  nextCursor: string | null;
-  hasMore: boolean;
-};
-
-// cursor = base64(JSON.stringify({ id, createdAt }))
-export function encodeCursor(payload: object): string {
-  return Buffer.from(JSON.stringify(payload)).toString('base64url');
-}
-export function decodeCursor<T>(cursor: string): T {
-  return JSON.parse(Buffer.from(cursor, 'base64url').toString());
-}
-```
-
 ### `shared/date.ts`
 
 ```ts
@@ -154,40 +127,34 @@ deleteArticle(userId); // ❌ Type error
 export const asUserId = (s: string): UserId => s as UserId;
 ```
 
-### `shared/constants.ts`
-
-```ts
-export const MAX_TITLE_LENGTH = 200;
-export const MAX_DESCRIPTION_LENGTH = 500;
-export const DEFAULT_PAGE_SIZE = 20;
-export const MAX_PAGE_SIZE = 50;
-export const FEED_CACHE_TTL_SEC = 60;
-```
-
 ## 3. `lib/` の構成
 
 ```
 lib/
 ├── auth.ts                ← Better Auth インスタンス
-├── env.ts                 ← 環境変数(t3-env)
+├── env.ts                 ← 環境変数(t3-env。サーバー専用)
+├── initialize-user-subscriptions.ts ← 初回ログイン時の購読初期化(ADR-0012)
+├── seo.ts / site-info.ts / site-url.ts ← メタデータ・サイト情報
 ├── rss/
 │   ├── fetcher.ts         ← HTTP取得
-│   ├── parser.ts          ← XML→ Zod
-│   ├── types.ts
-│   └── adapters/
-├── ogp/
-│   └── extractor.ts       ← OGPメタ取得
-├── ai/                    ← (将来)Vercel AI SDK ラッパー
-│   ├── client.ts
-│   └── prompts/
+│   ├── parser.ts          ← XML → ArticleInput
+│   ├── ingest.ts          ← 取得 → パース → sink で保存、companies の状態更新
+│   ├── build-feed-xml.ts  ← 公開 RSS の生成(ADR-0039)
+│   └── types.ts
+├── hatena/
+│   └── count-client.ts    ← はてブ数取得
+├── ai/
+│   └── llm-client.ts      ← Vercel AI SDK(Gemini)ラッパー
+├── tags/
+│   └── curated.ts         ← タグのキュレーション(ADR-0032)
 ├── observability/
-│   ├── sentry.ts
-│   ├── posthog.ts
+│   ├── posthog.ts         ← PostHog イベント(ADR-0043)
 │   └── logger.ts          ← console をラップ(構造化ログ)
 ├── cache/
-│   └── tags.ts            ← revalidateTag のキー定義
+│   └── tags.ts            ← cacheTag / revalidateTag のキー定義
 └── http/
-    └── fetcher.ts         ← retry/timeout 付き fetch
+    ├── fetcher.ts         ← retry/timeout 付き fetch
+    └── safe-url.ts        ← SSRF ガード
 ```
 
 ### `lib/env.ts`

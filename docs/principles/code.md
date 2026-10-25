@@ -111,4 +111,4 @@ const userId = session.user!.id;
 | `throw` | Result型 |
 | `console.log` 本番残し | observability/logger |
 | `useEffect` でfetch | RSC または TanStack Query |
-| ORM型を上層に漏らす | features/types.ts で再定義 |
+| ORM型を上層に漏らす | domain / application の型で再定義し、infrastructure の mapper で変換 |

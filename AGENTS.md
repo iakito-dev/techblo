@@ -79,7 +79,7 @@
 
 ### React/Next.js
 - デフォルトはServer Component(`'use client'` は本当に必要なときだけ)
-- 状態管理は最小化(Server Actions + useOptimistic / TanStack Query で大半カバー)
+- 状態管理は最小化(Server Actions + useOptimistic で大半カバー)
 - Server Action は `features/*/web/actions.ts` に集約(実装は application の usecase)
 - データ取得は `features/*/web/queries.ts`(composition root)から application usecase 経由、DB アクセスは infrastructure の Repository
 
@@ -110,7 +110,7 @@ db/schema/              # Drizzle schemas
 db/migrations/          # Drizzle migrations
 lib/                    # 横断的なinfrastructure(auth, rss, ogp, observability)
 trigger/                # Trigger.dev tasks
-shared/                 # features横断の純粋ロジック(Result型, pagination)
+shared/                 # features横断の純粋ロジック(Result型, error, カテゴリ定義, 日付)
 docs/                   # 設計ドキュメント
 ```
 

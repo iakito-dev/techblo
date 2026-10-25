@@ -14,7 +14,7 @@
 - [ ] **本番DBマイグレーション + シード + 初回取り込み**
   - Supabase 本番に `bun run db:migrate`(未適用マイグレーションを忘れない)
   - `bun run db:seed`(企業マスタ)→ 初回 ingest(空フィード回避)
-- [x] **独自ドメイン + URL 整合** — techblo.dev([memory: production-domain](/Users/akito/.claude/projects/-Users-akito-Projects-corpex/memory/production-domain.md))
+- [x] **独自ドメイン + URL 整合** — techblo.dev
   - 独自ドメイン取得(Vercel は Hobby でも独自ドメイン無料)
   - `NEXT_PUBLIC_APP_URL` / `metadataBase`(app/layout.tsx)/ Better Auth `baseURL` / `lib/http/fetcher.ts` の User-Agent URL を本番ドメインへ
 - [ ] **Google OAuth 本番化**

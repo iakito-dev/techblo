@@ -24,7 +24,7 @@ Better Auth + ソーシャル OAuth(Google / GitHub / Discord)でユーザー認
 ## データモデル
 
 Better Auth が管理するテーブル(`users`, `sessions`, `accounts`)を利用。
-独自に追加する場合は `db/schema/users.ts` に拡張カラム(`onboarded_at` 等)を定義。
+スキーマは `db/schema/auth.ts`。独自に追加する場合もここに拡張カラム(`onboarded_at` 等)を定義。
 
 ## 実装ファイル
 

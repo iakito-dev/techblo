@@ -229,7 +229,7 @@ evals/
 
 ### プロンプトのバージョニング
 
-- プロンプトは **ファイルとしてコード管理**(`lib/ai/prompts/summarize.ts`)
+- プロンプトは **ファイルとしてコード管理**(`features/ai-summary/infrastructure/llm-summary-generator.ts` / `llm-category-classifier.ts`)
 - 変更時は git diff でレビュー
 - 大きく変える時は ADR を書く
 

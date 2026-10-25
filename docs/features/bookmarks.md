@@ -84,7 +84,7 @@ PostHog のイベント(一覧と規約は [observability.md §4](../architectur
 実装済み(ADR-0013)。
 - `features/bookmarks`(4層): `setBookmark` / `listBookmarkedArticleIds`、`setBookmarkAction`(セッションは `lib/auth` 直取得)、`getBookmarkedArticleIds`。`onConflictDoNothing` で冪等。
 - 記事カードの🔖は横断 UI `components/article/article-actions.tsx`(client・楽観更新)。`features/feed` は保存系を import せず `ArticleCard` の `actions` スロットで受ける。
-- `/bookmarks`(`app/bookmarks/page.tsx`、要 `requireSession`)が `getBookmarkedArticleIds` → `features/feed` の `getArticlesByIds` で記事本体を取得し追加順に表示。空状態あり。
+- `/bookmarks`(`app/(app)/bookmarks/page.tsx`。ゲストは `GuestSavedArticles` で localStorage の保存を表示)が `getBookmarkedArticleIds` → `features/feed` の `getArticlesByIds` で記事本体を取得し追加順に表示。空状態あり。
 
 ## 一覧の絞り込み・並び替え
 

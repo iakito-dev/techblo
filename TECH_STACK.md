@@ -15,7 +15,7 @@
 | 領域 | 技術 |
 |---|---|
 | スタイリング | **Tailwind CSS v4** |
-| コンポーネント | **shadcn/ui**(Radix UI ベース) |
+| コンポーネント | **shadcn/ui**(Radix UI ベース、`components/ui/`)+ **HeroUI v3**(Dropdown / Modal / Avatar 等の既存箇所で当面共存。ADR-0020) |
 | アニメーション | **motion** (旧 Framer Motion) + **View Transitions API** |
 | Drawer/Modal | **vaul** |
 | Toast | **sonner** |
@@ -49,14 +49,14 @@
 ### 状態管理
 | 領域 | 技術 |
 |---|---|
-| クライアント状態 | **Zustand** |
-| サーバー状態 | **TanStack Query v5** |
+| サーバー状態 | **RSC + Server Actions + `useOptimistic`**(専用ライブラリは使っていない) |
+| クライアント状態 | URL(searchParams)+ React state。ゲスト保存は localStorage(ADR-0017) |
 
 ### 観測・運用
 | 領域 | 技術 |
 |---|---|
 | エラー監視 | **Sentry**(導入予定・未導入) |
-| プロダクト分析 | **PostHog**(アナリティクス + Feature Flag + セッション録画) |
+| プロダクト分析 | **PostHog**(イベント計測。autocapture・セッション録画はオフ / ADR-0043) |
 
 ### 開発基盤
 | 領域 | 技術 |
@@ -65,8 +65,7 @@
 | パッケージマネージャ | **Bun** |
 | Linter/Formatter | **Biome** |
 | 単体テスト | **Vitest** |
-| E2Eテスト | **Playwright** |
-| コンポーネント開発 | **Storybook 8** |
+| E2Eテスト | **Playwright**(依存のみ。テストは未作成) |
 
 ### 周辺
 | 領域 | 技術 |
@@ -132,7 +131,7 @@
    │ (RSS取得・AI要約)   │
    └─────────────────────┘
               ↓
-     [Sentry] [PostHog]
+  [Vercel Logs] [PostHog]
        監視     分析
 ```
 

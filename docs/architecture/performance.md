@@ -17,10 +17,9 @@
 ### PPR(Partial Prerendering)を最大限活用
 
 ```tsx
-// app/(public)/page.tsx
+// app/(app)/page.tsx(イメージ)
+// PPR は next.config.ts の cacheComponents: true で全ルートに効く(ルート単位の指定は不要)
 import { Suspense } from 'react';
-
-export const experimental_ppr = true;
 
 export default function Page() {
   return (

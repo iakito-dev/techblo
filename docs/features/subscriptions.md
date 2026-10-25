@@ -63,11 +63,11 @@ initializeSubscriptions({ userId }): Promise<Result<void, ...>>
 >   (`listSubscriptions` usecase + `mergeSettings`。状態行が無い企業はデフォルト ON)
 > - 更新: `features/subscriptions/web/actions.ts` の `toggleSubscriptionAction({ companyId, enabled })`
 >   (セッションは features 間 import 回避のため `lib/auth` から直接取得。ADR-0002)
-> - 画面: `app/settings/page.tsx`(`requireSession` 必須)+ `web/components/subscription-list|toggle`
+> - 画面: `app/(app)/settings/companies/page.tsx`+ `web/components/subscription-list|toggle`
 
 > **実装状況(フィード反映)**: 実装済み。
 > - `features/subscriptions/web/queries.ts` の `getEnabledCompanyIds(userId)` が購読 ON の企業 id を返す。
-> - `app/page.tsx` の `SubscribedFeed`(app 層の合成点)が `getSession` → `getEnabledCompanyIds` →
+> - `app/(app)/page.tsx` の `SubscribedFeed`(app 層の合成点)が `getSession` → `getEnabledCompanyIds` →
 >   `FeedGrid` の `companyIds` prop へ渡す。`features/feed` は subscriptions を import しない(ADR-0002)。
 > - 未ログインは全企業表示。全 OFF(空配列)は `getFeed` を呼ばず空状態 +`/settings` 導線
 >   (article repo は空配列を「フィルタなし=全件」と解釈するため `[]` を渡さない)。

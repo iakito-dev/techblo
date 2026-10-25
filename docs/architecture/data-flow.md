@@ -6,17 +6,15 @@
 
 ```
 1. Browser → GET /
-2. middleware.ts: session check → 認証なし、public扱い
-3. app/(public)/page.tsx (RSC) 起動
-4. features/feed/web/queries.ts: getFeed({ sort: 'latest', page: 1 })  // 'use cache'
+2. app/(app)/page.tsx (RSC) 起動(middleware は無い。ゲストもそのまま閲覧できる)
+3. features/feed/web/queries.ts: getFeed({ sort: 'latest', page: 1 })  // 'use cache'
    (composition root: repo 組立 → application usecase → domain Repository(Port))
    ├ キャッシュ hit?
    │   ├ Yes → cached data 即返却
    │   └ No  → application が count と list を並列実行(Drizzle)→ cacheLife('minutes') で保持
-5. RSC が JSX を生成
-6. PPR: shell(ヘッダー・見出し・並び替え)を静的に、記事カードをストリーミング
-7. Browser に段階的に表示
-8. Suspense fallback (skeleton) → 実データに置換
+4. RSC が JSX を生成
+5. PPR(cacheComponents): shell(ヘッダー・見出し・並び替え)を静的に、記事カードをストリーミング
+6. Suspense fallback (skeleton) → 実データに置換
 ```
 
 **キャッシュキー**: `getFeed` の引数 `(sort, page, limit)`('use cache' が自動導出。タグ `feed`)
@@ -25,18 +23,13 @@
 
 ```
 1. Browser → GET / with cookie
-2. middleware.ts: session 取得成功
-3. app/(public)/page.tsx (RSC) 起動
-4. features/auth/server.ts: getSession() → user取得
-5. features/feed/web/queries.ts: getFeed({ sort: 'latest' })
-   ├ unstable_cache はuser_idで分離... ❌ する場合キャッシュヒット率0
-   └ 代わりに「未ログイン用フィード」をキャッシュ → クライアントで個人化フィルタ
-6. features/subscriptions/web/queries.ts: getEnabledCompanyIds(userId)
-7. 取得結果をフィルタ(購読中の企業のみ)
-8. features/bookmarks/web/queries.ts: listBookmarkedIds(userId, articleIds)
-9. features/favorites/web/queries.ts: listFavoritedIds(userId, articleIds)
-10. RSC が「未読/ブックマーク済み/お気に入り済み」のフラグを記事に付与
-11. PPR streaming で表示
+2. app/(app)/page.tsx (RSC) 起動
+3. features/auth/server.ts: getSession() → user取得(React cache() でリクエスト内デデュープ)
+4. features/subscriptions/web/queries.ts: 購読中の企業 ID を取得(ユーザー別タグでキャッシュ / ADR-0016)
+5. features/feed/web/queries.ts: 購読企業で絞ったフィードを取得
+6. 保存状態(ブックマーク / お気に入り)・既読は各 feature の queries から ID 集合で取得し、
+   app / components 側で記事カードに合成する(ADR-0013)
+7. PPR streaming で表示
 ```
 
 **設計判断**: 個人化フィルタは「全データを取得した後にアプリ層でフィルタ」より「DBクエリでJOIN」が望ましい(N+1を避ける)。
@@ -46,14 +39,14 @@
 ```
 1. User: ブックマークボタンクリック (Client Component)
 2. Client: useOptimistic で即UIを更新 ("保存済み" 表示)
-3. <form action={addBookmark}> でServer Action呼出
-4. Server Action: features/bookmarks/web/actions.ts addBookmark(formData)
-   ├ requireSession() → user取得
-   ├ Zod parse(formData)(application/dto.ts)
-   ├ application: addBookmark usecase(認可は domain、Repository は引数注入)
-   │    └ infrastructure: BookmarkRepository.upsert → INSERT ... ON CONFLICT DO NOTHING
-   ├ revalidatePath('/bookmarks')
-   └ trackEvent('bookmark_added')
+3. Server Action 呼出(ゲストは Server Action を呼ばず localStorage に保存 / ADR-0017)
+4. Server Action: features/bookmarks/web/actions.ts setBookmarkAction(input)
+   ├ getSession() → user取得(未ログインならエラーを返す)
+   ├ application: usecase(Repository は引数注入)
+   │    └ infrastructure: BookmarkRepository → INSERT ... ON CONFLICT DO NOTHING
+   ├ updateTag(CACHE_TAGS.userBookmarks(userId))
+   └ revalidatePath('/bookmarks')
+   ※ 保存イベントはクライアントから PostHog に送る(ADR-0043)
 5. Client: Server Action のレスポンスを受信
    ├ ok → useOptimistic コミット完了
    └ err → useOptimistic ロールバック + sonner toast
@@ -65,25 +58,18 @@
 
 ```
 1. Trigger.dev cron: 毎時0分に発火
-2. jobs/fetch-all-feeds.ts (親ジョブ)
-   ├ companies WHERE enabled = true を取得
-   └ refreshCompanyFeed.batchTrigger(...)
-3. jobs/refresh-company-feed.ts (子ジョブ × 6社並列)
-   ├ retry: 3 で fetchRss(url)
-   │   └ lib/http/fetcher.ts: AbortSignal.timeout(10s) で安全に取得
-   ├ parseRss(xml) → Zod validate → ArticleInput[]
-   ├ for each article:
-   │    ├ OGP取得が必要なら lib/ogp/extractor.ts で補完
-   │    └ articles テーブルに upsert (by url unique)
-   ├ companies.last_fetched_at = now()
-   └ もし全件失敗なら companies.last_error に記録
-4. 親ジョブで Promise.allSettled の結果を集約
-5. revalidateTag(CACHE_TAGS.feed) → edge cache を即無効化
-6. Trigger.dev ダッシュボードに実行結果を記録
-7. 失敗があれば Sentry にエラー送信
+2. trigger/fetch-feed-articles.ts
+   ├ DrizzleArticleRepository と upsertArticles usecase を組み立てて sink にする
+   └ lib/rss/ingest.ts: ingestAllCompanies(sink)
+3. enabled な全企業を Promise.allSettled で並列に ingestCompany
+   ├ lib/rss/fetcher.ts → lib/http/fetcher.ts(timeout 15秒 + retry、SSRF ガード)
+   ├ lib/rss/parser.ts: RSS/Atom → Zod validate → ArticleInput[]
+   ├ sink: articles テーブルに upsert (by url unique)
+   └ 成功なら companies.last_fetched_at、失敗なら last_error / consecutive_failures を更新
+4. はてブ数を更新(updateArticleMetrics / ADR-0018)
+5. POST /api/revalidate → Next 側で revalidateTag(cron は Next ランタイム外のため)
+6. Trigger.dev ダッシュボードに実行結果を記録、失敗は logger.warn
 ```
-
-**並列度**: 最大20(Trigger.dev free tier上限)。6社なら問題なし。
 
 ## シナリオ5: 初回Google OAuth ログイン
 
@@ -94,27 +80,23 @@
 4. ユーザーがGoogleで認可
 5. Google → /api/auth/callback/google にリダイレクト
 6. Better Auth がuser・session・accountを作成
-7. middleware: signin成功イベントを検知 → initializeSubscriptions ジョブ起動
-   └ jobs/initialize-user-subscriptions.ts: 全企業を enabled=true で INSERT
+7. Better Auth の databaseHooks.user.create.after(lib/auth.ts)
+   └ lib/initialize-user-subscriptions.ts: 全有効企業を subscriptions に INSERT(ADR-0012)
 8. リダイレクト先(元のページ or /)へ302
 9. Browser: cookie付きでアクセス、ログイン状態
 ```
 
-**設計判断**: ユーザー初期化はjob化することで、認証フローを高速に保つ。
+**設計判断**: 初期化に失敗してもログインは止めず、error ログだけ残す。
 
 ## シナリオ6: 購読企業のON/OFF
 
 ```
 1. User: 設定画面で企業のチェックを外す
 2. Client: useOptimistic で即UI更新
-3. <form action={toggleSubscription}> 送信
-4. Server Action: toggleSubscription(formData)
-   ├ requireSession()
-   ├ Zod parse
-   ├ db.update(subscriptions)
-   │    .set({ enabled: newValue, updated_at: now() })
-   │    .where(and(eq(user_id, X), eq(company_id, Y)))
-   ├ revalidatePath('/')  ← トップ画面のフィードを再生成
+3. Server Action: features/subscriptions/web/actions.ts toggleSubscriptionAction(input)
+   ├ getSession()(未ログインならエラー。ゲストは localStorage)
+   ├ application: usecase → infrastructure: SubscriptionRepository で更新
+   ├ updateTag(CACHE_TAGS.userSubscriptions(userId))  ← フィードの購読絞り込みも追従
    └ revalidatePath('/settings')
 5. Client: 成功なら確定、失敗ならロールバック
 ```
@@ -163,7 +145,7 @@ features/X/infrastructure: Repository が try/catch で Result.err にラップ
    ↓
 features/X/application: usecase が Result を伝播(throw しない)
    ↓
-features/X/web/{queries,actions}.ts: result.ok チェック、err なら logger.error + Sentry送信
+features/X/web/{queries,actions}.ts: result.ok チェック、err なら logger.error
    ↓
 return err({ kind: 'INTERNAL' })
    ↓

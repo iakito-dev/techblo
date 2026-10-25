@@ -74,9 +74,9 @@ images: {
 ## ステップ6: RSS取得ジョブを手動実行
 
 ```bash
-# Trigger.dev のダッシュボードから fetch-company-feed を手動実行
-# または開発環境で
-bun run jobs/refresh-company-feed.ts --company-id={new_company_id}
+# Trigger.dev のダッシュボードから fetch-feed-articles を手動実行
+# または開発環境で(enabled な全企業を取り込む)
+bun run scripts/ingest.ts
 ```
 
 ## ステップ7: 表示確認

@@ -47,7 +47,7 @@ Infrastructure   ← External (DB, Auth, RSS, AI, Observability)
 
 - すべての Server Action は実行時間と成否を記録
 - 外部呼び出しは Span を切る
-- エラーは throw ではなく Result で返し、Sentry に明示送信
+- エラーは throw ではなく Result で返し、logger に context 付きで残す(Sentry は未導入)
 - ユーザー行動は PostHog にイベントとして送る
 
 ## 7. ベンダーロックを避ける

@@ -13,7 +13,7 @@ LLM キー無しで進められる骨格を実装済み。`typecheck` / `depcrui
 - **domain**: `article-summary.ts`(エンティティ + `parseBullets` / `parseTags` の Zod 検証。`parseBullets` は「要点をまとめた要約です」等の中身のない定型行を検証前に除去し、全行該当なら failed=非表示にする)/ `article-summary-repository.ts` / `summary-generator.ts`(LLM Driven Port)/ `article-content-fetcher.ts`(本文取得 Port)
 - **application**: `dto.ts` / `get-summary.ts` / `generate-summary.ts`(本文取得→生成→検証→upsert のオーケストレーション)+ `generate-summary.test.ts`(5ケース)
 - **infrastructure**: `drizzle-article-summary-repository.ts`(upsert/findByArticleId/listPendingArticleIds)/ `llm-summary-generator.ts`(プロンプト整形 + lib/ai へ委譲。**二段構成 = 概要(overview, 1文)+ 補足の箇条書き(bullets) + タグ**。AI要約のベストプラクティス準拠: 本文のみ根拠で推測しない・第三者が客観的に解説・要約自体や一般論は書かない。概要は「です/ます」調の自然文で記事の性質に応じ結びを変える(紹介/解説/経験談/振り返り等。「〜内容です」固定や中身のない紹介は避ける)。箇条書きは概要を補う重複しない要点を**見出し(体言止め)+ 説明(です/ます調の具体的な1〜2文)**で。名詞の積み重ねを避け動詞を使い、文末を揃えない。文体・体裁は few-shot 出力例2件(技術の振り返り/イベント報告)で固定。タグは横断的な一般トピックを正式表記で0〜5個、表記ゆれ/上位下位重複を統一し、自社独自プロダクト名・イベント名・年号・分類一般語は使わない)/ `html-content-fetcher.ts`(素朴な本文抽出)
-- **web**: `queries.ts`(`getSummaryByArticleId`, 'use cache: remote' + 記事タグ。ADR-0042)/ `components/summary-view.tsx`(**概要文 + 箇条書き + 関連タグ + AI生成ラベル**。デザインは**案A=ティール地コールアウト内に概要リード + チェックマーク箇条書き**で確定)
+- **web**: `queries.ts`(`getSummaryByArticleId`, 'use cache: remote' + 記事タグ。ADR-0042)/ `web/components/summary-view.tsx`(**概要文 + 箇条書き + 関連タグ + AI生成ラベル**。デザインは**案A=ティール地コールアウト内に概要リード + チェックマーク箇条書き**で確定)
 - **lib/ai**: `llm-client.ts`(ベンダー非依存 LLM クライアントのインターフェース + **未設定スタブ**。キー入手後にプロバイダ別アダプタを追加する seam)
 - **feed 連携**: `article-dialog.tsx` に `summary?: ReactNode` スロットを追加(feed は ai-summary を import しない・構造のみ)
 

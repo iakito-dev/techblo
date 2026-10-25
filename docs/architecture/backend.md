@@ -193,12 +193,14 @@ Server Action で表現できないものを Route Handler に置く:
 | パス | 用途 |
 |---|---|
 | `app/api/auth/[...all]/route.ts` | Better Auth ハンドラー |
-| `app/api/og/[id]/route.ts` | OGP プレースホルダー画像生成(`ImageResponse`) |
-| `app/api/trigger/route.ts` | Trigger.dev webhook |
+| `app/api/og/[id]/route.tsx` | 記事の共有用 OG 画像生成(`ImageResponse` / ADR-0029) |
+| `app/api/revalidate/route.ts` | cron からのキャッシュ無効化(`REVALIDATE_SECRET` で保護) |
 | `app/api/healthz/route.ts` | ヘルスチェック |
+| `app/api/zenn-icon/route.ts` | Zenn のアイコン取得 |
+| `app/feed.xml/route.ts`, `app/companies/[slug]/feed.xml/route.ts` | 公開 RSS(ADR-0039) |
 
 ```ts
-// app/api/og/[id]/route.ts
+// app/api/og/[id]/route.tsx(イメージ)
 import { ImageResponse } from 'next/og';
 
 export async function GET(req: Request, { params }: { params: { id: string } }) {
@@ -238,88 +240,52 @@ export async function canDeleteBookmark(
 
 ## 7. バックグラウンドジョブ(Trigger.dev v4)
 
-```
-jobs/
-├── trigger.config.ts                  ← Trigger.dev 設定
-├── fetch-all-feeds.ts                 ← 親ジョブ(毎時cron)
-├── refresh-company-feed.ts            ← 子ジョブ(企業単位)
-└── initialize-user-subscriptions.ts   ← 新規ユーザー初期化
-```
+タスクは `trigger/` に置き、設定はルートの `trigger.config.ts`。各タスクはバッチの composition root で、
+feature の Repository / usecase を組み立てて呼ぶ。
 
-### 親→子のfan-out
+| タスク | cron | 内容 |
+|---|---|---|
+| `trigger/fetch-feed-articles.ts` | 毎時0分 | 全企業の RSS 取込 → はてブ数更新 → `/api/revalidate` |
+| `trigger/generate-article-summaries.ts` | 毎時10分 | 未要約記事の AI 要約生成(ADR-0026) |
+| `trigger/fetch-user-feeds.ts` | 毎時15分 | ユーザー登録 RSS の取込(ADR-0014) |
+| `trigger/classify-article-categories.ts` | 毎時40分 | 記事カテゴリの AI 分類(ADR-0034) |
 
 ```ts
-// jobs/fetch-all-feeds.ts
-import { schedules } from '@trigger.dev/sdk';
-import { refreshCompanyFeed } from './refresh-company-feed';
-
-export const fetchAllFeeds = schedules.task({
-  id: 'fetch-all-feeds',
-  cron: '0 * * * *', // 毎時0分
+// trigger/fetch-feed-articles.ts(抜粋)
+export const fetchFeedArticles = schedules.task({
+  id: 'fetch-feed-articles',
+  cron: '0 * * * *',
+  maxDuration: 300,
   run: async () => {
-    const companies = await db.select().from(companies).where(eq(companies.enabled, true));
-
-    await refreshCompanyFeed.batchTrigger(
-      companies.map((c) => ({ payload: { companyId: c.id } }))
-    );
-  },
-});
-```
-
-```ts
-// jobs/refresh-company-feed.ts
-import { task, retry } from '@trigger.dev/sdk';
-import { fetchRss } from '@/lib/rss/fetcher';
-import { parseRss } from '@/lib/rss/parser';
-
-export const refreshCompanyFeed = task({
-  id: 'refresh-company-feed',
-  retry: { maxAttempts: 3 },
-  maxDuration: 60,
-  run: async ({ companyId }: { companyId: string }) => {
-    const company = await db.query.companies.findFirst({ where: eq(companies.id, companyId) });
-    const xml = await fetchRss(company.rss_url);
-    const articles = parseRss(xml);
-    await upsertArticles(companyId, articles);
-    await db.update(companies).set({ last_fetched_at: new Date() }).where(eq(companies.id, companyId));
+    const repo = new DrizzleArticleRepository(db);
+    const sink = upsertArticles({ articles: repo });
+    const results = await ingestAllCompanies(sink);
+    // ...
   },
 });
 ```
 
 ### ジョブの規約
 
-- 並列度は最大20(Trigger.dev free tier 上限)
-- `maxAttempts: 3` で再試行
-- `maxDuration: 60` でタイムアウト保護
-- 失敗は `companies.last_error` に記録
-- 1企業の失敗が全体を止めない(`Promise.allSettled` 相当)
+- 企業ごとの取込は `lib/rss/ingest.ts` が `Promise.allSettled` で並列実行し、1社の失敗が全体を止めない
+- HTTP の timeout / retry は `lib/http/fetcher.ts` の `safeFetch` に任せる
+- 失敗は companies(`last_error_at` / `consecutive_failures`)に記録し、次の cron で再試行
+- cron は Next ランタイム外で動くので、`lib/env`(t3-env)ではなく必要な `process.env` だけを読む
+- LLM を呼ぶタスクは RSS 取込と別 cron にして、LLM 側の失敗や遅延が新着取込を止めないようにする
 
 ## 8. RSS パイプライン
 
 ```
-[fetcher]   HTTP取得(retry, timeout, User-Agent)
+[lib/rss/fetcher.ts]  HTTP取得(lib/http の safeFetch: timeout 15秒, retry, SSRF ガード)
     ↓
-[parser]    XML→ Zod validate → ArticleInput[]
+[lib/rss/parser.ts]   RSS / Atom → Zod validate → ArticleInput[](フィードごとのタイムゾーン補正 / ADR-0025)
     ↓
-[normalizer] 企業ごとの差異を吸収(features/{company}/adapter.ts)
+[lib/rss/ingest.ts]   sink(呼び出し元から注入)で保存し、companies の成功/失敗を記録
     ↓
-[ogp-extractor] descriptionに画像URLがなければHTMLから抽出
-    ↓
-[upserter]  db.insert(articles).onConflictDoUpdate(by url)
+[features/feed/application/upsert-articles] → DrizzleArticleRepository(url で upsert)
 ```
 
-### lib/rss/
-
-```
-lib/rss/
-├── fetcher.ts       ← HTTP取得(timeout, retry, User-Agent)
-├── parser.ts        ← XML→ Zod
-├── adapters/        ← 企業ごとの正規化
-│   ├── lycorp.ts
-│   ├── mercari.ts
-│   └── ...
-└── types.ts         ← ArticleInput schema
-```
+企業ごとの adapter は持たず、差異はパーサの汎用処理とフィード単位の設定(`companies.feed_timezone` 等)で吸収する。
 
 ### Zod でパース時に検証
 
@@ -327,35 +293,19 @@ lib/rss/
 // lib/rss/types.ts
 export const articleInputSchema = z.object({
   url: z.string().url(),
-  title: z.string().min(1),
-  description: z.string().optional(),
-  published_at: z.coerce.date(),
-  og_image: z.string().url().optional(),
+  title: z.string().min(1).max(500),
+  description: z.string().max(ARTICLE_DESCRIPTION_MAX_LENGTH).nullable(),
+  ogImage: z.string().url().nullable(),
+  author: z.string().max(200).nullable(),
+  publishedAt: z.date(),
 });
 ```
 
-## 9. 認証ミドルウェア
+## 9. 認証ガード
 
-```ts
-// middleware.ts
-import { NextResponse } from 'next/server';
-import { auth } from '@/lib/auth';
-
-export async function middleware(req: NextRequest) {
-  const session = await auth.api.getSession({ headers: req.headers });
-
-  // 認証必須ルートのガード
-  if (req.nextUrl.pathname.startsWith('/(auth)') && !session) {
-    return NextResponse.redirect(new URL('/login', req.url));
-  }
-
-  return NextResponse.next();
-}
-
-export const config = {
-  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
-};
-```
+middleware(`middleware.ts` / `proxy.ts`)は置いていない。アプリ画面はゲストでも開け、保存などはゲストなら
+localStorage に持ってログイン時にマージする(ADR-0017)。認証が要る処理は RSC / Server Action の中で
+`features/auth/server.ts` の `getSession()` を呼んで判定する。
 
 ## 10. レート制限
 
@@ -407,7 +357,7 @@ export const env = createEnv({
 
 - 開始/終了ログ
 - 重要な分岐の理由(why)
-- 失敗時のSentry送信(context付き)
+- 失敗時は `logger.error` に context 付きで出す(Sentry は未導入)
 - ユーザー行動の PostHog イベント
 
 詳細は [observability.md](./observability.md) を参照。

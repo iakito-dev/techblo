@@ -1,13 +1,15 @@
 # Observability
 
-「何が起きているか」を把握する仕組み。Sentry / PostHog / Vercel Logs / Trigger.dev を組み合わせる。
+「何が起きているか」を把握する仕組み。PostHog / Vercel Logs / Trigger.dev を組み合わせる。
+
+> **現状**: Sentry は未導入。§3 と §9 の Sentry 部分は導入時の方針として残している。サーバーのエラーは `lib/observability/logger` から Vercel Logs に出る。
 
 ## 1. 三本柱
 
 | 種別 | ツール | 目的 |
 |---|---|---|
 | ログ(Logs) | Vercel Logs / console | 開発・デバッグ |
-| エラー(Errors) | Sentry | 異常検知・原因究明 |
+| エラー(Errors) | logger → Vercel Logs(Sentry は未導入) | 異常検知・原因究明 |
 | メトリクス・行動(Events) | PostHog | ユーザー行動分析、Feature Flag |
 | ジョブ実行 | Trigger.dev Dashboard | バッチの成否・履歴 |
 
@@ -21,14 +23,14 @@ logger.warn('rss fetch slow', { companyId, durationMs });
 logger.error('db query failed', { query, error });
 ```
 
-各ログに以下が必ず含まれる(自動付与):
+本番では各ログに以下が自動で付く(開発時は人間可読の1行):
 - `ts`: timestamp ISO 8601
 - `level`: info / warn / error
 - `msg`: メッセージ
-- `requestId`: middleware で生成、cookie/header 経由で伝播
-- `route`: リクエストルート(該当する場合)
 
-## 3. Sentry
+`requestId` などの相関 ID はまだ付けていない。必要な情報は呼び出し側で context に渡す。
+
+## 3. Sentry(未導入・導入時の方針)
 
 ### 設定
 
@@ -196,7 +198,7 @@ const db = drizzle(pool, {
 
 ## 9. アラート
 
-### Sentry のアラート
+### Sentry のアラート(導入後)
 
 - 1時間あたりエラー10件超 → Discord通知(個人向け)
 - 新規エラー(初出) → 通知

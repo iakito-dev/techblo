@@ -44,7 +44,8 @@
                               ↓                   ↓
                   ┌───────────────────┐   ┌───────────────┐
                   │ Supabase Postgres │   │ External APIs │
-                  │ (東京 / pgbouncer)│   │ (RSS, OGP)    │
+                  │ (東京 / pgbouncer)│   │ (RSS, はてブ, │
+                  │                   │   │  Gemini)      │
                   └───────────────────┘   └───────────────┘
                               ↑
                   ┌───────────────────────┐
@@ -53,7 +54,7 @@
                   └───────────────────────┘
                               ↓
                   ┌───────────────────────┐
-                  │ Sentry + PostHog      │
+                  │ Vercel Logs + PostHog │
                   │ (Observability)       │
                   └───────────────────────┘
 ```
@@ -63,40 +64,33 @@
 ### 1. 公開ページ閲覧(未ログイン)
 
 ```
-Browser ─GET /─→ Vercel Edge
+Browser ─GET /─→ Vercel
                      ↓
-            [middleware.ts] (session check, ログインなしならpublic扱い)
+            [app/(app)/page.tsx] (RSC。middleware は無く、ゲストもそのまま閲覧できる)
                      ↓
-            [app/(public)/page.tsx] (RSC)
-                     ↓
-            [features/feed/web/queries.ts: getFeed({ sort: 'latest' })] ← composition root
+            [features/feed/web/queries.ts: getFeed / getFeedSections] ← composition root
                      ↓ (application usecase → domain Repository(Port))
-            [getFeed は 'use cache'(tag: feed)。miss 時のみ Drizzle Repo が count/list を並列実行]
+            ['use cache' + cacheTag。miss 時のみ Drizzle Repo が DB を引く]
                      ↓
             [Supabase Postgres]
                      ↓
             HTML stream (PPR: shell→static, articles→dynamic)
-                     ↓ ↓ ↓
-                  Browser に段階表示
 ```
 
-### 2. 認証必要ページ閲覧(ログイン済み)
+### 2. 保存一覧の閲覧(ログイン済み)
 
 ```
-Browser ─GET /bookmarks─→ Vercel Edge
+Browser ─GET /bookmarks─→ Vercel
                               ↓
-                  [middleware.ts] session 検証
+                  [app/(app)/bookmarks/page.tsx] (RSC)
                               ↓
-                  未認証なら → 302 /login
-                  認証済みなら → 続行
+                  [features/auth/server.ts: getSession()]
+                    ゲストなら localStorage の保存をクライアントで表示(ADR-0017)
                               ↓
-                  [app/(auth)/bookmarks/page.tsx] (RSC)
-                              ↓
-                  [features/auth/server.ts: requireSession()]
-                              ↓
-                  [features/bookmarks/web/queries.ts: listBookmarks(userId)] ← composition root
+                  [features/bookmarks/web/queries.ts] ← composition root
+                    ('use cache' + ユーザー別タグ / ADR-0016)
                               ↓ (application usecase → infrastructure Repository)
-                  [Supabase Postgres, no cache (個人化データ)]
+                  [Supabase Postgres]
                               ↓
                   HTML stream
 ```
@@ -104,20 +98,15 @@ Browser ─GET /bookmarks─→ Vercel Edge
 ### 3. ミューテーション(Server Action)
 
 ```
-Client Form ─FormData→ [Server Action: features/bookmarks/web/actions.ts createBookmark]
+Client ─→ [Server Action: features/bookmarks/web/actions.ts setBookmarkAction]
                               ↓
-                  Zod validate(input)
+                  getSession()(未ログインならエラーを返す)
                               ↓
-                  features/auth/server.ts: requireSession()
+                  features/bookmarks/application: usecase(Repository は引数注入)
                               ↓
-                  features/bookmarks/application: addBookmark usecase
-                    (認可ルール・ビジネスルールは domain、Repository は引数注入)
+                  features/bookmarks/infrastructure: BookmarkRepository
                               ↓
-                  features/bookmarks/infrastructure: BookmarkRepository.insert(...)
-                              ↓
-                  revalidatePath('/bookmarks')
-                              ↓
-                  Result<void, BookmarkError> を返却
+                  updateTag(ユーザー別タグ) + revalidatePath('/bookmarks')
                               ↓
             Client で useOptimistic がコミット
             または失敗時にロールバック
@@ -126,30 +115,24 @@ Client Form ─FormData→ [Server Action: features/bookmarks/web/actions.ts cre
 ### 4. バックグラウンドジョブ(RSS取得)
 
 ```
-Cron(毎時) → [Trigger.dev v4]
+Cron(毎時0分) → [Trigger.dev v4]
                   ↓
-        [jobs/fetch-all-feeds.ts]
+        [trigger/fetch-feed-articles.ts]
                   ↓
-        SELECT companies WHERE enabled = true
+        [lib/rss/ingest.ts: ingestAllCompanies(sink)]
                   ↓
-        for each company in parallel (max 20):
-            [jobs/refresh-company-feed.ts]
-                  ↓
-            lib/rss/fetcher.ts (timeout 10s, retry 3)
+        enabled な全企業を Promise.allSettled で並列取得:
+            lib/rss/fetcher.ts (timeout 15s + retry)
                   ↓
             lib/rss/parser.ts (Zod validate)
                   ↓
-            lib/ogp/extractor.ts (description補完)
+            sink = features/feed/application/upsert-articles → articles に upsert
                   ↓
-            db.insert(articles).onConflictDoUpdate(...)
+            companies の last_fetched_at / 失敗状態を更新
                   ↓
-            UPDATE companies SET last_fetched_at = NOW()
+        はてブ数更新 → POST /api/revalidate(Next 側で revalidateTag)
                   ↓
-        Promise.allSettled で全社結果収集
-                  ↓
-        revalidateTag('feed') ← edge cache無効化
-                  ↓
-        Sentry + Trigger.dev dashboard で記録
+        logger + Trigger.dev dashboard で記録
 ```
 
 ## 依存方向(厳格)
@@ -189,29 +172,30 @@ Cron(毎時) → [Trigger.dev v4]
 ✗ db/ → features/*
 ✗ lib/ → features/*
 ✗ components/ui/ → features/*
-✗ app/ → db/, lib/ 直接 (必ず features/web/ 経由)
+✗ app/ → db/ 直接 (データは必ず features/*/web/ 経由)
 ```
 
 ## レンダリングモード
 
 | ルート | モード | キャッシュ |
 |---|---|---|
-| `/` | PPR (shell静的 + 記事動的) | 公開フィード60s edge cache |
-| `/bookmarks` | Dynamic SSR | キャッシュなし |
-| `/favorites` | Dynamic SSR | キャッシュなし |
-| `/settings` | Dynamic SSR | キャッシュなし |
-| `/login` | Static | ビルド時生成 |
+| `/` | PPR (shell静的 + 記事動的) | `'use cache'` + `cacheTag`(取込 cron で無効化) |
+| `/a/[id]` | PPR | 記事データを `'use cache: remote'`(ADR-0042) |
+| `/bookmarks` `/favorites` `/history` | PPR | ユーザー別タグでキャッシュ(ADR-0016) |
+| `/settings/*` | PPR | ユーザー別タグでキャッシュ |
+| `/companies/*` `/tags` | PPR | `'use cache'` |
+| `/lp` | Static | ビルド時生成 |
+| `/login` | PPR | 静的シェル + Suspense 内でセッション判定 |
 | `/api/og/[id]` | Dynamic | 1日 |
-| `/api/auth/*` | Dynamic | キャッシュなし |
-| `/api/trigger` | Dynamic | キャッシュなし |
+| `/api/auth/*` `/api/revalidate` | Dynamic | キャッシュなし |
 
 ## 環境別の差分
 
 | 環境 | DB | Auth | ジョブ | 観測 |
 |---|---|---|---|---|
 | Local | Supabase(個人開発用プロジェクト) | Better Auth dev | Trigger.dev devモード | Console only |
-| Preview | Supabase(テスト用 DB / `TEST_DATABASE_URL`) | Better Auth dev | Trigger.dev staging | Sentry preview |
-| Production | Supabase 本番(東京) | Better Auth prod | Trigger.dev production | Sentry + PostHog |
+| Preview | Supabase(テスト用 DB / `TEST_DATABASE_URL`) | Better Auth dev | Trigger.dev staging | Vercel Logs(PostHog キー無し = 送信しない) |
+| Production | Supabase 本番(東京) | Better Auth prod | Trigger.dev production | Vercel Logs + PostHog |
 
 > ※ Neon 時代の per-PR 自動 DB branching は廃止。テスト用は別 DB(`TEST_DATABASE_URL`)を用意する(ADR-0033)。
 

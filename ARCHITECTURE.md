@@ -1,16 +1,18 @@
 # Techblo アーキテクチャ
 
+このファイルは全体像の要約。詳細は `docs/architecture/*.md`、判断の経緯は `docs/adr/*.md` を参照。
+
 ## 1. 設計原則
 
 | 原則 | 内容 |
 |---|---|
-| **Server-first** | 静的化可能なものはRSC + PPR、動的なものは Server Actions。クライアント JS は最小化 |
-| **Feature-sliced** | ディレクトリは技術別ではなく **機能別**(feed / bookmarks / favorites / subscriptions / auth) |
-| **依存方向の固定** | UI → Application → Domain → Infrastructure(逆流禁止) |
-| **境界はpureな型** | 各レイヤー間は型(Zodスキーマ)で繋ぐ。ORMオブジェクトを上層に漏らさない |
-| **失敗を前提に設計** | RSS取得失敗・OGP取得失敗を「正常系」として扱う。リトライ可能な単位で分割 |
-| **観測可能性** | すべての操作にtrace、外部呼出はSpan、エラーはSentryへ |
-| **キャッシュは積極的に** | 公開フィードはedge cache、個人化データはDB単位でキャッシュ |
+| **Server-first** | 既定は RSC。動的な書き込みは Server Actions。クライアント JS は最小化(ADR-0003) |
+| **Feature-sliced** | ディレクトリは技術別ではなく **機能別**(feed / bookmarks / favorites / subscriptions / reads / user-feeds / ai-summary / health / auth) |
+| **依存方向の固定** | feature 内は `web / infrastructure → application → domain`(逆流禁止、ADR-0010) |
+| **境界はpureな型** | ORM の型を上層に漏らさず、domain / application の型に変換して渡す |
+| **失敗を前提に設計** | RSS 取得失敗を「正常系」として扱う。1社の失敗が全体を止めない |
+| **観測可能性** | サーバーは `lib/observability/logger` の構造化ログ、ユーザー行動は PostHog(ADR-0043)。Sentry は未導入 |
+| **キャッシュは積極的に** | `'use cache'` + `cacheTag` で共有データをキャッシュし、取込・保存時に `revalidateTag` で無効化(ADR-0042) |
 
 ---
 
@@ -18,48 +20,45 @@
 
 ```
 ┌────────────────────────────────────────────────────────────────┐
-│  Presentation Layer (React Server/Client Components)            │
+│  Presentation(React Server/Client Components)                 │
 │  - app/**/page.tsx, layout.tsx                                  │
-│  - components/                                                  │
+│  - components/(ui・layout・記事の横断合成 UI)                  │
 └────────────────────────────────────────────────────────────────┘
                           ↓ depends on
 ┌────────────────────────────────────────────────────────────────┐
-│  Web Layer (Driving Adapter / RSC・Server Actions)             │
-│  - features/{feed,bookmarks,...}/web/queries.ts (composition)   │
-│  - features/{feed,bookmarks,...}/web/actions.ts (Server Action) │
-│  - features/{...}/web/view-models, web/components               │
+│  Web(Driving Adapter / RSC・Server Actions)                   │
+│  - features/*/web/queries.ts(composition root)                │
+│  - features/*/web/actions.ts(Server Action)                   │
+│  - features/*/web/view-models, web/components                   │
 └────────────────────────────────────────────────────────────────┘
                           ↓ depends on
 ┌────────────────────────────────────────────────────────────────┐
-│  Application Layer (use-cases)                                  │
-│  - features/{...}/application/*.ts (ユースケース、依存は引数注入)│
-│  - features/{...}/application/dto.ts (Command/Query/表示DTO)    │
+│  Application(use-cases)                                       │
+│  - features/*/application/*.ts(ユースケース、依存は引数注入) │
+│  - features/*/application/dto.ts(Command/Query/表示DTO)       │
 └────────────────────────────────────────────────────────────────┘
                           ↓ depends on
 ┌────────────────────────────────────────────────────────────────┐
-│  Domain Layer (型・ビジネスルール)                             │
-│  - features/{...}/domain/*.ts (entity / value object)           │
-│  - features/{...}/domain (domain service, Repository interface) │
+│  Domain(型・ビジネスルール)                                   │
+│  - features/*/domain/*.ts(entity / VO / domain service /       │
+│    Repository interface)                                        │
 └────────────────────────────────────────────────────────────────┘
-                          ↓ depends on
+                          ↑ implements
 ┌────────────────────────────────────────────────────────────────┐
-│  Infrastructure Layer (外部依存の実装)                          │
-│  - features/{...}/infrastructure/*.ts (Drizzle Repo 実装・mapper)│
-│  - db/ (Drizzle schema, client)                                 │
-│  - auth/ (Better Auth)                                          │
-│  - rss/ (parser, fetcher)                                       │
-│  - jobs/ (Trigger.dev tasks)                                    │
-│  - lib/ (ai, ogp, observability)                                │
+│  Infrastructure(外部依存の実装)                               │
+│  - features/*/infrastructure/*.ts(Drizzle Repository・mapper) │
+│  - db/(Drizzle schema, client)                                 │
+│  - lib/(auth, rss, http, hatena, ai, cache, observability)     │
+│  - trigger/(Trigger.dev タスク = バッチの composition root)   │
 └────────────────────────────────────────────────────────────────┘
 ```
 
 **逆流禁止ルール**(ADR-0010、`bun run depcruise` で自動強制)
 - 依存方向は内向きのみ: web / infrastructure → application → domain
 - Domain は Infrastructure を import しない(Repository は domain の Driven Port、実装は infrastructure)
-- Presentation(web)は直接 Infrastructure を呼ばず application 経由(組立は web/queries.ts の composition root)
-- `db/` を import してよいのは infrastructure 層のみ
-- features/A は features/B を import しない(共有は shared/ へ)
-- lib は features を import しない(逆流禁止)
+- `db/` を import してよいのは infrastructure 層のみ(`app/` からの直接 import は禁止)
+- features/A は features/B を import しない(共有は `shared/` へ)
+- lib は features を import しない(保存処理は sink 注入で受け取る)
 
 ---
 
@@ -68,91 +67,77 @@
 ```
 techblo/
 ├── app/                              # Next.js App Router
-│   ├── (public)/                     # 認証不要画面
+│   ├── (app)/                        # サイドバー付きのアプリ画面(ゲストも閲覧可)
 │   │   ├── page.tsx                  # トップ(フィード)
+│   │   ├── a/[id]/page.tsx           # 記事ページ(ADR-0036)
+│   │   ├── bookmarks/ favorites/ history/
+│   │   ├── settings/                 # 設定(appearance / companies / feeds / support)
 │   │   └── layout.tsx
-│   ├── (auth)/                       # 認証必要画面
-│   │   ├── bookmarks/page.tsx
-│   │   ├── favorites/page.tsx
-│   │   ├── settings/page.tsx
-│   │   └── layout.tsx                # auth guard
+│   ├── companies/                    # 企業一覧・企業ページ・企業別 RSS(ADR-0030 / 0039)
+│   ├── tags/                         # タグ一覧(ADR-0040)
+│   ├── lp/                           # ランディングページ
+│   ├── login/ signup/ about/ privacy/ terms/
+│   ├── feed.xml/                     # 公開 RSS(ADR-0039)
+│   ├── _feed/                        # 公開 RSS の共通処理
 │   ├── api/
 │   │   ├── auth/[...all]/route.ts    # Better Auth handler
-│   │   ├── og/[id]/route.ts          # OGPプレースホルダー画像生成
-│   │   └── trigger/route.ts          # Trigger.dev webhook
-│   ├── globals.css
+│   │   ├── og/[id]/route.tsx         # 共有用 OG 画像(ADR-0029)
+│   │   ├── revalidate/route.ts       # cron からのキャッシュ無効化(シークレット保護)
+│   │   ├── healthz/route.ts          # ヘルスチェック
+│   │   └── zenn-icon/route.ts
+│   ├── robots.ts / sitemap.ts / manifest.ts
 │   └── layout.tsx
 │
-├── features/                         # 機能別モジュール(各 feature を4層に分割: ADR-0010)
-│   ├── feed/
-│   │   ├── domain/                   # 純粋TS(entity/VO/domain service/Repository interface)
-│   │   ├── application/              # ユースケース(依存は引数注入)+ dto.ts
-│   │   ├── infrastructure/           # Drizzle 実装(Repository)・mapper(db を import可)
-│   │   └── web/                      # queries.ts(composition root)/actions.ts/view-models/components
-│   ├── bookmarks/
-│   │   ├── domain/
-│   │   ├── application/
-│   │   ├── infrastructure/
-│   │   └── web/                      # web/queries.ts, web/actions.ts(add/remove/list), components
-│   ├── favorites/                    # bookmarks と同形
-│   ├── subscriptions/                # 購読企業ON/OFF
-│   ├── health/                       # ヘルスチェック(GET /api/healthz)
-│   └── auth/
-│       ├── components/               # LoginButton, AuthGate
-│       ├── server.ts                 # getSession等のヘルパー
-│       └── client.ts                 # useSession等
+├── features/                         # 機能別モジュール(4層: ADR-0010)
+│   ├── feed/                         # 記事一覧・検索・タグ・カテゴリ・人気順・関連記事
+│   ├── bookmarks/ favorites/         # 保存(ADR-0006)
+│   ├── subscriptions/                # 購読企業 ON/OFF
+│   ├── reads/                        # 既読・閲覧履歴(ADR-0021 / 0041)
+│   ├── user-feeds/                   # ユーザー登録 RSS(ADR-0014)
+│   ├── ai-summary/                   # AI 要約・カテゴリ分類(ADR-0026 / 0034)
+│   ├── health/                       # GET /api/healthz
+│   └── auth/                         # Better Auth の薄いラッパー(server.ts / client.ts / components)
+│     # 各 feature: domain/ application/ infrastructure/ web/
 │
-├── components/                       # 機能横断のUI primitives
-│   ├── ui/                           # shadcn/ui (Button, Card, ...)
-│   └── layout/                       # Header, MobileNav, Sidebar
+├── components/
+│   ├── ui/                           # shadcn/ui primitives(Radix ベース)
+│   ├── layout/                       # Header, Sidebar, MobileNav, BottomChrome
+│   ├── article/                      # 記事に対する横断合成(ADR-0013)
+│   ├── seo/ legal/
 │
-├── db/                               # Infrastructure: DB
-│   ├── schema/                       # Drizzle schemas
-│   │   ├── companies.ts
-│   │   ├── articles.ts
-│   │   ├── users.ts
-│   │   ├── bookmarks.ts
-│   │   ├── favorites.ts
-│   │   └── subscriptions.ts
-│   ├── client.ts                     # drizzle インスタンス
+├── db/
+│   ├── schema/                       # Drizzle schemas(companies, articles, auth, bookmarks, ...)
+│   ├── client.ts                     # drizzle インスタンス(postgres-js / ADR-0033)
 │   └── migrations/
 │
-├── lib/                              # Infrastructure: 横断
+├── lib/                              # 横断 infrastructure
 │   ├── auth.ts                       # Better Auth 設定
-│   ├── rss/
-│   │   ├── parser.ts                 # XML → Article[]
-│   │   ├── fetcher.ts                # HTTP + retry
-│   │   └── adapters/                 # 企業ごとの正規化処理
-│   ├── ogp/
-│   │   └── extractor.ts              # description/og:image取得
-│   ├── ai/                           # 将来: AI要約
-│   ├── observability/
-│   │   ├── sentry.ts
-│   │   └── posthog.ts
-│   └── env.ts                        # @t3-oss/env-nextjs で型付け
+│   ├── env.ts                        # @t3-oss/env-nextjs で型付け(サーバー専用)
+│   ├── rss/                          # fetcher / parser / ingest / build-feed-xml
+│   ├── http/                         # timeout + retry 付き fetch、SSRF ガード
+│   ├── hatena/                       # はてブ数取得(ADR-0014 / 0018)
+│   ├── ai/                           # LLM クライアント
+│   ├── tags/                         # タグのキュレーション(ADR-0032)
+│   ├── cache/tags.ts                 # cacheTag 名の一元管理
+│   └── observability/                # logger, posthog
 │
-├── jobs/                             # Trigger.dev タスク
-│   ├── fetch-all-feeds.ts            # 毎時実行
-│   ├── refresh-company-feed.ts       # 1社単位
-│   └── trigger.config.ts
-│
-├── shared/                           # features横断の共有モジュール
-│   ├── result.ts                     # Result<T, E> 型
-│   └── pagination.ts
-│
-├── public/
-├── design/                           # モックアップ(現状)
+├── trigger/                          # Trigger.dev v4 タスク(cron)
+├── shared/                           # features 横断の純粋ロジック(Result, error, categories, date, ...)
+├── scripts/                          # seed / ingest / scaffold-feature / 動作確認スクリプト
+├── infra/vercel/                     # Vercel の Terraform
+├── design/                           # 初期デザインモックアップ
+├── docs/                             # 設計ドキュメント
+├── trigger.config.ts
 ├── drizzle.config.ts
-├── biome.json
 ├── next.config.ts
 └── package.json
 ```
 
 **重要な境界**
 - `features/A` は `features/B` を直接 import しない(共有は `shared/` か `components/ui/`)
-- `app/` は features の `web/queries.ts` / `web/actions.ts` のみ叩く(`db/`直叩き禁止)
-- `db/` への直接アクセスは各 feature の `infrastructure/` 層の Repository のみ
-- `db/` のスキーマ型は domain / application の型に変換して公開(ORM型を上層に漏らさない)
+- 記事に対する横断機能(保存・購読と記事の組み合わせ)は app / components 側で合成する(ADR-0013)
+- `app/` は features の `web/queries.ts` / `web/actions.ts` 経由でデータに触れる(`db/` 直叩き禁止)
+- `db/` のスキーマ型は domain / application の型に変換して公開する
 
 ---
 
@@ -162,92 +147,65 @@ techblo/
 ```
 [Browser]
    ↓ GET /
-[app/(public)/page.tsx (RSC)]
+[app/(app)/page.tsx (RSC)]
    ↓ await
-[features/feed/web/queries.ts: getArticles({ filter })] ← composition root
-   ↓ (application の usecase を組立て呼出、Result を吸収)
-[features/feed/infrastructure: ArticleRepository (Drizzle)]
-   ↓
-[db/client.ts: drizzle.select() with cache]
+[features/feed/web/queries.ts] ← composition root('use cache' + cacheTag)
+   ↓ application の usecase を組み立てて呼ぶ
+[features/feed/infrastructure: DrizzleArticleRepository]
    ↓
 [Supabase Postgres]
 ```
-- **PPR**: shell部分(ヘッダー・サイドバー)は静的化、記事カードは動的
-- **キャッシュ**: 未ログイン時のフィードは `unstable_cache` で 60秒 edge cache
 
 ### 書き込み(ブックマーク追加)
 ```
 [Browser: クライアントコンポーネント]
-   ↓ formAction
-[features/bookmarks/web/actions.ts (Server Action)]
-   ↓ getSession() → ユーザー確認
-[features/bookmarks/application: addBookmark usecase(認可・ビジネスルール)]
+   ↓ Server Action
+[features/bookmarks/web/actions.ts]
+   ↓ getSession() でユーザー確認(未ログインはゲスト保存 = localStorage / ADR-0017)
+[features/bookmarks/application: usecase]
    ↓
-[features/bookmarks/infrastructure: BookmarkRepository → insert into bookmarks]
+[features/bookmarks/infrastructure: Repository → insert into bookmarks]
    ↓
-[revalidatePath('/bookmarks')]
+[updateTag(CACHE_TAGS.userBookmarks(userId)) + revalidatePath('/bookmarks')]
 ```
-- **楽観更新**: `useOptimistic` で即座にUI更新
-- **冪等性**: 重複INSERTは `ON CONFLICT DO NOTHING`
+- **楽観更新**: `useOptimistic` で即座に UI 更新
+- **冪等性**: 重複 INSERT は `ON CONFLICT DO NOTHING`
 
-### バックグラウンド(RSS取得)
+### バックグラウンド(RSS 取得)
 ```
-[Trigger.dev cron: 毎時]
+[Trigger.dev cron: 毎時0分]
    ↓
-[jobs/fetch-all-feeds.ts]
-   ↓ for each company in DB
-[jobs/refresh-company-feed.ts] ← 並列実行(20まで)
+[trigger/fetch-feed-articles.ts]
+   ↓ ingestAllCompanies(sink)
+[lib/rss/ingest.ts] ← enabled な全企業を Promise.allSettled で並列取得
+   ↓ lib/rss/fetcher.ts(timeout 15秒 + retry)→ lib/rss/parser.ts
+[features/feed/application/upsert-articles(sink として注入)]
    ↓
-[lib/rss/fetcher.ts: HTTP + retry 3回]
-   ↓
-[lib/rss/parser.ts: XML → ArticleInput[]]
-   ↓
-[lib/ogp/extractor.ts: OGP補完]
-   ↓
-[db: upsert into articles (url unique)]
+[db: upsert into articles] → はてブ数更新 → POST /api/revalidate
 ```
-- **失敗時**: 1社の失敗が全体を止めない(Promise.allSettled)
-- **観測**: 各社の last_fetched_at と last_error を companies に記録
+- 他の cron(いずれも毎時): `generate-article-summaries`(10分)、`fetch-user-feeds`(15分)、`classify-article-categories`(40分)
+- **観測**: 各社の `last_fetched_at` / `consecutive_failures` を companies に記録(`docs/features/health.md`)
+
+詳細は `docs/architecture/data-flow.md`。
 
 ---
 
 ## 5. キャッシュ戦略
 
-| 対象 | 層 | 期間 | 無効化トリガー |
-|---|---|---|---|
-| 公開フィード(未ログイン) | Next.js Data Cache | 60秒 | RSS取得ジョブ完了時 `revalidateTag('feed')` |
-| 企業マスタ | Next.js Data Cache | 1時間 | 開発者が変更時に手動 |
-| 個別記事メタ | Next.js Data Cache | 5分 | クリック数更新時 |
-| ユーザー個人化データ | キャッシュなし | - | - |
-| OGP画像 | next/image + 元サイトCDN | 1日 | next.config 設定 |
-| ビルド時静的アセット | Vercel Edge | 永続 | デプロイ毎 |
+- 共有データ(フィード・記事・企業)は `'use cache'`(一部 `'use cache: remote'`)+ `cacheTag` でキャッシュ(ADR-0042)
+- ユーザー単位のデータもユーザー別タグでキャッシュし、保存・購読の Server Action が `updateTag` で即時無効化(ADR-0016)
+- 取込 cron は Next ランタイム外なので `/api/revalidate` を叩いて無効化する
+- タグ名は `lib/cache/tags.ts` の `CACHE_TAGS` で一元管理
 
-**原則**: 公開データは積極キャッシュ、個人化データはキャッシュしない
+詳細は `docs/architecture/performance.md`。
 
 ---
 
 ## 6. 認証境界
 
-```
-[Request]
-   ↓
-[middleware.ts]
-   ↓ session cookie 検証
-   ↓ /(auth)/* なら未ログイン時 → /login へリダイレクト
-   ↓
-[Page (RSC)]
-   ↓
-[features/auth/server.ts: getSession()]
-   ↓ Better Auth: { user, session } | null
-   ↓
-[Server Action]
-   ↓ ログイン必須なら null チェック → 401
-```
-
-**ガード戦略**
-- ルートレベル: middleware で `/(auth)/*` を保護
-- アクションレベル: 各 Server Action 冒頭で `requireSession()` ヘルパー
-- ポリシーレベル: `canBookmark(user, article)` 等で詳細制御
+- middleware によるルート保護はしていない。アプリ画面はゲストでも開け、保存などはゲストなら localStorage に保持してログイン時にマージする(ADR-0017)
+- RSC / Server Action では `features/auth/server.ts` の `getSession()`(React `cache()` でリクエスト内デデュープ)でユーザーを確認する
+- ログイン必須の処理は Server Action 冒頭で session を確認し、未ログインならエラーを返す
 
 ---
 
@@ -255,19 +213,17 @@ techblo/
 
 | 種別 | 扱い |
 |---|---|
-| **ユーザー入力エラー** | Zod parse fail → form エラー表示 |
-| **認証エラー** | Server Action から `{ error: 'UNAUTHORIZED' }` 返却、UIで処理 |
+| **ユーザー入力エラー** | Zod parse fail → エラー表示 |
+| **認証エラー** | Server Action からエラーを返し、UI で処理 |
 | **DB制約違反** | 冪等処理で吸収(upsert / onConflictDoNothing) |
-| **RSS取得失敗** | リトライ3回 → companies.last_error に記録、次回再試行 |
-| **OGP取得失敗** | プレースホルダー画像生成にフォールバック |
-| **ネットワークタイムアウト** | 10秒で打ち切り、Sentryに記録 |
-| **予期せぬエラー** | error boundary → Sentry へ送信 |
+| **RSS取得失敗** | retry 後に companies に失敗を記録し、次の cron で再試行 |
+| **予期せぬエラー** | error boundary(`app/error.tsx` / `app/global-error.tsx`)+ logger |
 
-**Resultパターン**(shared/result.ts)
+**Resultパターン**(`shared/result.ts`)
 ```typescript
 type Result<T, E> = { ok: true; value: T } | { ok: false; error: E };
 ```
-Server Action / queries は Result を返し、throw は避ける(observabilityのため)
+usecase / Repository は Result を返し、throw は避ける。詳細は `docs/architecture/error-handling.md`。
 
 ---
 
@@ -275,32 +231,26 @@ Server Action / queries は Result を返し、throw は避ける(observability�
 
 ```
 [Application]
-   ├→ Sentry: エラー & トランザクション
-   ├→ PostHog: ユーザー行動 & Feature Flag
-   └→ Vercel Logs: アクセスログ
+   ├→ lib/observability/logger: 構造化ログ(本番は JSON)→ Vercel Logs
+   ├→ PostHog: ユーザー行動イベント(ADR-0043)
+   └→ Vercel Analytics / Speed Insights: アクセス・Web Vitals
 [Trigger.dev]
    └→ Trigger.dev Dashboard: ジョブ実行履歴
 ```
 
-**監視すべきメトリクス(MVPから)**
-- RSS取得成功率(企業別)
-- 各社の last_fetched_at 経過時間
-- ログインユーザー数(日次/週次)
-- ブックマーク追加レート
-- ページ表示速度(Web Vitals)
+詳細は `docs/architecture/observability.md`。
 
 ---
 
 ## 9. テスト戦略
 
-| 種別 | ツール | 対象 |
+| 種別 | ツール | 現状 |
 |---|---|---|
-| Unit | Vitest | features/*/policies.ts、lib/rss/parser.ts |
-| Integration | Vitest + Test DB | features/*/actions.ts(`TEST_DATABASE_URL` の別インスタンスで隔離) |
-| E2E | Playwright | 主要シナリオ(閲覧→ログイン→ブックマーク) |
-| Visual | Storybook 8 | components/ui/*、ArticleCardの状態網羅 |
+| Unit | Vitest(`*.test.ts` を実装の隣に置く) | `bun run test:unit`。domain / application / lib を中心に実装済み |
+| Integration | Vitest + Test DB(`*.integration.test.ts`) | 仕組み(`vitest.integration.config.ts`)のみ。テストはまだ無い |
+| E2E | Playwright | 未導入(`e2e/` は無い) |
 
-**MVPでは Unit + 主要 E2E に絞る**。Integration テストは本番と別の Test DB(`TEST_DATABASE_URL`)で実行する(ADR-0033)。
+方針は `docs/principles/testing.md`。
 
 ---
 
@@ -308,25 +258,20 @@ Server Action / queries は Result を返し、throw は避ける(observability�
 
 | ボトルネック | 対応 |
 |---|---|
-| Neon Free 0.5GB超 | Launch($19/月)へアップグレード、古い記事のアーカイブ |
-| RSS取得が60秒超過 | Trigger.dev の並列度を上げる、企業ごとに分散 |
-| 認証ユーザー50K超 | Better Auth は影響なし、DBコネクション数を確認 |
-| 帯域100GB超 | OGP画像をCloudflare Imagesに移行 or Vercel Pro |
-| Cold start遅延 | Vercel の Fluid Compute、Neon 起動時間最適化 |
-| 全文検索が必要 | Postgres `pg_trgm` → 容量超えたら Meilisearch / Typesense |
-| AI要約(将来) | Trigger.dev でバッチ、`articles.ai_summary` カラム追加 |
+| DB 容量・接続数 | Supabase のプラン変更、古い記事のアーカイブ、Transaction Pooler の設定確認 |
+| RSS取得が長時間化 | `trigger/fetch-feed-articles.ts` の `maxDuration` 見直し、企業ごとのタスクに分割 |
+| 帯域 | OG 画像のキャッシュ見直し、Vercel のプラン確認 |
+| 検索負荷 | `pg_trgm`(ADR-0022)→ 足りなければ Meilisearch / Typesense |
 
 **移行容易性のため守ること**
-- Postgres標準SQLに依存(Neon固有機能は最小限)
-- DBアクセスは全て各 feature の infrastructure 層 Repository 経由(`app/` からの直接 db/ は禁止、web は composition root の web/queries.ts 経由)
-- 認証は features/auth 経由(将来 Clerk 等への乗換え可)
-- 外部サービスは lib/ にラップ(Trigger.dev → Inngest 等)
+- Postgres 標準 SQL に依存(ベンダー固有機能は最小限)
+- DB アクセスは全て各 feature の infrastructure 層 Repository 経由
+- 認証は features/auth 経由
+- 外部サービスは lib/ にラップ
 
 ---
 
 ## 11. 機能追加時の手順テンプレ
-
-新機能を追加するときの判断フロー:
 
 1. **既存featureに収まるか?** → 既存に追加
 2. **新しい features/X として独立** → `bun run scaffold:feature X` で4層雛形を生成
@@ -334,9 +279,11 @@ Server Action / queries は Result を返し、throw は避ける(observability�
    - `features/X/application/`(ユースケース + `dto.ts`)
    - `features/X/infrastructure/`(Drizzle Repository 実装・mapper)
    - `features/X/web/`(`queries.ts` composition root / `actions.ts` / `view-models/` / `components/`)
-3. **DBスキーマ変更** → `db/schema/X.ts` + migration
-4. **バックグラウンド処理** → `jobs/X.ts`(Trigger.dev)
-5. **テスト** → `features/X/*.test.ts`
+3. **DBスキーマ変更** → `db/schema/X.ts` + `bun run db:generate`
+4. **バックグラウンド処理** → `trigger/X.ts`(Trigger.dev)
+5. **テスト** → 実装の隣に `*.test.ts`
+
+詳細は `docs/guides/adding-a-feature.md`。
 
 ---
 
@@ -344,9 +291,7 @@ Server Action / queries は Result を返し、throw は避ける(observability�
 
 | 検討 | 不採用理由 |
 |---|---|
-| Clean Architecture フル実装 | 個人開発には過剰、レイヤー4つで十分 |
-| Repository pattern を厳密に | Drizzle は型安全で薄いラッパーで十分、過度な抽象化を避ける |
-| マイクロサービス | 個人開発でMonolithが圧倒的に有利、Server Actionsで完結 |
-| GraphQL | RESTもtRPCも不要、Server Actions + RSCで型安全に完結 |
-| Redux / MobX | TanStack Query + Zustand で十分、React 19の機能でさらに簡略化 |
-| Hexagonal (port/adapter) | RSS取得部分のみadapter方式採用、他は単純な関数で |
+| Clean Architecture フル実装 | 個人開発には過剰。feature 内4層(ADR-0010)で十分 |
+| マイクロサービス | 個人開発では Monolith が有利、Server Actions で完結 |
+| GraphQL / tRPC | Server Actions + RSC で型安全に完結 |
+| グローバル状態管理ライブラリ | URL 状態・Server Actions・React 19 の機能で足りる |
