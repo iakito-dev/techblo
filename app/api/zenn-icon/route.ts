@@ -3,7 +3,7 @@ import { logger } from '@/lib/observability/logger';
 /**
  * Zenn publication の登録アイコンへリダイレクトするエンドポイント。
  *
- * 企業ファビコンは通常 Google favicon サービスでドメインから引く(components/article/company-favicon.tsx)が、
+ * 企業ファビコンは通常 Google favicon サービスでドメインから引く(components/ui/company-favicon.tsx)が、
  * Zenn publication は全社 `zenn.dev` ドメインのため共通の Zenn ロゴになってしまう。publication 固有のアバターは
  * 非公式 API `https://zenn.dev/api/publications/{slug}` の avatar_url にあるが、この API は CORS 非対応で
  * ブラウザから直接叩けない。そこでサーバー側で取得し、実体画像(res.cloudinary.com)へ 307 リダイレクトする。

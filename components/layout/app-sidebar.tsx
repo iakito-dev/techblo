@@ -16,11 +16,11 @@ import {
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { type Ref, useEffect, useRef } from 'react';
-import { CompanyFavicon } from '@/components/article/company-favicon';
 import { useKeyboardShortcutsHelp } from '@/components/layout/keyboard-shortcuts';
 import { Logo } from '@/components/layout/logo';
 import { Badge } from '@/components/ui/badge';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { CompanyFavicon } from '@/components/ui/company-favicon';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { CATEGORY_DEFINITIONS } from '@/shared/categories';
 import { cn } from '@/shared/utils';

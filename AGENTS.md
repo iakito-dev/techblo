@@ -102,6 +102,7 @@
 
 ```
 app/                    # Next.js routes
+app/_composition/       # 複数 feature をまたぐ合成(記事 × 保存・購読・既読 / ADR-0013・0044)
 features/{name}/        # 機能モジュール(4層: domain/application/infrastructure/web — ADR-0010)
   domain/               #   純粋TS(entity/VO/domain service/Repository interface)
   application/          #   ユースケース(依存は引数注入)+ dto.ts

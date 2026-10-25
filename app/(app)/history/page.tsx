@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
-import { GuestReadingHistory } from '@/components/article/guest-reading-history';
-import { ReadingHistoryView } from '@/components/article/reading-history-view';
-import { SavedArticlesSkeleton } from '@/components/article/saved-articles-skeleton';
+import { GuestReadingHistory } from '@/app/_composition/article/guest-reading-history';
+import { ReadingHistoryView } from '@/app/_composition/article/reading-history-view';
+import { SavedArticlesSkeleton } from '@/app/_composition/article/saved-articles-skeleton';
 import { getSummariesByArticleIds } from '@/features/ai-summary/web/queries';
 import { getSession } from '@/features/auth/server';
 import { getBookmarkedArticleIds } from '@/features/bookmarks/web/queries';

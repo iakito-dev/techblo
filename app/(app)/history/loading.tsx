@@ -1,4 +1,4 @@
-import { SavedArticlesSkeleton } from '@/components/article/saved-articles-skeleton';
+import { SavedArticlesSkeleton } from '@/app/_composition/article/saved-articles-skeleton';
 import { MOBILE_GUTTER_CLASS } from '@/shared/layout';
 
 /**

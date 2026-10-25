@@ -66,7 +66,7 @@ PostHog のイベント(一覧と規約は [observability.md §4](../architectur
 
 | イベント | プロパティ | 発火 |
 |---|---|---|
-| `favorite_added` / `favorite_removed` | articleId, isGuest | `ArticleActions` / `SavedArticlesView`(`components/article/track-save.ts`)。ログイン時は Server Action 成功後、ゲストは localStorage 書き込み時 |
+| `favorite_added` / `favorite_removed` | articleId, isGuest | `ArticleActions` / `SavedArticlesView`(`app/_composition/article/track-save.ts`)。ログイン時は Server Action 成功後、ゲストは localStorage 書き込み時 |
 
 - お気に入り追加レート
 - 1ユーザーあたりの平均お気に入り数
@@ -80,7 +80,7 @@ PostHog のイベント(一覧と規約は [observability.md §4](../architectur
 
 実装済み(ADR-0013)。bookmarks と同型。
 - `features/favorites`(4層): `setFavorite` / `listFavoritedArticleIds`、`setFavoriteAction`、`getFavoritedArticleIds`。
-- 記事カードの♥は `components/article/article-actions.tsx`。`/favorites`(`app/(app)/favorites/page.tsx`。ゲストは localStorage の保存を表示)で追加順に表示。空状態あり。
+- 記事カードの♥は `app/_composition/article/article-actions.tsx`。`/favorites`(`app/(app)/favorites/page.tsx`。ゲストは localStorage の保存を表示)で追加順に表示。空状態あり。
 
 ## 一覧の絞り込み・並び替え
 
@@ -91,4 +91,4 @@ PostHog のイベント(一覧と規約は [observability.md §4](../architectur
 - 件数表示: 「N件」、絞り込み中は「N件 / 全M件」
 - 絞り込み結果 0 件: 「一致する記事がありません」+「絞り込みをクリア」(保存 0 件の空状態とは別)
 - 入力は lg 未満 16px(iOS の自動ズーム回避)。コントロールは 2 件以上の保存がある時に表示
-- ロジックは `components/article/saved-articles-filter.ts`(純関数・unit test あり)、UI は `saved-articles-controls.tsx`
+- ロジックは `app/_composition/article/saved-articles-filter.ts`(純関数・unit test あり)、UI は `saved-articles-controls.tsx`

@@ -226,21 +226,22 @@ MVPでは使わない。複雑度を上げないため。
 
 ```
 components/
-├── ui/                       ← shadcn primitives(変更最小限)
+├── ui/                       ← shadcn primitives(変更最小限)+ CompanyFavicon
 │   ├── button.tsx
-│   ├── card.tsx
-│   ├── dialog.tsx
+│   ├── tooltip.tsx
+│   ├── company-favicon.tsx
 │   └── ...
 ├── layout/                   ← 横断的なlayout components
 │   ├── header.tsx
+│   ├── app-sidebar.tsx
 │   ├── mobile-nav.tsx
-│   ├── sidebar.tsx
-│   └── footer.tsx
-└── shared/                   ← 横断的だがUI primitiveではない
-    ├── login-modal.tsx       ← グローバルに使うmodal
-    ├── error-fallback.tsx
-    └── theme-provider.tsx
+│   └── bottom-chrome.tsx
+├── seo/                      ← JSON-LD など
+└── legal/                    ← 規約・プライバシーの本文
 ```
+
+複数 feature をまたぐ合成(記事 × 保存・購読・既読、サイドバーの composition root)は `components/` ではなく
+`app/_composition/` に置く(ADR-0013 / ADR-0044)。features と components からは import しない。
 
 features 配下の components は **その feature 専用**(web 層に置く):
 

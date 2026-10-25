@@ -22,7 +22,7 @@
 ┌────────────────────────────────────────────────────────────────┐
 │  Presentation(React Server/Client Components)                 │
 │  - app/**/page.tsx, layout.tsx                                  │
-│  - components/(ui・layout・記事の横断合成 UI)                  │
+│  - components/(ui・layout)、app/_composition(feature 横断の合成)│
 └────────────────────────────────────────────────────────────────┘
                           ↓ depends on
 ┌────────────────────────────────────────────────────────────────┐
@@ -79,6 +79,9 @@ techblo/
 │   ├── login/ signup/ about/ privacy/ terms/
 │   ├── feed.xml/                     # 公開 RSS(ADR-0039)
 │   ├── _feed/                        # 公開 RSS の共通処理
+│   ├── _composition/                 # 複数 feature をまたぐ合成(ADR-0013 / 0044)
+│   │   ├── article/                  #   記事 × 保存・購読・既読の合成(Server Action・データ取得・一覧 UI)
+│   │   └── sidebar.tsx               #   サイドバーの composition root
 │   ├── api/
 │   │   ├── auth/[...all]/route.ts    # Better Auth handler
 │   │   ├── og/[id]/route.tsx         # 共有用 OG 画像(ADR-0029)
@@ -100,9 +103,8 @@ techblo/
 │     # 各 feature: domain/ application/ infrastructure/ web/
 │
 ├── components/
-│   ├── ui/                           # shadcn/ui primitives(Radix ベース)
-│   ├── layout/                       # Header, Sidebar, MobileNav, BottomChrome
-│   ├── article/                      # 記事に対する横断合成(ADR-0013)
+│   ├── ui/                           # shadcn/ui primitives(Radix ベース)+ CompanyFavicon
+│   ├── layout/                       # Header, AppSidebar, MobileNav, BottomChrome
 │   ├── seo/ legal/
 │
 ├── db/
@@ -135,7 +137,7 @@ techblo/
 
 **重要な境界**
 - `features/A` は `features/B` を直接 import しない(共有は `shared/` か `components/ui/`)
-- 記事に対する横断機能(保存・購読と記事の組み合わせ)は app / components 側で合成する(ADR-0013)
+- 記事に対する横断機能(保存・購読と記事の組み合わせ)は `app/_composition/` で合成する(ADR-0013 / 0044)。features と components からは import しない
 - `app/` は features の `web/queries.ts` / `web/actions.ts` 経由でデータに触れる(`db/` 直叩き禁止)
 - `db/` のスキーマ型は domain / application の型に変換して公開する
 

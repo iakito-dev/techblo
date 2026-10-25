@@ -2,7 +2,7 @@ import { Analytics } from '@vercel/analytics/next';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import type { Metadata, Viewport } from 'next';
 import { Inter, Newsreader, Noto_Sans_JP, Outfit } from 'next/font/google';
-import { GuestSavesMigrator } from '@/components/article/guest-saves-migrator';
+import { GuestSavesMigrator } from '@/app/_composition/article/guest-saves-migrator';
 import { ThemedToaster } from '@/components/layout/themed-toaster';
 import { env } from '@/lib/env';
 import { SITE_DESCRIPTION, SITE_SOCIAL_DESCRIPTION } from '@/lib/seo';

@@ -1,4 +1,4 @@
-import { CompanyFavicon } from '@/components/article/company-favicon';
+import { CompanyFavicon } from '@/components/ui/company-favicon';
 import { formatRelative } from '@/shared/date';
 import type { ArticleCard } from '../../application/dto';
 import { ArticleLink } from './article-link';

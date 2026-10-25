@@ -1,11 +1,11 @@
 import { Suspense } from 'react';
+import { Sidebar } from '@/app/_composition/sidebar';
 import { BottomChromeProvider } from '@/components/layout/bottom-chrome';
 import { Header } from '@/components/layout/header';
 import { KeyboardShortcutsProvider } from '@/components/layout/keyboard-shortcuts';
 import { MobileNav } from '@/components/layout/mobile-nav';
 import { MobileSwipeNavigation } from '@/components/layout/mobile-swipe-navigation';
 import { ScrollToTop } from '@/components/layout/scroll-to-top';
-import { Sidebar } from '@/components/layout/sidebar';
 import { SkipLink } from '@/components/layout/skip-link';
 
 /**

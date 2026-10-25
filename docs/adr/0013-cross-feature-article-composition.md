@@ -3,6 +3,7 @@
 - **状態**: Accepted
 - **決定日**: 2026-06-02
 - **関連**: ADR-0002(Feature Sliced), ADR-0010(レイヤード+ヘキサゴナル), ADR-0006(2層保存)
+- **更新**: 本文中の `components/article/*` は ADR-0044 で `app/_composition/article/*` へ移動した
 
 ## 背景
 

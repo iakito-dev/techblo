@@ -6,7 +6,7 @@ import {
 
 /**
  * フィードのローディング skeleton。Suspense fallback で使う。
- * 一覧本体は app 層の合成(components/article/feed-load-more + feed-list)で描画する(ADR-0013)。
+ * 一覧本体は app 層の合成(app/_composition/article/feed-load-more + feed-list)で描画する(ADR-0013)。
  * NOTE: 旧 FeedGrid 本体は「もっと読む」化で廃止(skeleton のみ残す)。
  *
  * count は描画する枚数。少ないとリロード毎に skeleton→実カードでページが伸びてガタつくため、

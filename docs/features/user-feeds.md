@@ -83,7 +83,7 @@ refreshUserFeedAction(id): Result<{ added }, { message }>     // 手動更新
 ## メインフィードへの反映
 
 - マージは **新着順(latest)・フィルタ/検索なし**の主経路のみ(ADR-0014)。`popular`・検索・未読/既読フィルタでは公開記事のみ。
-- 合成点は app 層 [feed-load-more.tsx](../../components/article/feed-load-more.tsx): ログイン + 上記条件で
+- 合成点は app 層 [feed-load-more.tsx](../../app/_composition/article/feed-load-more.tsx): ログイン + 上記条件で
   `getEnabledUserFeedIds` を取り、非空なら `getMergedFeed` 経路へ。`feed` feature は `user-feeds` を import せず、
   マージは `feed` の Repository が `user_feed_articles` を UNION ALL して行う。
 - ユーザー記事の表示: フィードタイトルを「企業名」位置に出し、ファビコンは記事 URL から導出。

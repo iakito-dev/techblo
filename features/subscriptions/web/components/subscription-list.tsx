@@ -4,7 +4,7 @@ import { AlertDialog, Button } from '@heroui/react';
 import { Search } from 'lucide-react';
 import { useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
-import { CompanyFavicon } from '@/components/article/company-favicon';
+import { CompanyFavicon } from '@/components/ui/company-favicon';
 import { SettingsSection } from '@/components/ui/settings-section';
 import type { CompanyId } from '@/shared/type-utils';
 import type { SubscriptionSetting } from '../../application/dto';

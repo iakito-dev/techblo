@@ -4,7 +4,7 @@
 
 「後で読む」用途で記事を一時的に保存。読了後は削除して未読リストを整理する想定。
 
-未ログインでも保存・一覧閲覧が可能で、ゲストは localStorage(article ID 配列)に保持する。ログインすると localStorage の保存が DB へマージされ永続化される(ADR-0017)。client ストアは `components/article/use-guest-saves.ts`、移行は `guest-saves-migrator.tsx`、bulk 追加は Repository の `addMany`。
+未ログインでも保存・一覧閲覧が可能で、ゲストは localStorage(article ID 配列)に保持する。ログインすると localStorage の保存が DB へマージされ永続化される(ADR-0017)。client ストアは `app/_composition/article/use-guest-saves.ts`、移行は `guest-saves-migrator.tsx`、bulk 追加は Repository の `addMany`。
 
 ## ユーザーストーリー
 
@@ -68,7 +68,7 @@ PostHog のイベント(一覧と規約は [observability.md §4](../architectur
 
 | イベント | プロパティ | 発火 |
 |---|---|---|
-| `bookmark_added` / `bookmark_removed` | articleId, isGuest | `ArticleActions` / `SavedArticlesView`(`components/article/track-save.ts`)。ログイン時は Server Action 成功後、ゲストは localStorage 書き込み時 |
+| `bookmark_added` / `bookmark_removed` | articleId, isGuest | `ArticleActions` / `SavedArticlesView`(`app/_composition/article/track-save.ts`)。ログイン時は Server Action 成功後、ゲストは localStorage 書き込み時 |
 
 - ブックマーク追加レート(表示比)
 - ブックマーク → お気に入り 昇格率
@@ -83,7 +83,7 @@ PostHog のイベント(一覧と規約は [observability.md §4](../architectur
 
 実装済み(ADR-0013)。
 - `features/bookmarks`(4層): `setBookmark` / `listBookmarkedArticleIds`、`setBookmarkAction`(セッションは `lib/auth` 直取得)、`getBookmarkedArticleIds`。`onConflictDoNothing` で冪等。
-- 記事カードの🔖は横断 UI `components/article/article-actions.tsx`(client・楽観更新)。`features/feed` は保存系を import せず `ArticleCard` の `actions` スロットで受ける。
+- 記事カードの🔖は横断 UI `app/_composition/article/article-actions.tsx`(client・楽観更新)。`features/feed` は保存系を import せず `ArticleCard` の `actions` スロットで受ける。
 - `/bookmarks`(`app/(app)/bookmarks/page.tsx`。ゲストは `GuestSavedArticles` で localStorage の保存を表示)が `getBookmarkedArticleIds` → `features/feed` の `getArticlesByIds` で記事本体を取得し追加順に表示。空状態あり。
 
 ## 一覧の絞り込み・並び替え
@@ -95,4 +95,4 @@ PostHog のイベント(一覧と規約は [observability.md §4](../architectur
 - 件数表示: 「N件」、絞り込み中は「N件 / 全M件」
 - 絞り込み結果 0 件: 「一致する記事がありません」+「絞り込みをクリア」(保存 0 件の空状態とは別)
 - 入力は lg 未満 16px(iOS の自動ズーム回避)。コントロールは 2 件以上の保存がある時に表示
-- ロジックは `components/article/saved-articles-filter.ts`(純関数・unit test あり)、UI は `saved-articles-controls.tsx`
+- ロジックは `app/_composition/article/saved-articles-filter.ts`(純関数・unit test あり)、UI は `saved-articles-controls.tsx`

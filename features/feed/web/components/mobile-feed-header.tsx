@@ -3,7 +3,6 @@
 import { ListFilter, Loader2, Search, X } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { FilterCompany, FilterUserFeed } from '@/components/article/feed-load-more';
 import { LogoMark } from '@/components/layout/logo';
 import { MOBILE_GUTTER_CLASS } from '@/shared/layout';
 import { cn } from '@/shared/utils';
@@ -14,6 +13,7 @@ import {
   categoryTabLabel,
   parseCategoryTab,
 } from '../view-models/category-tabs';
+import type { FilterCompany, FilterUserFeed } from '../view-models/feed-filter-options';
 import { useFeedNav } from '../view-models/feed-nav-context';
 import { useFeedFilters } from '../view-models/use-feed-filters';
 import { useFeedSearch } from '../view-models/use-feed-search';

@@ -49,7 +49,7 @@ export async function setBookmarkAction(input: {
 
 /**
  * ゲスト(localStorage)のブックマークをログイン後に DB へ一括マージする Server Action。
- * 実在しない article ID は呼び出し側(components/article)で除外済みの前提(FK 安全・ADR-0017)。
+ * 実在しない article ID は呼び出し側(app/_composition/article)で除外済みの前提(FK 安全・ADR-0017)。
  * 冪等なので二重実行されても重複しない。
  */
 export async function migrateGuestBookmarks(

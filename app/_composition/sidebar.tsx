@@ -1,8 +1,8 @@
 import { connection } from 'next/server';
 import { Suspense } from 'react';
-import { getFeedFilterUserFeeds } from '@/components/article/feed-load-more';
+import { getFeedFilterUserFeeds } from '@/app/_composition/article/feed-load-more';
+import { AppSidebar } from '@/components/layout/app-sidebar';
 import { getSidebarCompanies } from '@/features/feed/web/queries';
-import { AppSidebar } from './app-sidebar';
 
 /**
  * サイドバーの composition root(Server Component)。

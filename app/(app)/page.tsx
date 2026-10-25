@@ -1,15 +1,15 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Suspense } from 'react';
-import { FeedList } from '@/components/article/feed-list';
+import { FeedList } from '@/app/_composition/article/feed-list';
 import {
   getDefaultFilterCompanies,
   getFeedFilterCompanies,
   getFeedFilterUserFeeds,
   getFeedPageData,
   getSectionsPageData,
-} from '@/components/article/feed-load-more';
-import { FeedSectionsView } from '@/components/article/feed-sections-view';
+} from '@/app/_composition/article/feed-load-more';
+import { FeedSectionsView } from '@/app/_composition/article/feed-sections-view';
 import { FeedHeader, FeedTopbar } from '@/components/layout/feed-topbar';
 import { JsonLd } from '@/components/seo/json-ld';
 import {

@@ -3,8 +3,7 @@
 import { Check, Search, X } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
-import { CompanyFavicon } from '@/components/article/company-favicon';
-import type { FilterCompany, FilterUserFeed } from '@/components/article/feed-load-more';
+import { CompanyFavicon } from '@/components/ui/company-favicon';
 import {
   type FeedSort,
   type PopularPeriod,
@@ -13,6 +12,7 @@ import {
   parseReadMode,
   type ReadFilterMode,
 } from '../../domain/feed-sort';
+import type { FilterCompany, FilterUserFeed } from '../view-models/feed-filter-options';
 import { useFeedNav } from '../view-models/feed-nav-context';
 import { parseListParam } from '../view-models/parse-list-param';
 import { FeedBottomSheet } from './feed-bottom-sheet';

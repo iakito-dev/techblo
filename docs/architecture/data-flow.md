@@ -28,7 +28,7 @@
 4. features/subscriptions/web/queries.ts: 購読中の企業 ID を取得(ユーザー別タグでキャッシュ / ADR-0016)
 5. features/feed/web/queries.ts: 購読企業で絞ったフィードを取得
 6. 保存状態(ブックマーク / お気に入り)・既読は各 feature の queries から ID 集合で取得し、
-   app / components 側で記事カードに合成する(ADR-0013)
+   app/_composition で記事カードに合成する(ADR-0013 / 0044)
 7. PPR streaming で表示
 ```
 

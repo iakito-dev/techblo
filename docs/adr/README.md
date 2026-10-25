@@ -18,7 +18,7 @@
 | [0010](./0010-layered-hexagonal-within-features.md) | feature 内部のレイヤード + ヘキサゴナル(軽量DDD) | Accepted |
 | [0011](./0011-base44-design-refresh.md) | Base44参照デザインへの刷新(インディゴ配色 + テキスト主体カード) | Accepted |
 | [0012](./0012-subscription-initialization-on-signup.md) | 初回ログイン時の subscriptions 初期化を better-auth フックで行う | Accepted |
-| [0013](./0013-cross-feature-article-composition.md) ※ | 記事に対する横断機能(購読/ブックマーク/お気に入り)は app 層で合成する | Accepted |
+| [0013](./0013-cross-feature-article-composition.md) ※ | 記事に対する横断機能(購読/ブックマーク/お気に入り)は app 層で合成する | Accepted(置き場所は ADR-0044 で `app/_composition/` へ) |
 | [0013](./0013-offset-pagination-and-feed-cache.md) ※ | フィードはオフセットページネーション + キャッシュ | Accepted |
 | [0014](./0014-external-popularity-signals.md) ※ | 人気順に外部シグナル(はてなブックマーク数)を採用 | Accepted |
 | [0014](./0014-user-private-rss-feeds.md) ※ | ユーザー登録RSS(プライベート)を別テーブル分離 + UNION マージ | Accepted |
@@ -51,6 +51,7 @@
 | [0041](./0041-reading-history-from-reads.md) | 閲覧履歴(/history)を既読テーブルの readAt から提供する | Accepted |
 | [0042](./0042-remote-cache-for-request-time-article-data.md) | 記事ページの本文を共有キャッシュ + 操作時の先読みで速くし、クライアントから zod を外す | Accepted |
 | [0043](./0043-posthog-client-side-event-tracking.md) | PostHog の行動計測はクライアントの明示イベントだけで行い、個人情報は送らない | Accepted |
+| [0044](./0044-move-cross-feature-composition-under-app.md) | 記事の横断合成を `components/article/` から `app/_composition/` へ移す | Accepted |
 
 ※ 0013 と 0014 は同日に並行して採番され、番号が2件ずつ重複している。コードやドキュメントから
 参照済みのため改番はしない(既存ADRは変更しない)。**これらを参照する時は番号だけでなく

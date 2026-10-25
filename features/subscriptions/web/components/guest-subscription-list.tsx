@@ -3,7 +3,7 @@
 import { Button } from '@heroui/react';
 import { Search } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import { CompanyFavicon } from '@/components/article/company-favicon';
+import { CompanyFavicon } from '@/components/ui/company-favicon';
 import { SettingsSection } from '@/components/ui/settings-section';
 import { trackSubscriptionChange } from '../track-subscription';
 import { useGuestSubscriptions } from '../use-guest-subscriptions';

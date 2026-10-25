@@ -15,6 +15,10 @@ import {
   getSidebarCompanies,
   searchFeed,
 } from '@/features/feed/web/queries';
+import type {
+  FilterCompany,
+  FilterUserFeed,
+} from '@/features/feed/web/view-models/feed-filter-options';
 import { readUnsubscribedFrom } from '@/features/subscriptions/web/guest-subscriptions';
 import { getEnabledCompanyIds } from '@/features/subscriptions/web/queries';
 import { getEnabledUserFeedIds, getUserFeedFilters } from '@/features/user-feeds/web/queries';
@@ -37,24 +41,6 @@ export type FeedPageInput = {
   tag?: string;
   /** カテゴリ絞り込み(?category=)。職能軸7種の完全一致。公開記事のみ対象(ADR-0034)。 */
   category?: string;
-};
-
-/** 企業フィルタのチップ1件分(購読スコープに絞った企業)。 */
-export type FilterCompany = {
-  slug: string;
-  name: string;
-  /** 企業サイト URL。ファビコン表示のドメイン導出に使う */
-  siteUrl: string;
-  /** 記事数。モバイルのフィルタシートで企業ごとに件数を出すのに使う。 */
-  articleCount: number;
-};
-
-/** マイフィードのフィルタ1件分(サイドバー/チップ/シートで企業と並べる)。 */
-export type FilterUserFeed = {
-  id: string;
-  title: string;
-  siteUrl: string | null;
-  articleCount: number;
 };
 
 /** カード1件分の表示データ + 保存状態(クライアントへ渡すシリアライズ可能な形)。 */

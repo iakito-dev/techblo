@@ -3,7 +3,7 @@
 import { Bookmark, Heart } from 'lucide-react';
 import Link from 'next/link';
 import { memo, type ReactNode } from 'react';
-import { CompanyFavicon } from '@/components/article/company-favicon';
+import { CompanyFavicon } from '@/components/ui/company-favicon';
 import type { ArticleCard as ArticleCardType } from '../../application/dto';
 import { stripHtml } from '../strip-html';
 import { ArticleLink } from './article-link';

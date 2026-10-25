@@ -70,6 +70,7 @@ AIエージェントもこのファイルから辿れるように構成されて
 - [0041-reading-history-from-reads.md](./adr/0041-reading-history-from-reads.md)
 - [0042-remote-cache-for-request-time-article-data.md](./adr/0042-remote-cache-for-request-time-article-data.md)
 - [0043-posthog-client-side-event-tracking.md](./adr/0043-posthog-client-side-event-tracking.md)
+- [0044-move-cross-feature-composition-under-app.md](./adr/0044-move-cross-feature-composition-under-app.md)
 
 ### `features/` — 機能仕様
 
