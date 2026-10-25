@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { setBookmarkAction } from '@/features/bookmarks/web/actions';
 import { setFavoriteAction } from '@/features/favorites/web/actions';
+import { trackSaveChange } from './track-save';
 import { useGuestSaves } from './use-guest-saves';
 
 /**
@@ -64,7 +65,9 @@ function AuthedArticleActions({
       if (!result.ok) {
         setBookmarked(!next);
         toast.error('あとで読むの更新に失敗しました');
+        return;
       }
+      trackSaveChange('bookmark', articleId, next, false);
     });
   }
 
@@ -78,7 +81,9 @@ function AuthedArticleActions({
       if (!result.ok) {
         setFavorited(!next);
         toast.error('お気に入りの更新に失敗しました');
+        return;
       }
+      trackSaveChange('favorite', articleId, next, false);
     });
   }
 
@@ -104,12 +109,16 @@ function GuestArticleActions({ articleId }: { articleId: string }) {
       bookmarked={bookmarks.has(articleId)}
       favorited={favorites.has(articleId)}
       onBookmark={() => {
+        const saved = bookmarks.toggle(articleId);
+        trackSaveChange('bookmark', articleId, saved, true);
         // 追加時のみ確認トースト(登録 CTA は出さない)。
-        if (bookmarks.toggle(articleId)) toast.success('あとで読むに追加しました');
+        if (saved) toast.success('あとで読むに追加しました');
       }}
       onFavorite={() => {
+        const saved = favorites.toggle(articleId);
+        trackSaveChange('favorite', articleId, saved, true);
         // 追加時のみ確認トースト(ブックマークと同様)。
-        if (favorites.toggle(articleId)) toast.success('お気に入りに追加しました');
+        if (saved) toast.success('お気に入りに追加しました');
       }}
       disabled={!ready}
     />

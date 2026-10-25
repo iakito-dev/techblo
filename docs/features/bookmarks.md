@@ -64,6 +64,12 @@ toggleBookmark({ articleId }): Promise<Result<{ added: boolean }, BookmarkError>
 
 ## メトリクス
 
+PostHog のイベント(一覧と規約は [observability.md §4](../architecture/observability.md)):
+
+| イベント | プロパティ | 発火 |
+|---|---|---|
+| `bookmark_added` / `bookmark_removed` | articleId, isGuest | `ArticleActions` / `SavedArticlesView`(`components/article/track-save.ts`)。ログイン時は Server Action 成功後、ゲストは localStorage 書き込み時 |
+
 - ブックマーク追加レート(表示比)
 - ブックマーク → お気に入り 昇格率
 - 平均保持期間(追加から削除まで)

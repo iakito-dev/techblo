@@ -5,8 +5,8 @@ import Link from 'next/link';
 import { memo, type ReactNode } from 'react';
 import { CompanyFavicon } from '@/components/article/company-favicon';
 import type { ArticleCard as ArticleCardType } from '../../application/dto';
-import { ARTICLE_LINK_PREFETCH } from '../article-link-prefetch';
 import { stripHtml } from '../strip-html';
+import { ArticleLink } from './article-link';
 import { RelativeTime } from './relative-time';
 
 /**
@@ -83,9 +83,9 @@ export const ArticleCard = memo(function ArticleCard({
           本文まで含めた full prefetch に切り替える(unstable_dynamicOnHover。ADR-0042)。
           本文は 'use cache: remote' なので、この先読みもほぼ DB 往復なしで返る。 */}
       <h2 className="mb-2 line-clamp-3 font-bold text-[1.125rem] text-fg-default leading-[1.46] tracking-[-0.015em]">
-        <Link
-          href={`/a/${article.id}`}
-          {...ARTICLE_LINK_PREFETCH}
+        <ArticleLink
+          article={article}
+          source="feed"
           // 上罫とタイトルのフォーカス強調(has-[[data-detail-trigger]:focus-visible])の目印。
           data-detail-trigger
           // j/k ショートカットが辿る対象の目印(keyboard-shortcuts.tsx)。
@@ -93,7 +93,7 @@ export const ArticleCard = memo(function ArticleCard({
           className="transition-colors after:absolute after:inset-0 focus-visible:outline-none group-hover:text-accent group-has-[[data-detail-trigger]:focus-visible]:text-accent group-has-[[data-detail-trigger]:focus-visible]:underline group-has-[[data-detail-trigger]:focus-visible]:decoration-[1.5px] group-has-[[data-detail-trigger]:focus-visible]:underline-offset-4"
         >
           {article.title}
-        </Link>
+        </ArticleLink>
       </h2>
 
       {/* 抜粋: AI要約の概要優先、無ければ RSS 抜粋 */}

@@ -50,6 +50,7 @@
 | [0040](./0040-tags-index-page.md) | タグ一覧ページ(/tags)を都度集計 + キャッシュで提供する | Accepted |
 | [0041](./0041-reading-history-from-reads.md) | 閲覧履歴(/history)を既読テーブルの readAt から提供する | Accepted |
 | [0042](./0042-remote-cache-for-request-time-article-data.md) | 記事ページの本文を共有キャッシュ + 操作時の先読みで速くし、クライアントから zod を外す | Accepted |
+| [0043](./0043-posthog-client-side-event-tracking.md) | PostHog の行動計測はクライアントの明示イベントだけで行い、個人情報は送らない | Accepted |
 
 ※ 0013 と 0014 は同日に並行して採番され、番号が2件ずつ重複している。コードやドキュメントから
 参照済みのため改番はしない(既存ADRは変更しない)。**これらを参照する時は番号だけでなく

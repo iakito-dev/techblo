@@ -13,6 +13,7 @@ import { FEED_GAP_CLASS } from '@/features/feed/web/feed-grid-classes';
 import { ActionButtons } from './article-actions';
 import { SavedSearchInput, SavedSortDropdown } from './saved-articles-controls';
 import { filterAndSortSaved, type SavedSort } from './saved-articles-filter';
+import { trackSaveChange } from './track-save';
 import { type GuestSaveKind, setGuestSave, useGuestSaves } from './use-guest-saves';
 
 type SavedKind = Exclude<GuestSaveKind, 'read'>;
@@ -97,6 +98,7 @@ export function SavedArticlesView({
     if (isGuest) {
       // hook の toggle は古い closure から呼ばれると逆向きに反転するため、純関数で明示的に設定する
       setGuestSave(kind, articleId, next);
+      trackSaveChange(kind, articleId, next, true);
       return;
     }
     const call =
@@ -104,7 +106,10 @@ export function SavedArticlesView({
         ? setBookmarkAction({ articleId, bookmarked: next })
         : setFavoriteAction({ articleId, favorited: next });
     void call.then((result) => {
-      if (result.ok) return;
+      if (result.ok) {
+        trackSaveChange(kind, articleId, next, false);
+        return;
+      }
       if (next) {
         toast.error('元に戻せませんでした');
         markUnsaved(articleId);
@@ -281,7 +286,7 @@ function SavedCardActions({
 
   function toggleOther() {
     if (isGuest) {
-      guestOther.toggle(articleId);
+      trackSaveChange(otherKind, articleId, guestOther.toggle(articleId), true);
       return;
     }
     const next = !otherActive;
@@ -298,7 +303,9 @@ function SavedCardActions({
             ? 'あとで読むの更新に失敗しました'
             : 'お気に入りの更新に失敗しました',
         );
+        return;
       }
+      trackSaveChange(otherKind, articleId, next, false);
     });
   }
 

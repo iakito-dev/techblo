@@ -43,7 +43,8 @@ export type ArticleCard = {
   viewCount: number;
   bookmarkCount: number;
   hatenaBookmarkCount: number;
-  company: { slug: string; name: string; brandColor: string };
+  /** id は表示には使わないが、記事クリック計測(PostHog の companyId)に載せるため持つ。 */
+  company: { id: string; slug: string; name: string; brandColor: string };
 };
 
 export type FeedPage = {
@@ -74,7 +75,7 @@ export type CompanyDetailDto = CompanyWithCount & {
 
 /**
  * ドメイン Article → 表示 DTO。
- * favorite 数や company.id など UI が使わない情報はここで落とす。
+ * favorite 数など UI が使わない情報はここで落とす。
  */
 export const toArticleCard = (a: Article): ArticleCard => ({
   id: a.id,
@@ -87,5 +88,10 @@ export const toArticleCard = (a: Article): ArticleCard => ({
   viewCount: a.counts.view,
   bookmarkCount: a.counts.bookmark,
   hatenaBookmarkCount: a.counts.hatena,
-  company: { slug: a.company.slug, name: a.company.name, brandColor: a.company.brandColor },
+  company: {
+    id: a.company.id,
+    slug: a.company.slug,
+    name: a.company.name,
+    brandColor: a.company.brandColor,
+  },
 });

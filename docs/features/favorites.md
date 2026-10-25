@@ -62,6 +62,12 @@ toggleFavorite({ articleId }): Promise<Result<{ added: boolean }, FavoriteError>
 
 ## メトリクス
 
+PostHog のイベント(一覧と規約は [observability.md §4](../architecture/observability.md)):
+
+| イベント | プロパティ | 発火 |
+|---|---|---|
+| `favorite_added` / `favorite_removed` | articleId, isGuest | `ArticleActions` / `SavedArticlesView`(`components/article/track-save.ts`)。ログイン時は Server Action 成功後、ゲストは localStorage 書き込み時 |
+
 - お気に入り追加レート
 - 1ユーザーあたりの平均お気に入り数
 

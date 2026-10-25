@@ -3,6 +3,7 @@
 import { ProgressProvider } from '@bprogress/next/app';
 import { ThemeProvider } from 'next-themes';
 import type { ReactNode } from 'react';
+import { type PostHogConfig, PostHogProvider } from './posthog-provider';
 
 /**
  * クライアント専用のグローバル Provider をまとめる境界。
@@ -15,8 +16,10 @@ import type { ReactNode } from 'react';
  *
  * ProgressProvider: 画面最上部のローディングバー(@bprogress/next)。フィルタ切替・ページ間遷移・
  * 戻る/進む等のクライアントナビゲーション中に表示し、コンテンツを暗くせず「読み込み中」を示す。
+ *
+ * PostHogProvider: プロダクト分析(app/posthog-provider.tsx)。キー未設定なら何もしない。
  */
-export function Providers({ children }: { children: ReactNode }) {
+export function Providers({ posthog, children }: { posthog: PostHogConfig; children: ReactNode }) {
   return (
     <ThemeProvider
       attribute={['class', 'data-theme']}
@@ -25,7 +28,7 @@ export function Providers({ children }: { children: ReactNode }) {
       disableTransitionOnChange
     >
       <ProgressProvider color="var(--color-primary)" height="2px" options={{ showSpinner: false }}>
-        {children}
+        <PostHogProvider config={posthog}>{children}</PostHogProvider>
       </ProgressProvider>
     </ThemeProvider>
   );

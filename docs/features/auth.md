@@ -34,6 +34,8 @@ Better Auth が管理するテーブル(`users`, `sessions`, `accounts`)を利�
 | `app/api/auth/[...all]/route.ts` | Better Auth API ハンドラ(`toNextJsHandler`) |
 | `features/auth/server.ts` | `getSession` / `requireSession`(サーバー側) |
 | `features/auth/client.ts` | `authClient` / `signIn` / `signOut` / `useSession` / `signInWithProvider` / `SocialProvider` |
+| `features/auth/pending-login.ts` | ログインボタン押下時のプロバイダを sessionStorage に置き、認証完了(`login_succeeded`)の判定に使う |
+| `features/auth/components/analytics-identity.tsx` | セッションと PostHog の同期(identify / reset / `login_succeeded`。client) |
 | `features/auth/last-provider.ts` | 直近ログイン方法の `localStorage` 読み書き(`readLastProvider` / `writeLastProvider`) |
 | `features/auth/components/social-sign-in-buttons.tsx` | Google / GitHub / Discord のログインボタン群(主役+「または」+コンパクト2列・前回利用を主役化) |
 | `features/auth/components/auth-heading.tsx` | 認証画面の見出し(client・前回利用の有無で出し分け) |
@@ -76,6 +78,14 @@ signOut()
 
 ## メトリクス
 
+PostHog のイベント(一覧と規約は [observability.md §4](../architecture/observability.md)):
+
+| イベント | プロパティ | 発火 |
+|---|---|---|
+| `login_clicked` | provider | `SocialSignInButtons` の押下(ログイン・登録は同じ操作) |
+| `login_succeeded` | provider, isNewUser | OAuth から戻ってセッションができたとき(`AnalyticsIdentity`)。押下時に `features/auth/pending-login.ts` が sessionStorage に置いたプロバイダと突き合わせる。isNewUser はユーザー作成から10分以内か |
+
+- identify / reset も `AnalyticsIdentity`(`features/auth/components/analytics-identity.tsx`)が行う。ログイン中は Better Auth のユーザー id だけで identify し(メール・名前は送らない)、未ログインで識別済みなら reset する
 - ログイン成功率
 - ログイン誘導モーダル表示 → 実際のログイン率
 - 月次アクティブユーザー(MAU)

@@ -15,7 +15,7 @@ const makeCard = (id: string): ArticleCard => ({
   viewCount: 0,
   bookmarkCount: 0,
   hatenaBookmarkCount: 0,
-  company: { slug: 'example', name: 'Example', brandColor: '#000000' },
+  company: { id: 'company-1', slug: 'example', name: 'Example', brandColor: '#000000' },
 });
 
 const categorized = (id: string, category: ArticleCategory) => ({

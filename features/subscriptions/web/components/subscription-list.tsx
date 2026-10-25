@@ -9,6 +9,7 @@ import { SettingsSection } from '@/components/ui/settings-section';
 import type { CompanyId } from '@/shared/type-utils';
 import type { SubscriptionSetting } from '../../application/dto';
 import { toggleSubscriptionAction } from '../actions';
+import { trackSubscriptionChange } from '../track-subscription';
 import { SubscriptionToggle } from './subscription-toggle';
 
 /** 保存成功チェックの表示時間(ms)。 */
@@ -63,6 +64,7 @@ export function SubscriptionList({ settings }: { settings: SubscriptionSetting[]
       (result) => {
         if (result.ok) {
           flashSaved(setting.companyId);
+          trackSubscriptionChange(setting, next, { isGuest: false, bulk: false });
         } else {
           setEnabledMap((prev) => new Map(prev).set(setting.companyId, !next));
           toast.error(`「${setting.name}」の更新に失敗しました`);
@@ -86,6 +88,9 @@ export function SubscriptionList({ settings }: { settings: SubscriptionSetting[]
       ),
     );
     const failed = targets.filter((_, i) => !results[i]?.ok);
+    targets.forEach((t, i) => {
+      if (results[i]?.ok) trackSubscriptionChange(t, next, { isGuest: false, bulk: true });
+    });
     if (failed.length > 0) {
       setEnabledMap((prev) => {
         const map = new Map(prev);

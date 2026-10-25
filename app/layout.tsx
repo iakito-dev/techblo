@@ -4,6 +4,7 @@ import type { Metadata, Viewport } from 'next';
 import { Inter, Newsreader, Noto_Sans_JP, Outfit } from 'next/font/google';
 import { GuestSavesMigrator } from '@/components/article/guest-saves-migrator';
 import { ThemedToaster } from '@/components/layout/themed-toaster';
+import { env } from '@/lib/env';
 import { SITE_DESCRIPTION, SITE_SOCIAL_DESCRIPTION } from '@/lib/seo';
 import { resolveBaseUrl } from '@/lib/site-url';
 import { Providers } from './providers';
@@ -108,8 +109,10 @@ export default function RootLayout({
       className={`${inter.variable} ${notoSansJp.variable} ${outfit.variable} ${newsreader.variable}`}
     >
       <body className="min-h-dvh bg-bg-app text-fg-default antialiased">
-        {/* 画面最上部のローディングバー等のクライアント provider(app/providers.tsx) */}
-        <Providers>
+        {/* 画面最上部のローディングバー・PostHog 等のクライアント provider(app/providers.tsx) */}
+        <Providers
+          posthog={{ key: env.NEXT_PUBLIC_POSTHOG_KEY, host: env.NEXT_PUBLIC_POSTHOG_HOST }}
+        >
           {children}
           <ThemedToaster />
         </Providers>

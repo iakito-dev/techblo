@@ -5,6 +5,7 @@ import { Search } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { CompanyFavicon } from '@/components/article/company-favicon';
 import { SettingsSection } from '@/components/ui/settings-section';
+import { trackSubscriptionChange } from '../track-subscription';
 import { useGuestSubscriptions } from '../use-guest-subscriptions';
 import { SubscriptionToggle } from './subscription-toggle';
 
@@ -27,6 +28,27 @@ export function GuestSubscriptionList({ companies }: { companies: GuestSubscript
 
   const enabledCount = companies.filter((c) => !isDisabled(c.slug)).length;
   const allSlugs = useMemo(() => companies.map((c) => c.slug), [companies]);
+
+  // Cookie は slug だけを持つので companyId は null で送る。
+  function toggleCompany(slug: string) {
+    trackSubscriptionChange({ companyId: null, slug }, isDisabled(slug), {
+      isGuest: true,
+      bulk: false,
+    });
+    toggle(slug);
+  }
+
+  function setAllCompanies(enabled: boolean) {
+    for (const c of companies) {
+      if (isDisabled(c.slug) === enabled) {
+        trackSubscriptionChange({ companyId: null, slug: c.slug }, enabled, {
+          isGuest: true,
+          bulk: true,
+        });
+      }
+    }
+    setAll(allSlugs, enabled);
+  }
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -57,7 +79,7 @@ export function GuestSubscriptionList({ companies }: { companies: GuestSubscript
             variant="outline"
             size="sm"
             isDisabled={!ready || enabledCount === companies.length}
-            onPress={() => setAll(allSlugs, true)}
+            onPress={() => setAllCompanies(true)}
             className="rounded-sm bg-bg-surface"
           >
             すべて表示
@@ -66,7 +88,7 @@ export function GuestSubscriptionList({ companies }: { companies: GuestSubscript
             variant="outline"
             size="sm"
             isDisabled={!ready || enabledCount === 0}
-            onPress={() => setAll(allSlugs, false)}
+            onPress={() => setAllCompanies(false)}
             className="rounded-sm bg-bg-surface"
           >
             すべて非表示
@@ -90,7 +112,7 @@ export function GuestSubscriptionList({ companies }: { companies: GuestSubscript
                   type="button"
                   aria-hidden="true"
                   tabIndex={-1}
-                  onClick={() => toggle(c.slug)}
+                  onClick={() => toggleCompany(c.slug)}
                   className="absolute inset-0 cursor-pointer rounded-lg"
                 />
                 <span
@@ -106,7 +128,7 @@ export function GuestSubscriptionList({ companies }: { companies: GuestSubscript
                     name={c.name}
                     enabled={enabled}
                     justSaved={false}
-                    onChange={() => toggle(c.slug)}
+                    onChange={() => toggleCompany(c.slug)}
                   />
                 </span>
               </li>

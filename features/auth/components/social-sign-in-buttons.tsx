@@ -3,8 +3,10 @@
 import { Button } from '@heroui/react';
 import { type ReactElement, useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import { captureEvent } from '@/lib/observability/posthog';
 import { type SocialProvider, signInWithProvider } from '../client';
 import { readLastProvider, writeLastProvider } from '../last-provider';
+import { clearPendingLogin, markPendingLogin } from '../pending-login';
 
 /** Google G ロゴ(公式配色)。アセット追加を避けインライン SVG で描画。 */
 function GoogleIcon() {
@@ -90,10 +92,14 @@ export function SocialSignInButtons({ callbackURL }: { callbackURL?: string }) {
     setPending(provider);
     // リダイレクト前に記録しておく(成功時はこのページに戻らないため、次回ここで主役判定に使う)。
     writeLastProvider(provider);
+    captureEvent('login_clicked', { provider });
+    // 認証完了は戻り先のページで AnalyticsIdentity が判定する(pending-login.ts)。
+    markPendingLogin(provider);
     const { error } = await signInWithProvider(provider, callbackURL);
     // 成功時はプロバイダへリダイレクトするためここには戻らない。
     // 戻ってくる = 失敗(ポップアップブロック等)なので解除して通知。
     if (error) {
+      clearPendingLogin();
       setPending(null);
       toast.error('ログインに失敗しました。時間をおいて再度お試しください。');
     }

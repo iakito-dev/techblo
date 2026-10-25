@@ -183,6 +183,15 @@ trackArticleView(input: { articleId: string }): Promise<Result<void, FeedError>>
 
 ## メトリクス
 
+PostHog のイベント(一覧と規約は [observability.md §4](../architecture/observability.md)):
+
+| イベント | プロパティ | 発火 |
+|---|---|---|
+| `article_clicked` | articleId, companyId, companySlug, source(`feed` / `event_list` / `related`) | 記事ページへのリンク(`features/feed/web/components/article-link.tsx` の `ArticleLink`)。`ArticleCard` / `FeedEventRow` / `RelatedArticles` が使う |
+| `article_source_opened` | articleId, companyId, companySlug | 記事ページの「元記事を開く」(`ArticleSourceLink`) |
+
+記事ページの閲覧そのものは `$pageview`(`/a/[id]`)で取れる。`ArticleCard` DTO の `company.id` はこの計測のために持つ。
+
 - 各社の記事表示回数
 - ブックマーク/お気に入り率(表示数比)
 - スクロール深度(PostHog)

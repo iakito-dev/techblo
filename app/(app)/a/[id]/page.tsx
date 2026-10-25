@@ -14,6 +14,7 @@ import { articleFallbackImage } from '@/features/feed/web/article-image';
 import { ArticleBackLink } from '@/features/feed/web/components/article-back-link';
 import { ArticleDetailSkeleton } from '@/features/feed/web/components/article-detail-skeleton';
 import { ArticleHeroImage } from '@/features/feed/web/components/article-hero-image';
+import { ArticleSourceLink } from '@/features/feed/web/components/article-link';
 import { RelatedArticles } from '@/features/feed/web/components/related-articles';
 import { ShareButton } from '@/features/feed/web/components/share-button';
 import { getArticleById, getRelatedArticles } from '@/features/feed/web/queries';
@@ -274,15 +275,13 @@ async function ArticleContent({ params }: { params: Promise<{ id: string }> }) {
             </div>
           </Suspense>
           <ShareButton articleId={article.id} title={article.title} />
-          <a
-            href={article.url}
-            target="_blank"
-            rel="noopener noreferrer"
+          <ArticleSourceLink
+            article={article}
             className="ml-auto inline-flex min-h-12 touch-manipulation items-center gap-2 rounded-md bg-primary px-5 font-semibold text-fg-inverse text-sm transition-colors hover:bg-primary-hover xl:order-first xl:ml-0 xl:w-full xl:justify-center"
           >
             元記事を開く
             <ExternalLink aria-hidden="true" className="size-4" />
-          </a>
+          </ArticleSourceLink>
         </div>
         {/* 関連記事は補助情報。本文・保存状態とは独立にストリームし、表示を待たせない。 */}
         <Suspense fallback={null}>

@@ -86,6 +86,12 @@ initializeSubscriptions({ userId }): Promise<Result<void, ...>>
 
 ## メトリクス
 
+PostHog のイベント(一覧と規約は [observability.md §4](../architecture/observability.md)):
+
+| イベント | プロパティ | 発火 |
+|---|---|---|
+| `subscription_added` / `subscription_removed` | companyId(ゲストは null), companySlug, isGuest, bulk | `SubscriptionList`(Server Action 成功後)/ `GuestSubscriptionList`(Cookie 書き込み時)。`features/subscriptions/web/track-subscription.ts`。「すべて表示/非表示」は実際に変わった企業ごとに bulk=true で送る |
+
 - 平均購読企業数
 - 最も非購読されている企業(品質改善の指標)
 
