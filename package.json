@@ -10,7 +10,7 @@
     "start": "next start",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
-    "depcruise": "bunx --bun depcruise features lib app shared db --config .dependency-cruiser.cjs",
+    "depcruise": "bunx --bun depcruise features lib app shared db components trigger --config .dependency-cruiser.cjs",
     "scaffold:feature": "bun run scripts/scaffold-feature.ts",
     "format": "biome format --write .",
     "format:check": "biome format .",

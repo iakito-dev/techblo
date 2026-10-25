@@ -67,6 +67,36 @@ module.exports = {
       from: { path: '^app/' },
       to: { path: '^db/' },
     },
+    {
+      name: 'components-no-direct-db',
+      comment:
+        'components は db を直叩きしない。データは features の web/queries・web/actions 経由(ADR-0010)',
+      severity: 'error',
+      from: { path: '^components/' },
+      to: { path: '^db/' },
+    },
+    {
+      name: 'ui-primitives-no-features',
+      comment: 'components/ui は機能を知らない UI 部品。features / db / lib に依存しない(ADR-0020)',
+      severity: 'error',
+      from: { path: '^components/ui/' },
+      to: { path: '^(features|db|lib)/' },
+    },
+    {
+      name: 'shared-pure',
+      comment:
+        'shared は features 横断の純粋ロジック。features / lib / db / app / components に依存しない',
+      severity: 'error',
+      from: { path: '^shared/' },
+      to: { path: '^(features|lib|db|app|components)/' },
+    },
+    {
+      name: 'no-import-app',
+      comment: 'app はルーティング層(最外殻)。他の層から app を import しない',
+      severity: 'error',
+      from: { path: '^(features|lib|shared|components|db|trigger)/' },
+      to: { path: '^app/' },
+    },
   ],
   options: {
     doNotFollow: { path: 'node_modules' },

@@ -76,6 +76,9 @@
 - `db/` へアクセスしてよいのは feature の `infrastructure/` 層のみ(Repository 経由)
 - `db/` のスキーマ型を上層に直接漏らさない(`domain` / `application` の型で再定義)
 - `lib/` は `features/` を import しない(逆流禁止、保存処理は sink 注入)
+- `components/` も `db/` を直接 import しない。`components/ui/` は features / db / lib に依存しない
+- `shared/` は純粋ロジックのみ(features / lib / db / app / components を import しない)
+- `app/` は最外殻。他の層から `app/` を import しない
 
 ### React/Next.js
 - デフォルトはServer Component(`'use client'` は本当に必要なときだけ)
