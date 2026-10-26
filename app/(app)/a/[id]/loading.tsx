@@ -1,3 +1,4 @@
+import { ResetScrollOnMount } from '@/components/layout/reset-scroll-on-mount';
 import { ArticleDetailSkeleton } from '@/features/feed/web/components/article-detail-skeleton';
 import { MOBILE_GUTTER_CLASS } from '@/shared/layout';
 
@@ -17,6 +18,7 @@ export default function Loading() {
       <main
         className={`mx-auto max-w-2xl max-lg:-mt-4 xl:max-w-[66rem] ${MOBILE_GUTTER_CLASS} pb-8 md:px-6 md:pb-10 lg:px-8 lg:pt-6`}
       >
+        <ResetScrollOnMount />
         <div className="mb-1 h-11" />
         <ArticleDetailSkeleton />
       </main>

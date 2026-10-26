@@ -6,6 +6,7 @@ import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
 import { ArticleDetailActions } from '@/app/_composition/article/article-detail-actions';
 import { ArticleViewTracker } from '@/app/_composition/article/article-view-tracker';
+import { ResetScrollOnMount } from '@/components/layout/reset-scroll-on-mount';
 import { JsonLd } from '@/components/seo/json-ld';
 import { CompanyFavicon } from '@/components/ui/company-favicon';
 import { SummaryView } from '@/features/ai-summary/web/components/summary-view';
@@ -130,6 +131,8 @@ export default function ArticlePage({ params }: { params: Promise<{ id: string }
       <main
         className={`mx-auto max-w-2xl max-lg:-mt-4 xl:max-w-[66rem] ${MOBILE_GUTTER_CLASS} pb-8 md:px-6 md:pb-10 lg:px-8 lg:pt-6`}
       >
+        {/* フィードの途中から来ても記事の頭から開く(Next の遷移時スクロールの補正)。 */}
+        <ResetScrollOnMount />
         <ArticleBackLink className="mb-1 max-lg:hidden" />
         <Suspense fallback={<ArticleDetailSkeleton />}>
           <ArticleContent params={params} />
