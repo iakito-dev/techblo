@@ -37,7 +37,13 @@ jobs:
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version-file: .tool-versions
-      - run: bun run scripts/factory-guard.ts
+      # このワークフローを導入する PR 自身は、base にまだスクリプトがない。判定対象もないので成功で抜ける
+      - run: |
+          if [ ! -f scripts/factory-guard.ts ]; then
+            echo "base に scripts/factory-guard.ts がないため判定をスキップします"
+            exit 0
+          fi
+          bun run scripts/factory-guard.ts
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
