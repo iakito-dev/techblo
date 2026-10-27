@@ -364,6 +364,7 @@ async function main() {
         brandColor: sql`excluded.brand_color`,
         description: sql`excluded.description`,
         enabled: sql`excluded.enabled`,
+        feedTimezone: sql`excluded.feed_timezone`,
         updatedAt: sql`now()`,
       },
     });
