@@ -71,6 +71,7 @@ AIエージェントもこのファイルから辿れるように構成されて
 - [0042-remote-cache-for-request-time-article-data.md](./adr/0042-remote-cache-for-request-time-article-data.md)
 - [0043-posthog-client-side-event-tracking.md](./adr/0043-posthog-client-side-event-tracking.md)
 - [0044-move-cross-feature-composition-under-app.md](./adr/0044-move-cross-feature-composition-under-app.md)
+- [0045-software-factory.md](./adr/0045-software-factory.md)
 
 ### `features/` — 機能仕様
 
@@ -96,6 +97,7 @@ AIエージェントもこのファイルから辿れるように構成されて
 - [local-dev.md](./guides/local-dev.md) — ローカル開発セットアップ
 - [launch-checklist.md](./guides/launch-checklist.md) — 公開(本番ローンチ)前にやるべきこと
 - [ai-engineering.md](./guides/ai-engineering.md) — AI開発のベストプラクティス
+- [software-factory.md](./guides/software-factory.md) — 定期起動エージェント(ソフトウェアファクトリー)の運用
 
 ---
 

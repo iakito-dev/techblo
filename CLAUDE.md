@@ -27,6 +27,7 @@ Claude Code 向けの指示。共通の指示は `AGENTS.md` を参照してく�
 |---|---|
 | `.agents/skills/find-skills` | 追加スキルの探索・インストール |
 | `.agents/skills/ckm-design-system` | デザイントークン設計(3層アーキテクチャ) |
+| `.claude/skills/factory` | ソフトウェアファクトリーの 1 回分の実行手順(定期実行から起動 / ADR-0045) |
 
 スキルが必要そうな場面では `find-skills` を起動して探索してください。
 

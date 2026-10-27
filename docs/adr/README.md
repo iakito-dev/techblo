@@ -52,6 +52,7 @@
 | [0042](./0042-remote-cache-for-request-time-article-data.md) | 記事ページの本文を共有キャッシュ + 操作時の先読みで速くし、クライアントから zod を外す | Accepted |
 | [0043](./0043-posthog-client-side-event-tracking.md) | PostHog の行動計測はクライアントの明示イベントだけで行い、個人情報は送らない | Accepted |
 | [0044](./0044-move-cross-feature-composition-under-app.md) | 記事の横断合成を `components/article/` から `app/_composition/` へ移す | Accepted |
+| [0045](./0045-software-factory.md) | 定期起動エージェント(ソフトウェアファクトリー)と、CI のガードによる条件付き自動マージ | Accepted |
 
 ※ 0013 と 0014 は同日に並行して採番され、番号が2件ずつ重複している。コードやドキュメントから
 参照済みのため改番はしない(既存ADRは変更しない)。**これらを参照する時は番号だけでなく
