@@ -311,6 +311,14 @@ const SEED_COMPANIES = [
     description: 'IVRy のエンジニアブログ(note マガジン)',
   },
   {
+    slug: 'loglass',
+    name: 'ログラス',
+    rssUrl: 'https://zenn.dev/p/loglass/feed',
+    siteUrl: 'https://zenn.dev/p/loglass',
+    brandColor: '#1a56db',
+    description: 'ログラス テックブログ(Zenn)',
+  },
+  {
     slug: 'anthropic',
     name: 'Anthropic',
     // 公式 RSS が無いため、Anthropic 公式サイトを定期スクレイプして生成されるコミュニティ製フィードを使用
