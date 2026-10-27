@@ -1,0 +1,49 @@
+name: Factory guard
+
+# ソフトウェアファクトリー(ADR-0045)の PR を自動マージしてよいか判定する。
+# 判定ロジックは scripts/factory-guard.ts。factory/* 以外の PR では何もせず成功する。
+# 条件を満たせば github-actions[bot] が Approve し、ブランチ保護の「承認 1 件」を満たす。
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, reopened, synchronize, labeled, unlabeled, ready_for_review]
+
+# 連続 push・ラベル付け替えでは最新の状態だけを判定する
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  guard:
+    name: Factory guard
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      # Approve レビューを付けるため
+      pull-requests: write
+    steps:
+      # PR の head ではなく main の判定スクリプトを使う。head を動かすと、PR がスクリプトを書き換えて
+      # 自分を承認できてしまう(判定に要る PR の情報はすべて API から取る)
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          persist-credentials: false
+      # 判定スクリプトは依存なしの単体ファイルなので bun install は不要
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: .tool-versions
+      # このワークフローを導入する PR 自身は、base にまだスクリプトがない。判定対象もないので成功で抜ける
+      - run: |
+          if [ ! -f scripts/factory-guard.ts ]; then
+            echo "base に scripts/factory-guard.ts がないため判定をスキップします"
+            exit 0
+          fi
+          bun run scripts/factory-guard.ts
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
