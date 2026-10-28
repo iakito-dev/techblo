@@ -252,8 +252,8 @@ PostHog のイベント(一覧と規約は [observability.md §4](../architectur
 
 ## 公開 RSS フィード(ADR-0039)
 
-- `/feed.xml`(全企業の新着50件。`?category=<key>` で職能カテゴリに絞り込み。不正キーは無視して全体)と `/companies/[slug]/feed.xml`(存在しない slug は404)を Route Handler で配信する。RSS 2.0 / `application/rss+xml`。
+- `/feed.xml`(全企業の新着50件。`?category=<key>` で職能カテゴリに絞り込み。不正キーは無視して全体。`?tag=<タグ>` で AI要約タグ(`/?tag=` と同じ類義語展開。空白のみ・50文字超は無視)に絞り込み、`category` と併用可)と `/companies/[slug]/feed.xml`(存在しない slug は404)を Route Handler で配信する。RSS 2.0 / `application/rss+xml`。
 - item の `link` は元記事 URL(元ブログへの送客を優先)、`guid`(isPermaLink=false)は Techblo の記事ページ URL。`dc:creator` と `source` は企業名、`category` は AI要約タグ、`description` は AI要約 overview を優先し、無ければ RSS 抜粋。
 - 合成は app 層(`app/_feed/public-feed.ts`)。XML 生成は `lib/rss/build-feed-xml.ts`(純粋関数、エスケープ・制御文字除去)。
 - `Cache-Control: public, s-maxage=600, stale-while-revalidate=3600`。データは `getFeed`(feed タグで無効化)を再利用。失敗時は 500 + `logger.error`。
-- ルートレイアウトの `alternates.types` で `/feed.xml` を自動検出用に宣言する。
+- ルートレイアウトの `alternates.types` で `/feed.xml` を自動検出用に宣言する。`/?tag=` 表示中は `app/(app)/page.tsx` の metadata がタグ別フィードも併記する。

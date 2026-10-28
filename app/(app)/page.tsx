@@ -59,8 +59,21 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const sp = await searchParams;
   const isSearch = !!sp.q?.trim();
+  const tag = sp.tag?.trim();
   return {
-    alternates: { canonical: '/' },
+    alternates: {
+      canonical: '/',
+      // alternates はルートレイアウトのものを浅く上書きするので、全体フィードも併記する。
+      // タグ絞り込み中は RSS リーダーの自動検出でそのタグのフィードも見つかるようにする(ADR-0039)。
+      types: {
+        'application/rss+xml': [
+          ...(tag
+            ? [{ url: `/feed.xml?tag=${encodeURIComponent(tag)}`, title: `#${tag} の新着` }]
+            : []),
+          { url: '/feed.xml', title: 'テクブロ 新着' },
+        ],
+      },
+    },
     ...(isSearch ? { robots: { index: false, follow: true } } : {}),
   };
 }
