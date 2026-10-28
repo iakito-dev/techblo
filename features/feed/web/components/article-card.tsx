@@ -118,7 +118,9 @@ export const ArticleCard = memo(function ArticleCard({
             aria-label="AI生成タグ"
             // overflow-hidden が ::before の当たり判定(上下に広げた分)を切らないよう、
             // 上下 padding で余白を確保し同量の負マージンで行高は変えない。
-            className="-my-1.5 flex min-w-0 flex-1 flex-nowrap gap-1.5 overflow-hidden py-1.5"
+            // 1行に収まらないバッジは折り返して(h-8 = バッジ 20px + padding)枠外へ追い出し、
+            // 半端に切れた状態では見せない。gap-y-3 は2行目が padding 内へ覗かない余白。
+            className="-my-1.5 flex h-8 min-w-0 flex-1 flex-wrap gap-x-1.5 gap-y-3 overflow-hidden py-1.5"
           >
             {tags.slice(0, 3).map((tag) => (
               <li key={tag} className="shrink-0">
