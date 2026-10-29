@@ -146,7 +146,7 @@ export function AppSidebar({
             {/* 企業(クリックで /?company=slug 絞り込み・折りたたみ) */}
             <Collapsible defaultOpen className="mt-1">
               <div className="flex items-center justify-between px-2.5">
-                <CollapsibleTrigger className="group flex items-center gap-1 py-1 font-medium text-fg-subtle text-xs outline-none">
+                <CollapsibleTrigger className="group flex items-center gap-1 py-1 font-medium rounded-sm text-fg-subtle text-xs outline-none focus-visible:ring-2 focus-visible:ring-accent">
                   <ChevronRight className="size-3.5 transition-transform group-data-[state=open]:rotate-90" />
                   企業
                 </CollapsibleTrigger>
@@ -182,7 +182,7 @@ export function AppSidebar({
             {userFeeds.length > 0 && (
               <Collapsible defaultOpen className="mt-1">
                 <div className="flex items-center justify-between px-2.5">
-                  <CollapsibleTrigger className="group flex items-center gap-1 py-1 font-medium text-fg-subtle text-xs outline-none">
+                  <CollapsibleTrigger className="group flex items-center gap-1 py-1 font-medium rounded-sm text-fg-subtle text-xs outline-none focus-visible:ring-2 focus-visible:ring-accent">
                     <ChevronRight className="size-3.5 transition-transform group-data-[state=open]:rotate-90" />
                     マイフィード
                   </CollapsibleTrigger>
