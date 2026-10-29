@@ -131,7 +131,7 @@ export default function ArticlePage({ params }: { params: Promise<{ id: string }
           記事は上から読み始めるものなので、戻る行をヘッダー直下に寄せて本文の頭出しを早める。
           max-lg の -mt-4 は Header の mb-8 を半分食う分(lg+ は Header 自体が出ないため
           lg:pt-6 で自前の上余白を持つ)。 */}
-      <main
+      <div
         className={`mx-auto max-w-2xl max-lg:-mt-4 xl:max-w-[66rem] ${MOBILE_GUTTER_CLASS} pb-8 md:px-6 md:pb-10 lg:px-8 lg:pt-6`}
       >
         {/* フィードの途中から来ても記事の頭から開く(Next の遷移時スクロールの補正)。 */}
@@ -140,7 +140,7 @@ export default function ArticlePage({ params }: { params: Promise<{ id: string }
         <Suspense fallback={<ArticleDetailSkeleton />}>
           <ArticleContent params={params} />
         </Suspense>
-      </main>
+      </div>
     </div>
   );
 }
