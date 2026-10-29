@@ -1,6 +1,6 @@
 import { ExternalLink } from 'lucide-react';
 import type { Metadata } from 'next';
-import { cacheLife } from 'next/cache';
+import { cacheLife, cacheTag } from 'next/cache';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
@@ -20,6 +20,7 @@ import { RelatedArticles } from '@/features/feed/web/components/related-articles
 import { ShareButton } from '@/features/feed/web/components/share-button';
 import { getArticleById, getRelatedArticles } from '@/features/feed/web/queries';
 import { toExcerpt } from '@/features/feed/web/strip-html';
+import { CACHE_TAGS } from '@/lib/cache/tags';
 import { articleJsonLd } from '@/lib/seo';
 import { resolveBaseUrl } from '@/lib/site-url';
 import { formatRelative } from '@/shared/date';
@@ -48,10 +49,12 @@ function hostname(url: string): string {
  * 記事ページはリクエスト時に描画される(id が動的で静的シェルに入らない)ので、in-memory の
  * 'use cache' はサーバーレスのインスタンスごとに空から始まり、ほぼ毎回 Supabase まで往復していた。
  * インスタンス間で共有される 'use cache: remote'(Vercel Runtime Cache)にする(ADR-0042)。
+ * 記事タグを付けて分類 cron の無効化を受け、寿命は 'days' にして再検証の書き込みを減らす(ADR-0047)。
  */
 async function loadArticle(id: string) {
   'use cache: remote';
-  cacheLife('hours');
+  cacheTag(CACHE_TAGS.article(id));
+  cacheLife('days');
   return getArticleById(id);
 }
 

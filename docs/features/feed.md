@@ -102,7 +102,7 @@ getSidebarCompanies(): Promise<CompanyWithCount[]>          // サイドバー/�
 getCompanyBySlug(slug): Promise<CompanyDetailDto | null>    // 企業ページ(/companies/[slug])用。slug で1社+紹介文('use cache' tag=[companies,feed]。ADR-0030)
 getSitemapCompanies(): Promise<{ slug }[]>                   // sitemap 用の全企業 slug('use cache')
 getArticleById(id: string): Promise<ArticleCard | null>     // 単発参照(OGP プレースホルダー生成等)
-getRelatedArticles(id: string): Promise<ArticleCard[]>      // 記事ページの関連記事(最大6件。'use cache: remote' tag=feed days、失敗時は空+minutes。ADR-0037)
+getRelatedArticles(id: string): Promise<ArticleCard[]>      // 記事ページの関連記事(最大6件。'use cache: remote' tag=article(id) days(ADR-0047)、失敗時は空+minutes。ADR-0037)
 
 // app/_composition/article/feed-load-more.tsx(app 層の合成点・RSC から呼ぶ。ADR-0013)
 getCompanyArticles({ slug, page, limit }): Promise<{ items: ComposedArticle[]; hasMore; isGuest }>
@@ -224,7 +224,7 @@ PostHog のイベント(一覧と規約は [observability.md §4](../architectur
   - 記事本体・AI要約はユーザー非依存で `'use cache'`。ページは PPR(`◐`)として静的シェルをプリレンダし、カードの `Link` 既定 prefetch(ビューポートに入った分)でシェルを先読みする。
   - 保存状態(ユーザー依存)だけ別の Suspense 境界(`ArticleDetailActions`)に隔離し、本文の表示をユーザー取得で待たせない。
   - `loading.tsx` と本文の Suspense fallback は同じ `ArticleDetailSkeleton`(実レイアウトと同じ位置・高さ。実物と同じ2カラム構造で、左が 上罫 → 見出し行 → タイトル → AI要約、右(aside 相当)が 画像 → ドメイン → アクション行。xl 以上のアクション行は「幅いっぱいのボタン枠 → アイコン3つ」。デザインを変えたら必ず追従させる)。これが無いと `(app)/loading.tsx` のフィード用 skeleton が出て、遷移のたびに一覧の skeleton が一瞬見える。
-- データ取得(ADR-0042): 本文はリクエスト時に描画されるため、記事(`loadArticle`)・AI要約(`getSummaryByArticleId`)・関連記事は `'use cache: remote'`(Vercel Runtime Cache)で引く。記事と要約は `Promise.all` で並列、関連記事は本文の取得前に投げて別の Suspense で受ける。記事ページへのリンク(カード・イベント行・関連記事)は画面内に入ると枠だけを先読みし、hover / touchstart で本文まで含めた full prefetch に切り替える(`unstable_dynamicOnHover` + `experimental.dynamicOnHover`)。
+- データ取得(ADR-0042): 本文はリクエスト時に描画されるため、記事(`loadArticle`)・AI要約(`getSummaryByArticleId`)・関連記事は `'use cache: remote'`(Vercel Runtime Cache)で引く。記事と要約は記事タグ + `cacheLife('days')`(要約 null は `'hours'`)で、cron の `/api/revalidate` による記事タグ無効化で更新を反映する(ADR-0047)。記事と要約は `Promise.all` で並列、関連記事は本文の取得前に投げて別の Suspense で受ける。記事ページへのリンク(カード・イベント行・関連記事)は画面内に入ると枠だけを先読みし、hover / touchstart で本文まで含めた full prefetch に切り替える(`unstable_dynamicOnHover` + `experimental.dynamicOnHover`)。
 - 記事ページに着地すると `ArticleViewTracker` が `trackArticleView` で表示回数を加算(未ログインも計測)し、既読マークを付ける。クリック時ではなく着地側で行うのは、遷移でリクエストが中断されないようにするため。
 - 保存系は ADR-0013 の `actions` スロットで注入(feed は bookmark/favorite を import しない)。
 
@@ -236,7 +236,7 @@ PostHog のイベント(一覧と規約は [observability.md §4](../architectur
   2. 足りなければ同じ企業の新着で補完(自身とタグ一致済みを除く。`list({ sort: 'latest', companyIds, limit: limit + 1 })`)
   3. 対象記事が無ければ空配列
 - 自身・削除済み・要約が ready でない記事は含めない。タグの表記ゆれは取りこぼす(類義語展開はしない)。
-- キャッシュ: `getRelatedArticles` は `'use cache: remote'` + `cacheTag(feed)` + `cacheLife('days')`。`tags` に索引は張らず、インスタンス間で共有されるキャッシュで1記事1回の走査に抑える(in-memory の `'use cache'` だとインスタンスの数だけ走査が走る。ADR-0042)。失敗(Result err・例外)は `logger.warn` して `cacheLife('minutes')` で `[]` を返し、記事ページを落とさない。
+- キャッシュ: `getRelatedArticles` は `'use cache: remote'` + `cacheTag(article(id))` + `cacheLife('days')`(`feed` タグは cron で毎時数回無効化され、Runtime Cache の書き込みが増えるため外した。ADR-0047)。`tags` に索引は張らず、インスタンス間で共有されるキャッシュで1記事1回の走査に抑える(in-memory の `'use cache'` だとインスタンスの数だけ走査が走る。ADR-0042)。失敗(Result err・例外)は `logger.warn` して `cacheLife('minutes')` で `[]` を返し、記事ページを落とさない。
 - シグネチャ: `listRelatedArticles(deps)(articleId, limit = RELATED_ARTICLES_LIMIT): Promise<Result<ArticleCard[], FeedError>>`(`features/feed/application/list-related-articles.ts`)。
 - id は呼び出し側(ページ)で UUID 検証済みのものだけを渡す(不正形式は DB エラーになる)。
 
