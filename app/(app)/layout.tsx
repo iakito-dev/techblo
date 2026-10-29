@@ -45,15 +45,17 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           <Header />
         </Suspense>
         <Sidebar />
-        {/* スキップリンクの着地点。ページごとに <main> の有無が違うため、共有のラッパーで受ける。 */}
-        <div
+        {/* スキップリンクの着地点であり、(app) 配下共通の main ランドマーク。以前はページごとに
+            <main> の有無がまちまち(フィード・保存・履歴・設定には無かった)で、スクリーンリーダーの
+            「メインへ移動」が効かない画面があったため、ここに一本化する(各 page は <main> を持たない)。 */}
+        <main
           data-mobile-swipe-content
           id="main-content"
           tabIndex={-1}
           className="focus:outline-none"
         >
           {children}
-        </div>
+        </main>
         <ScrollToTop />
         {/* 表示物を持たない(スワイプの検知のみ)ので fallback は無し。 */}
         <Suspense fallback={null}>
