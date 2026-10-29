@@ -28,6 +28,7 @@ import {
   DefaultMobileFeedControls,
   MobileFeedControls,
 } from '@/features/feed/web/components/mobile-feed-header';
+import { feedPageTitle } from '@/features/feed/web/feed-page-title';
 import { FeedNavProvider } from '@/features/feed/web/view-models/feed-nav-context';
 import { organizationJsonLd, websiteJsonLd } from '@/lib/seo';
 import { resolveBaseUrl } from '@/lib/site-url';
@@ -60,7 +61,9 @@ export async function generateMetadata({
   const sp = await searchParams;
   const isSearch = !!sp.q?.trim();
   const tag = sp.tag?.trim();
+  const title = feedPageTitle({ q: sp.q, tag });
   return {
+    ...(title ? { title } : {}),
     alternates: {
       canonical: '/',
       // alternates はルートレイアウトのものを浅く上書きするので、全体フィードも併記する。
