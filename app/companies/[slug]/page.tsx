@@ -160,11 +160,13 @@ async function CompanyContent({ params }: { params: Promise<{ slug: string }> })
       <header className="mb-8">
         <div className="flex items-center gap-2.5">
           <CompanyFavicon url={company.siteUrl} name={company.name} />
-          {/* ブランド色は黒など暗い色の企業があり、暗背景では読めなくなるためダーク時は本文色にする。 */}
-          <h1 className="font-bold text-(--brand) text-2xl tracking-tight md:text-3xl dark:text-fg-default">
+          {/* ブランド色は明るい色(黄・水色など)だと白背景で読めず、黒など暗い色だと暗背景で読めない。
+              見出しは本文色に固定し、ブランド色は下のアクセントバーで出す。 */}
+          <h1 className="font-bold text-2xl text-fg-default tracking-tight md:text-3xl">
             {company.name}の技術ブログ
           </h1>
         </div>
+        <span aria-hidden className="mt-3 block h-1 w-10 rounded-full bg-(--brand)" />
         <p className="mt-3 max-w-2xl text-fg-muted leading-relaxed">{description}</p>
         <div className="mt-4 flex flex-wrap items-center gap-3 text-sm">
           <span className="text-fg-muted">記事 {company.articleCount} 件</span>
