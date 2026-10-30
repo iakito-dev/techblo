@@ -61,7 +61,7 @@ export async function generateMetadata({
   const sp = await searchParams;
   const isSearch = !!sp.q?.trim();
   const tag = sp.tag?.trim();
-  const title = feedPageTitle({ q: sp.q, tag });
+  const title = feedPageTitle({ q: sp.q, tag, sort: parseFeedSort(sp.sort) });
   return {
     ...(title ? { title } : {}),
     alternates: {

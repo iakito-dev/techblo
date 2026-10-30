@@ -19,6 +19,16 @@ describe('feedPageTitle', () => {
     expect(feedPageTitle({ q: 'go', tag: 'SRE' })).toBe('「go」の検索結果');
   });
 
+  it('人気順は「人気の記事」、新着順は既定のまま', () => {
+    expect(feedPageTitle({ sort: 'popular' })).toBe('人気の記事');
+    expect(feedPageTitle({ sort: 'latest' })).toBeUndefined();
+  });
+
+  it('人気順でも検索・タグがあればそちらを優先する', () => {
+    expect(feedPageTitle({ q: 'go', sort: 'popular' })).toBe('「go」の検索結果');
+    expect(feedPageTitle({ tag: 'SRE', sort: 'popular' })).toBe('#SRE の記事');
+  });
+
   it('長い入力は 40 文字で切る(サロゲートペアを壊さない)', () => {
     const title = feedPageTitle({ q: '😀'.repeat(50) });
     expect(title).toBe(`「${'😀'.repeat(40)}…」の検索結果`);
