@@ -29,6 +29,7 @@ import {
   MobileFeedControls,
 } from '@/features/feed/web/components/mobile-feed-header';
 import { feedPageTitle } from '@/features/feed/web/feed-page-title';
+import { getCompanyBySlug } from '@/features/feed/web/queries';
 import { FeedNavProvider } from '@/features/feed/web/view-models/feed-nav-context';
 import { organizationJsonLd, websiteJsonLd } from '@/lib/seo';
 import { resolveBaseUrl } from '@/lib/site-url';
@@ -47,6 +48,24 @@ type FeedSearchParams = {
 };
 
 /**
+ * ?company= がちょうど 1 社のときだけ企業名を引く(複数選択はタイトルにしない)。
+ * タイトルのためだけに失敗してページ全体を落とさないよう、取得失敗・未登録は無視する。
+ */
+async function singleCompanyName(param: string | undefined): Promise<string | undefined> {
+  const slugs = param
+    ?.split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+  const slug = slugs?.length === 1 ? slugs[0] : undefined;
+  if (!slug) return undefined;
+  try {
+    return (await getCompanyBySlug(slug))?.name;
+  } catch {
+    return undefined;
+  }
+}
+
+/**
  * トップのメタデータ。
  * - canonical は常にクエリ無しの `/` に固定し、?sort=/?company=/?period=/?tag= などの
  *   パラメータ違いを `/` の重複として正規化する(クロール枠の浪費とインデックス分散を防ぐ)。
@@ -61,7 +80,13 @@ export async function generateMetadata({
   const sp = await searchParams;
   const isSearch = !!sp.q?.trim();
   const tag = sp.tag?.trim();
-  const title = feedPageTitle({ q: sp.q, tag, sort: parseFeedSort(sp.sort) });
+  const companyName = await singleCompanyName(sp.company);
+  const title = feedPageTitle({
+    q: sp.q,
+    tag,
+    company: companyName,
+    sort: parseFeedSort(sp.sort),
+  });
   return {
     ...(title ? { title } : {}),
     alternates: {
