@@ -24,6 +24,12 @@ describe('feedPageTitle', () => {
     expect(feedPageTitle({ sort: 'latest' })).toBeUndefined();
   });
 
+  it('企業は「企業名 の記事」にする(タグより後・人気順より前)', () => {
+    expect(feedPageTitle({ company: ' mercari ' })).toBe('mercari の記事');
+    expect(feedPageTitle({ company: 'mercari', tag: 'SRE' })).toBe('#SRE の記事');
+    expect(feedPageTitle({ company: 'mercari', sort: 'popular' })).toBe('mercari の記事');
+  });
+
   it('人気順でも検索・タグがあればそちらを優先する', () => {
     expect(feedPageTitle({ q: 'go', sort: 'popular' })).toBe('「go」の検索結果');
     expect(feedPageTitle({ tag: 'SRE', sort: 'popular' })).toBe('#SRE の記事');
