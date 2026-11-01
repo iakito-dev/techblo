@@ -45,7 +45,9 @@ export function isFeedDefaultView(params: FeedHeaderParams): boolean {
  * - ?category=<key> が有効なカテゴリキーなら、そのカテゴリの表示名(shared/categories.ts)
  * - ?tag=<label> があれば「#<label>」(category が有効ならそちらが優先)
  * - category 未指定 かつ 他の絞り込みも無く sort=latest だけが指定された「新着一覧」なら「新着」
- * - それ以外(既定状態・検索・企業・既読・人気順など、または不正な category キー)は「フィード」
+ * - ?q= があれば「検索結果」
+ * - sort=popular のみ(期間の指定は可)なら「人気の記事」
+ * - それ以外(既定状態・企業・既読など、または不正な category キー)は「フィード」
  */
 export function resolveFeedHeaderTitle(params: FeedHeaderParams): string {
   const rawCategory = params.category?.trim();
@@ -59,8 +61,21 @@ export function resolveFeedHeaderTitle(params: FeedHeaderParams): string {
   const tag = params.tag?.trim();
   if (tag) return `#${tag}`;
 
+  // 検索中は「検索結果」(タブタイトル feedPageTitle と揃える。検索語は検索ボックスに出ているので省く)。
+  if (nonEmpty(params.q)) return '検索結果';
+
   if (!hasOtherFilter(params) && params.sort?.trim() === 'latest') {
     return '新着';
+  }
+
+  // 人気順(企業・期間以外の絞り込みなし)はタブタイトルと同じ「人気の記事」。
+  if (
+    params.sort?.trim() === 'popular' &&
+    !nonEmpty(params.company) &&
+    !nonEmpty(params.feed) &&
+    !nonEmpty(params.read)
+  ) {
+    return '人気の記事';
   }
 
   return 'フィード';
