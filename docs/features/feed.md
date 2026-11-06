@@ -242,6 +242,7 @@ PostHog のイベント(一覧と規約は [observability.md §4](../architectur
 - キャッシュ: `getRelatedArticles` は `'use cache: remote'` + `cacheTag(article(id))` + `cacheLife('days')`(`feed` タグは cron で毎時数回無効化され、Runtime Cache の書き込みが増えるため外した。ADR-0047)。`tags` に索引は張らず、インスタンス間で共有されるキャッシュで1記事1回の走査に抑える(in-memory の `'use cache'` だとインスタンスの数だけ走査が走る。ADR-0042)。失敗(Result err・例外)は `logger.warn` して `cacheLife('minutes')` で `[]` を返し、記事ページを落とさない。
 - シグネチャ: `listRelatedArticles(deps)(articleId, limit = RELATED_ARTICLES_LIMIT): Promise<Result<ArticleCard[], FeedError>>`(`features/feed/application/list-related-articles.ts`)。
 - id は呼び出し側(ページ)で UUID 検証済みのものだけを渡す(不正形式は DB エラーになる)。
+- 外から来る article id(`/api/og/[id]`、ゲストの localStorage・Server Action 引数)は `shared/uuid.ts` の `isUuid` で検証する。`getArticleById` は不正な id を「無い」扱い(OG はフォールバック画像)、`getArticlesByIds` は不正な id を除いて引く(1 件の不正 id で一覧全体を 500 にしない)
 
 ## タグ一覧ページ(/tags、ADR-0040)
 
