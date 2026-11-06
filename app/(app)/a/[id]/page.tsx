@@ -25,9 +25,7 @@ import { articleJsonLd } from '@/lib/seo';
 import { resolveBaseUrl } from '@/lib/site-url';
 import { formatRelative } from '@/shared/date';
 import { MOBILE_GUTTER_CLASS } from '@/shared/layout';
-
-// article.id は uuid。不正な形式は DB エラーになるため事前に弾いて not-found 扱いにする。
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+import { isUuid } from '@/shared/uuid';
 
 /**
  * 主アクションの遷移先を示すドメイン表示。`www.` は情報量が無いので落とす。
@@ -64,7 +62,7 @@ async function loadArticle(id: string) {
  * 不正な id は DB エラーになるため、どちらも呼ぶ前に弾く(要約側には UUID 検証が無い)。
  */
 async function loadArticleWithSummary(id: string) {
-  if (!UUID_RE.test(id)) return { article: null, summary: null };
+  if (!isUuid(id)) return { article: null, summary: null };
   const [article, summary] = await Promise.all([loadArticle(id), getSummaryByArticleId(id)]);
   return { article, summary };
 }
@@ -150,7 +148,7 @@ async function ArticleContent({ params }: { params: Promise<{ id: string }> }) {
   // 関連記事は本文の下(右レール)で別にストリームするが、本文の取得を待ってから引き始めると
   // 往復が直列に積まれる。ここで先に投げて、表示側(Suspense の内側)では結果を待つだけにする。
   // getRelatedArticles は失敗時も [] を返す(reject しない)ので、notFound で捨てても安全。
-  const relatedPromise = UUID_RE.test(id) ? getRelatedArticles(id) : Promise.resolve([]);
+  const relatedPromise = isUuid(id) ? getRelatedArticles(id) : Promise.resolve([]);
   const { article, summary } = await loadArticleWithSummary(id);
   if (!article) notFound();
 
