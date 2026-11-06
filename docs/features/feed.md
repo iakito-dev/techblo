@@ -132,7 +132,7 @@ trackArticleView(input: { articleId: string }): Promise<Result<void, FeedError>>
   - 検索履歴(最近の検索): 明示確定(Enter / 検索キー / 履歴の選択)した語だけを端末内の localStorage(`techblo.search.history`)に最大8件保存する。debounce の途中入力は記録しない。trim・NFKC+小文字で同一視して重複は先頭へ移動、1語100文字上限。入力が空のときだけ、モバイルは検索オーバーレイ内のリスト、デスクトップは検索ボックス直下のポップオーバー(combobox/listbox、↑↓/Enter/Escape)に出し、個別削除と「すべて消去」ができる。localStorage が使えない環境では履歴なしで動く。静的シェル用 `DefaultFeedSearchBox` は履歴を読まない(純粋関数 `search-history.ts` / hook `use-search-history.ts`)
   - モバイル/タブレットの検索入力は 16px(`text-base`、lg+ のみ `text-sm`)。iOS のフォーカス時自動ズーム(16px 未満で発火)を防ぐ
   - デスクトップはトップバー(⌘K / Ctrl+K でフォーカス、Escape でクリア)、lg 未満は `FeedControls` の searchSlot に配置
-  - 検索語の正規化(trim・100文字上限・空→検索なし)は application 層、LIKE メタ文字エスケープは infrastructure 層(`escape-like.ts`)
+  - 検索語・タグの正規化(NUL 除去・trim・100文字上限・空→検索なし)は application 層(NUL は URL の `%00` で、Postgres が受けず 500 になるため。企業 slug に NUL を含む場合も DB を引かず「無い」扱い)、LIKE メタ文字エスケープは infrastructure 層(`escape-like.ts`)
   - 検索結果はフィードキャッシュを通さない(`searchFeed`)。「もっと読む」も `query` を引き継ぐ
 - 削除済み記事(`articles.deleted_at` not null)は表示しない
 - 人気順: 集計期間(`?period=today|week|month|all`、既定 all)で切り替え。いずれもその期間に公開された記事に絞り、**期間ごとに並べる指標を変える**(ADR-0018)
