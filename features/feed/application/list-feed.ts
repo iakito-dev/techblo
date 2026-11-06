@@ -1,5 +1,6 @@
 import { articleCategorySchema } from '@/shared/category-schema';
 import { ok, type Result } from '@/shared/result';
+import { stripNul } from '@/shared/text';
 import { asCompanyId, asUserId } from '@/shared/type-utils';
 import type { ArticleRepository } from '../domain/article-repository';
 import type { FeedError } from '../domain/errors';
@@ -34,10 +35,14 @@ export const listFeed =
       ? { userId: asUserId(input.readFilter.userId), mode: input.readFilter.mode }
       : undefined;
     const page = Math.max(1, Math.floor(input.page ?? 1));
+    // NUL(URL の %00)は Postgres が受けず 500 になるので、空白と同じく入力として落とす。
     // 空白のみは「検索なし」に正規化(ListCriteria.query は trim 済み・非空の契約)
-    const query = input.query?.trim().slice(0, MAX_QUERY_LENGTH) || undefined;
+    const query =
+      stripNul(input.query ?? '')
+        .trim()
+        .slice(0, MAX_QUERY_LENGTH) || undefined;
     // タグも空白のみは「絞り込みなし」に正規化(canonical なキュレーション値なので trim のみ)
-    const tag = input.tag?.trim() || undefined;
+    const tag = stripNul(input.tag ?? '').trim() || undefined;
     // カテゴリは enum 検証。不正なキー(URL 手打ち等)は絞り込みなし扱いで無視する(ADR-0034)。
     const categoryResult = input.category ? articleCategorySchema.safeParse(input.category) : null;
     const category = categoryResult?.success ? categoryResult.data : undefined;
