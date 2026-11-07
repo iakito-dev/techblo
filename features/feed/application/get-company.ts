@@ -1,4 +1,5 @@
 import { ok, type Result } from '@/shared/result';
+import { hasNul } from '@/shared/text';
 import type { CompanyRepository } from '../domain/company-repository';
 import type { FeedError } from '../domain/errors';
 import type { CompanyDetailDto } from './dto';
@@ -10,6 +11,8 @@ import type { CompanyDetailDto } from './dto';
 export const getCompany =
   (deps: { companies: CompanyRepository }) =>
   async (slug: string): Promise<Result<CompanyDetailDto | null, FeedError>> => {
+    // slug に NUL(URL の %00)が混ざると Postgres がエラーにするので、DB へ行かず「無い」扱いにする。
+    if (hasNul(slug)) return ok(null);
     const c = await deps.companies.findBySlug(slug);
     if (!c) return ok(null);
     return ok({

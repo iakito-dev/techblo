@@ -54,6 +54,7 @@
 | [0044](./0044-move-cross-feature-composition-under-app.md) | 記事の横断合成を `components/article/` から `app/_composition/` へ移す | Accepted |
 | [0045](./0045-software-factory.md) | 定期起動エージェント(ソフトウェアファクトリー)と、CI のガードによる条件付き自動マージ | Accepted |
 | [0046](./0046-factory-features-and-multi-pr.md) | ファクトリーの作業範囲を機能追加・UI/UX 改善に広げ、1 回の実行で複数 PR を出す | Accepted |
+| [0047](./0047-reduce-runtime-cache-writes.md) | Runtime Cache の書き込みを減らすため、記事ページの remote キャッシュを記事タグ + 長い寿命にする | Accepted |
 
 ※ 0013 と 0014 は同日に並行して採番され、番号が2件ずつ重複している。コードやドキュメントから
 参照済みのため改番はしない(既存ADRは変更しない)。**これらを参照する時は番号だけでなく

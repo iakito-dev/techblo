@@ -19,6 +19,13 @@ describe('getCompany', () => {
     expect(result).toEqual({ ok: true, value: null });
   });
 
+  it('slug に NUL(URL の %00)を含むなら DB を引かず ok(null) を返す', async () => {
+    const repo = fakeRepo(null);
+    const result = await getCompany({ companies: repo })('a\u0000b');
+    expect(repo.findBySlug).not.toHaveBeenCalled();
+    expect(result).toEqual({ ok: true, value: null });
+  });
+
   it('企業が見つかれば表示に必要な項目を DTO にして返す', async () => {
     const company: CompanyDetail = {
       id: asCompanyId('c1'),

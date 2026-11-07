@@ -15,13 +15,13 @@ import { MOBILE_GUTTER_CLASS } from '@/shared/layout';
 export default function Loading() {
   return (
     <div className="min-h-dvh pb-[calc(var(--mobile-nav-h)+1rem)] lg:pb-12 lg:pl-64">
-      <main
+      <div
         className={`mx-auto max-w-2xl max-lg:-mt-4 xl:max-w-[66rem] ${MOBILE_GUTTER_CLASS} pb-8 md:px-6 md:pb-10 lg:px-8 lg:pt-6`}
       >
         <ResetScrollOnMount />
         <div className="mb-1 h-11" />
         <ArticleDetailSkeleton />
-      </main>
+      </div>
     </div>
   );
 }

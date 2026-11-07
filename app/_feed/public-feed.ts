@@ -23,7 +23,12 @@ export type PublicFeedScope = {
   company?: { id: string; slug: string; name: string };
   /** 未検証の生キー。不正なら無視して全体フィードにする(listFeed と同じ挙動)。 */
   category?: string | null;
+  /** AI要約タグでの絞り込み(?tag=)。空白のみ・長すぎる値は無視して全体フィードにする。 */
+  tag?: string | null;
 };
+
+// UI の ?tag= は任意文字列を受けるが、RSS は URL・タイトルにそのまま載るので上限を設ける。
+const MAX_TAG_LENGTH = 50;
 
 export function xmlResponse(body: string, status = 200): Response {
   return new Response(body, {
@@ -41,11 +46,15 @@ export async function renderPublicFeed(scope: PublicFeedScope): Promise<Response
     const parsedCategory = scope.category ? articleCategorySchema.safeParse(scope.category) : null;
     const category = parsedCategory?.success ? parsedCategory.data : undefined;
 
+    const rawTag = scope.tag?.trim();
+    const tag = rawTag && rawTag.length <= MAX_TAG_LENGTH ? rawTag : undefined;
+
     const page = await getFeed({
       sort: 'latest',
       limit: FEED_LIMIT,
       companyIds: scope.company ? [scope.company.id] : undefined,
       category,
+      tag,
     });
     const summaries = await getSummariesByArticleIds(page.items.map((a) => a.id));
 
@@ -66,16 +75,23 @@ export async function renderPublicFeed(scope: PublicFeedScope): Promise<Response
     const categoryLabel = category
       ? CATEGORY_DEFINITIONS.find((d) => d.key === category)?.label
       : undefined;
+    const query = new URLSearchParams();
+    if (category) query.set('category', category);
+    if (tag) query.set('tag', tag);
     const selfUrl = scope.company
       ? `${baseUrl}/companies/${scope.company.slug}/feed.xml`
-      : `${baseUrl}/feed.xml${category ? `?category=${category}` : ''}`;
+      : `${baseUrl}/feed.xml${query.size ? `?${query}` : ''}`;
     const title = scope.company
       ? `${scope.company.name}の技術ブログ新着｜テクブロ`
-      : `${categoryLabel ? `${categoryLabel}の` : ''}技術ブログ新着｜テクブロ`;
+      : `${tag ? `#${tag} の` : ''}${categoryLabel ? `${categoryLabel}の` : ''}技術ブログ新着｜テクブロ`;
 
     const xml = buildFeedXml({
       title,
-      link: scope.company ? `${baseUrl}/companies/${scope.company.slug}` : `${baseUrl}/`,
+      link: scope.company
+        ? `${baseUrl}/companies/${scope.company.slug}`
+        : tag
+          ? `${baseUrl}/?tag=${encodeURIComponent(tag)}`
+          : `${baseUrl}/`,
       description: scope.company
         ? `${scope.company.name}の公式技術ブログの新着記事(元記事へのリンク)。`
         : 'テック企業の公式技術ブログの新着記事を集約したフィード(元記事へのリンク)。',

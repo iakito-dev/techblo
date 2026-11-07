@@ -31,10 +31,11 @@ export async function getSummaryByArticleId(articleId: string): Promise<ArticleS
     logger.error('getSummary failed', { error: result.error, articleId });
   }
   const summary = result.ok ? result.value : null;
-  // 要約は取込の約10分後に生成される。生成前に開かれた記事の null をインスタンス間共有の
-  // remote キャッシュに数時間残すと、/api/revalidate が届かない限り新着記事に要約が出ないので、
-  // null(未生成 / failed / 取得失敗)のときだけ短く持つ。
-  cacheLife(summary ? 'hours' : 'minutes');
+  // 要約は生成 cron が /api/revalidate で記事タグを無効化するので、寿命は長めでよい
+  // (再検証のたびに Runtime Cache への書き込みが走るため。ADR-0047)。
+  // null(未生成 / failed / 取得失敗)は無効化が届かなかった場合の保険として 'hours' に留める。
+  // 'minutes' だと failed のまま変わらない記事まで毎分書き直していた。
+  cacheLife(summary ? 'days' : 'hours');
   return summary;
 }
 
