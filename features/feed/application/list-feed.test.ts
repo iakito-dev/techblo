@@ -307,4 +307,14 @@ describe('listFeed', () => {
     expect(listCalls[0]?.category).toBe('ai');
     expect(listCalls[0]?.userFeedIds).toBeUndefined();
   });
+
+  it('検索語・タグの NUL(URL の %00)を取り除き、残らなければ絞り込みなしにする', async () => {
+    const { repo, listCalls } = capturingRepo();
+    await listFeed({ articles: repo })({ query: 're\u0000act', tag: 'S\u0000RE' });
+    await listFeed({ articles: repo })({ query: '\u0000', tag: '\u0000' });
+    expect(listCalls[0]?.query).toBe('react');
+    expect(listCalls[0]?.tag).toBe('SRE');
+    expect(listCalls[1]?.query).toBeUndefined();
+    expect(listCalls[1]?.tag).toBeUndefined();
+  });
 });

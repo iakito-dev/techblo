@@ -16,7 +16,7 @@
 - **既定状態(クエリなし)**: デスクトップ(md+)はセクション型フィード(新着 + カテゴリ別6棚 + イベント・コミュニティ、ADR-0035)。モバイル(<md)は既存のリスト表示(全カテゴリの新着・無限スクロール)
 - **モバイルのカテゴリタブ**: 廃止した(上部クロームを1行占める割に、横スクロールで画面外に隠れるタブが多く使いにくかったため)。モバイルにはカテゴリを選ぶ入口を置かない。`?category=` 付きで来た場合(共有リンク・デスクトップの棚の「もっと見る」)だけ、チップ行にカテゴリ名のチップを出して ✕ で解除できる(`buildCategoryTabHref(params, 'latest')`。絞り込みバッジの数には含めない)
 - **新着・棚の「もっと見る」**: 新着 → `/?sort=latest`(全カテゴリの新着一覧)、棚 → `/?category=<key>`
-- **一覧の見出し(デスクトップ)**: `?category=` のときはカテゴリ名、`sort=latest` だけのときは「新着」、それ以外は「フィード」(`resolveFeedHeaderTitle`)。既定状態以外では見出しの上に「← トップ」。サイドバーは `?category=` のときカテゴリ行を選択中にし「フィード」は選択中にしない。`/` の一覧は最大 1680px・md 以上でコンテンツ領域の実幅に応じて1〜4列(コンテナクエリ。ADR-0035。詳細は下記「列数・件数(可変)」)
+- **一覧の見出し(デスクトップ)**: `?category=` のときはカテゴリ名、`sort=latest` だけのときは「新着」、`?q=` のときは「検索結果」、`sort=popular` のみ(期間指定は可)は「人気の記事」(いずれもタブタイトルと揃える)、それ以外は「フィード」(`resolveFeedHeaderTitle`)。既定状態以外では見出しの上に「← トップ」。サイドバーは `?category=` のときカテゴリ行を選択中にし「フィード」は選択中にしない。`/` の一覧は最大 1680px・md 以上でコンテンツ領域の実幅に応じて1〜4列(コンテナクエリ。ADR-0035。詳細は下記「列数・件数(可変)」)
 - **クエリあり時**: `?category=` / `?q=` / `?company=` / `?feed=` / `?tag=` / `?read=` / `sort` / `period` のいずれかがあれば、既存のリスト表示にフォールバック
 - フォールバック条件: 棚が1つも作れない(カテゴリ分類のバックフィル前など)・全企業 OFF の場合は、既存のリスト表示にフォールバック
 - レイアウト(ADR-0020 で Dewey 風シェルへ刷新。ADR-0011 の配色・テキスト主体カードは維持):
@@ -41,6 +41,9 @@
 - 入力の角丸はアプリ共通で 14px(`rounded-md`)に揃える。共通 Input(デスクトップ検索・設定フォーム)と絞り込みシートの企業検索が 14px なので、モバイル検索バーの pill(`rounded-pill`)だけが外れ値だった。塗り・枠・影といった外枠の表現は各コンポーネントの既存のまま変えない(角丸だけ揃える)。絞り込みボタン(44px)も同じ 14px にする(完全な円だと検索バーの隣で独立した丸い島に見える)。ヘッダーのアイコンは 18px に統一する(虫眼鏡 16px / 絞り込み 20px で不揃いだった)。検索オーバーレイ(`MobileSearchOverlay`)と skeleton(`MobileFeedHeaderSkeleton`)も同じ寸法に揃える(skeleton がズレると読み込み前後で検索窓の見え方が変わる)
 - モバイル(<md)の左右ガターは `shared/layout.ts` の `MOBILE_GUTTER_CLASS`(20px / 430px 以上は 24px)に集約する。16px だと 440pt 級の端末で 18px の太字タイトルが画面端まで詰まって窮屈に見え、一方で小型端末(375pt)まで 24px にすると1行の文字数が減るため画面幅で段を付ける。sticky ヘッダー(検索行・チップ行)とリスト本体・棚・イベント・保存記事・設定・ロゴ帯が同じ定数を使う(ズレるとカードの上罫と検索バーの左端が揃わない)。md 以上(`md:px-6` / `lg:px-8`)は各画面が最大幅に応じて付ける
 - モバイル(<md)の検索行の左にはロゴマーク(`LogoMark`: ワードマーク無しの 2×2 ドット)を置く。フィードは共通 Header(ロゴ帯)を隠すため、これが無いと他タブ(ロゴ帯あり)から入った瞬間にロゴが消える。既にホームなので遷移先を持たない装飾(aria-hidden)として置き、行の高さは変えない
+- 絞り込み中のタブ/履歴タイトル(`feedPageTitle`): 検索語があれば「語」の検索結果、無ければタグ指定で #タグ の記事(検索優先 → タグ → 企業 → 人気順の順、40 文字で切る)。企業を 1 社だけ選んでいれば(`?company=slug`、複数選択は対象外)「企業名 の記事」、人気順(`?sort=popular`)のみなら「人気の記事」。それ以外は既定タイトルのまま。複数タブやブラウザ履歴で検索・タグ違いを見分けるため。canonical・noindex の扱いは変えない
+- `(app)` 配下の `<main>` ランドマークは `app/(app)/layout.tsx` の `#main-content` に一本化する(スキップリンクの着地点を兼ねる)。各 page は `<main>` を持たない(入れ子の main は無効なため、記事ページ・その loading も `div`)。以前はフィード・保存・履歴・設定に main が無く、スクリーンリーダーの「メインへ移動」が効かなかった
+- サイドバーの折りたたみ見出し(企業 / マイフィード)は `outline-none` のままだとキーボードで Tab を当てても焦点が見えなかったため、`focus-visible:ring-2 focus-visible:ring-accent` を付ける(マウス操作では出ない)
 - ルート遷移中(`app/(app)/loading.tsx`)は上部クロームも skeleton で出す(`feed-chrome-skeleton.tsx`: モバイル=検索/絞り込みヘッダー、タブレット=1行ツールバー枠、デスクトップ=上部バー + 見出し行)。モバイルのフィードは共通 Header(ロゴ帯)を隠して `MobileFeedControls` が上部を担うため、loading 側に枠が無いと「遷移中は上部が空 → 解決時に検索行が生えてカードが押し下がる」表示差になる。モバイル skeleton は検索行 + タブ行ぶんの高さ(`h-11` + `pb-2.5` + 下罫)を出す(タブのラベル自体は `?category=` 依存の選択下線を誤って見せないため出さない)
 - ツールバーは既定状態(新着・全企業)の `DefaultFeedControls` をフォールバックとして静的プリレンダし、購読スコープ版がストリームで上書き(ライブ版は useSearchParams を読むためフォールバック位置に置けない。操作は FeedNav context 経由で即機能。並び替えタブが即表示される利点があり、記事のような内容差し替えは起きないため据え置き)
 - データあり(通常表示)
@@ -102,7 +105,7 @@ getSidebarCompanies(): Promise<CompanyWithCount[]>          // サイドバー/�
 getCompanyBySlug(slug): Promise<CompanyDetailDto | null>    // 企業ページ(/companies/[slug])用。slug で1社+紹介文('use cache' tag=[companies,feed]。ADR-0030)
 getSitemapCompanies(): Promise<{ slug }[]>                   // sitemap 用の全企業 slug('use cache')
 getArticleById(id: string): Promise<ArticleCard | null>     // 単発参照(OGP プレースホルダー生成等)
-getRelatedArticles(id: string): Promise<ArticleCard[]>      // 記事ページの関連記事(最大6件。'use cache: remote' tag=feed days、失敗時は空+minutes。ADR-0037)
+getRelatedArticles(id: string): Promise<ArticleCard[]>      // 記事ページの関連記事(最大6件。'use cache: remote' tag=article(id) days(ADR-0047)、失敗時は空+minutes。ADR-0037)
 
 // app/_composition/article/feed-load-more.tsx(app 層の合成点・RSC から呼ぶ。ADR-0013)
 getCompanyArticles({ slug, page, limit }): Promise<{ items: ComposedArticle[]; hasMore; isGuest }>
@@ -122,14 +125,14 @@ trackArticleView(input: { articleId: string }): Promise<Result<void, FeedError>>
 - 未ログイン時: 全企業の記事を表示(購読設定無視)
 - ログイン時: `subscriptions.enabled=true` の企業のみ表示
 - 企業フィルタ(`?company=slug`): 購読とは独立した一時的なビューフィルタ。単一選択で、未選択なら「すべて」。企業一覧は購読スコープ内の企業(未ログインは全社)。スコープ外 slug は無視。設定(購読)は変更しない
-- タグフィルタ(`?tag=`、ADR-0027 / ADR-0032): AI生成の表示タグ(`article_summaries.tags`)で公開記事を絞る(Repository が `article_summaries` を EXISTS 参照)。サイドバーの固定キュレーション UI は廃止。入口は記事カード最終行と記事ページ AI要約のタグバッジ(`/?tag=<encodeURIComponent(タグ)>` への `next/link`、`prefetch={false}`)で、URL の `?tag=` から直接も使える(単一の真実源は `lib/tags/curated.ts`)。適用中はデスクトップ見出しが「#タグ名」になり「← トップ」で解除、モバイルはチップ行に「タグ: xxx ✕」(✕ は `tag` だけ削除。絞り込みバッジの件数には含めない)。タブレット(md〜lg)のツールバーは未対応。`?tag=` は canonical ラベルで、Repository が `expandTag()` で類義語群へ展開し各タグの `@>` 包含を OR で突き合わせる(例: `AI・LLM` = 生成AI/AI/LLM/機械学習)。完全一致の OR なので `tags` の GIN が効く。正規化検索基盤ではないためグループ外の表記ゆれ・キュレーション外タグは取りこぼす(網羅は `?q=` が担う)。公開記事のみ対象でマイフィードはマージしない。他フィルタ(既読/期間/並び替え)と併用可
+- タグフィルタ(`?tag=`、ADR-0027 / ADR-0032): AI生成の表示タグ(`article_summaries.tags`)で公開記事を絞る(Repository が `article_summaries` を EXISTS 参照)。サイドバーの固定キュレーション UI は廃止。入口は記事カード最終行と記事ページ AI要約のタグバッジ(`/?tag=<encodeURIComponent(タグ)>` への `next/link`、`prefetch={false}`)で、URL の `?tag=` から直接も使える(単一の真実源は `lib/tags/curated.ts`)。適用中はデスクトップ見出しが「#タグ名」になり「← トップ」で解除、モバイルはチップ行に「タグ: xxx ✕」(✕ は `tag` だけ削除。絞り込みバッジの件数には含めない)。タブレット(md〜lg)は `FeedControls` のツールバー下に「タグ: xxx ✕」チップ(`ActiveTagChip`、モバイルと同じ `RemovableChip` / `removeTag`)を出す。`?tag=` は canonical ラベルで、Repository が `expandTag()` で類義語群へ展開し各タグの `@>` 包含を OR で突き合わせる(例: `AI・LLM` = 生成AI/AI/LLM/機械学習)。完全一致の OR なので `tags` の GIN が効く。正規化検索基盤ではないためグループ外の表記ゆれ・キュレーション外タグは取りこぼす(網羅は `?q=` が担う)。公開記事のみ対象でマイフィードはマージしない。他フィルタ(既読/期間/並び替え)と併用可
 - 記事検索(`?q=`、ADR-0022): title/description の ILIKE 部分一致(pg_trgm GIN。マイグレーション 0004)。他のフィルタ(企業/既読/期間/並び替え)と AND で併用可能
   - 入力は debounce(300ms)で URL へ commit(`router.replace`、履歴を汚さない)。IME 変換中は commit しない(`use-feed-search.ts` / `feed-search-box.tsx`)
   - Enter / 検索キー(`enterKeyHint="search"`)で debounce を待たず即 commit(`useFeedSearch.commitNow`)。スマホのインライン検索/タブレットツールバーは入力を blur してキーボードを閉じ、検索オーバーレイは閉じて結果フィードへ戻す
   - 検索履歴(最近の検索): 明示確定(Enter / 検索キー / 履歴の選択)した語だけを端末内の localStorage(`techblo.search.history`)に最大8件保存する。debounce の途中入力は記録しない。trim・NFKC+小文字で同一視して重複は先頭へ移動、1語100文字上限。入力が空のときだけ、モバイルは検索オーバーレイ内のリスト、デスクトップは検索ボックス直下のポップオーバー(combobox/listbox、↑↓/Enter/Escape)に出し、個別削除と「すべて消去」ができる。localStorage が使えない環境では履歴なしで動く。静的シェル用 `DefaultFeedSearchBox` は履歴を読まない(純粋関数 `search-history.ts` / hook `use-search-history.ts`)
   - モバイル/タブレットの検索入力は 16px(`text-base`、lg+ のみ `text-sm`)。iOS のフォーカス時自動ズーム(16px 未満で発火)を防ぐ
   - デスクトップはトップバー(⌘K / Ctrl+K でフォーカス、Escape でクリア)、lg 未満は `FeedControls` の searchSlot に配置
-  - 検索語の正規化(trim・100文字上限・空→検索なし)は application 層、LIKE メタ文字エスケープは infrastructure 層(`escape-like.ts`)
+  - 検索語・タグの正規化(NUL 除去・trim・100文字上限・空→検索なし)は application 層(NUL は URL の `%00` で、Postgres が受けず 500 になるため。企業 slug に NUL を含む場合も DB を引かず「無い」扱い)、LIKE メタ文字エスケープは infrastructure 層(`escape-like.ts`)
   - 検索結果はフィードキャッシュを通さない(`searchFeed`)。「もっと読む」も `query` を引き継ぐ
 - 削除済み記事(`articles.deleted_at` not null)は表示しない
 - 人気順: 集計期間(`?period=today|week|month|all`、既定 all)で切り替え。いずれもその期間に公開された記事に絞り、**期間ごとに並べる指標を変える**(ADR-0018)
@@ -224,7 +227,7 @@ PostHog のイベント(一覧と規約は [observability.md §4](../architectur
   - 記事本体・AI要約はユーザー非依存で `'use cache'`。ページは PPR(`◐`)として静的シェルをプリレンダし、カードの `Link` 既定 prefetch(ビューポートに入った分)でシェルを先読みする。
   - 保存状態(ユーザー依存)だけ別の Suspense 境界(`ArticleDetailActions`)に隔離し、本文の表示をユーザー取得で待たせない。
   - `loading.tsx` と本文の Suspense fallback は同じ `ArticleDetailSkeleton`(実レイアウトと同じ位置・高さ。実物と同じ2カラム構造で、左が 上罫 → 見出し行 → タイトル → AI要約、右(aside 相当)が 画像 → ドメイン → アクション行。xl 以上のアクション行は「幅いっぱいのボタン枠 → アイコン3つ」。デザインを変えたら必ず追従させる)。これが無いと `(app)/loading.tsx` のフィード用 skeleton が出て、遷移のたびに一覧の skeleton が一瞬見える。
-- データ取得(ADR-0042): 本文はリクエスト時に描画されるため、記事(`loadArticle`)・AI要約(`getSummaryByArticleId`)・関連記事は `'use cache: remote'`(Vercel Runtime Cache)で引く。記事と要約は `Promise.all` で並列、関連記事は本文の取得前に投げて別の Suspense で受ける。記事ページへのリンク(カード・イベント行・関連記事)は画面内に入ると枠だけを先読みし、hover / touchstart で本文まで含めた full prefetch に切り替える(`unstable_dynamicOnHover` + `experimental.dynamicOnHover`)。
+- データ取得(ADR-0042): 本文はリクエスト時に描画されるため、記事(`loadArticle`)・AI要約(`getSummaryByArticleId`)・関連記事は `'use cache: remote'`(Vercel Runtime Cache)で引く。記事と要約は記事タグ + `cacheLife('days')`(要約 null は `'hours'`)で、cron の `/api/revalidate` による記事タグ無効化で更新を反映する(ADR-0047)。記事と要約は `Promise.all` で並列、関連記事は本文の取得前に投げて別の Suspense で受ける。記事ページへのリンク(カード・イベント行・関連記事)は画面内に入ると枠だけを先読みし、hover / touchstart で本文まで含めた full prefetch に切り替える(`unstable_dynamicOnHover` + `experimental.dynamicOnHover`)。
 - 記事ページに着地すると `ArticleViewTracker` が `trackArticleView` で表示回数を加算(未ログインも計測)し、既読マークを付ける。クリック時ではなく着地側で行うのは、遷移でリクエストが中断されないようにするため。
 - 保存系は ADR-0013 の `actions` スロットで注入(feed は bookmark/favorite を import しない)。
 
@@ -236,9 +239,10 @@ PostHog のイベント(一覧と規約は [observability.md §4](../architectur
   2. 足りなければ同じ企業の新着で補完(自身とタグ一致済みを除く。`list({ sort: 'latest', companyIds, limit: limit + 1 })`)
   3. 対象記事が無ければ空配列
 - 自身・削除済み・要約が ready でない記事は含めない。タグの表記ゆれは取りこぼす(類義語展開はしない)。
-- キャッシュ: `getRelatedArticles` は `'use cache: remote'` + `cacheTag(feed)` + `cacheLife('days')`。`tags` に索引は張らず、インスタンス間で共有されるキャッシュで1記事1回の走査に抑える(in-memory の `'use cache'` だとインスタンスの数だけ走査が走る。ADR-0042)。失敗(Result err・例外)は `logger.warn` して `cacheLife('minutes')` で `[]` を返し、記事ページを落とさない。
+- キャッシュ: `getRelatedArticles` は `'use cache: remote'` + `cacheTag(article(id))` + `cacheLife('days')`(`feed` タグは cron で毎時数回無効化され、Runtime Cache の書き込みが増えるため外した。ADR-0047)。`tags` に索引は張らず、インスタンス間で共有されるキャッシュで1記事1回の走査に抑える(in-memory の `'use cache'` だとインスタンスの数だけ走査が走る。ADR-0042)。失敗(Result err・例外)は `logger.warn` して `cacheLife('minutes')` で `[]` を返し、記事ページを落とさない。
 - シグネチャ: `listRelatedArticles(deps)(articleId, limit = RELATED_ARTICLES_LIMIT): Promise<Result<ArticleCard[], FeedError>>`(`features/feed/application/list-related-articles.ts`)。
 - id は呼び出し側(ページ)で UUID 検証済みのものだけを渡す(不正形式は DB エラーになる)。
+- 外から来る article id(`/api/og/[id]`、ゲストの localStorage・Server Action 引数)は `shared/uuid.ts` の `isUuid` で検証する。`getArticleById` は不正な id を「無い」扱い(OG はフォールバック画像)、`getArticlesByIds` は不正な id を除いて引く(1 件の不正 id で一覧全体を 500 にしない)
 
 ## タグ一覧ページ(/tags、ADR-0040)
 
