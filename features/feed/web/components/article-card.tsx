@@ -67,9 +67,15 @@ export const ArticleCard = memo(function ArticleCard({
           {showHatenaCount && article.hatenaBookmarkCount > 0 && (
             <>
               <span aria-hidden="true">・</span>
-              <span title={hatenaLabel} className="font-metric font-semibold text-fg-default">
+              <span title={hatenaLabel} className="inline-flex items-baseline gap-1">
+                {/* 数字だけだと何の数か分からない(日時の隣で並び順の根拠になる)ので出典を添える。 */}
+                <span aria-hidden="true" className="text-[11px]">
+                  はてブ
+                </span>
                 <span className="sr-only">はてなブックマーク </span>
-                {article.hatenaBookmarkCount}
+                <span className="font-metric font-semibold text-fg-default">
+                  {article.hatenaBookmarkCount}
+                </span>
               </span>
             </>
           )}
