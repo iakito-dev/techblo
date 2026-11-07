@@ -18,7 +18,7 @@ export default function RouteError({
   reset: () => void;
 }) {
   return (
-    <div className="min-h-dvh">
+    <main className="min-h-dvh">
       <StatusScreen
         icon={TriangleAlert}
         title="エラーが発生しました"
@@ -31,6 +31,6 @@ export default function RouteError({
           <Link href="/">フィードへ戻る</Link>
         </Button>
       </StatusScreen>
-    </div>
+    </main>
   );
 }

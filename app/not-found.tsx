@@ -15,7 +15,7 @@ export const metadata: Metadata = {
  */
 export default function NotFound() {
   return (
-    <div className="min-h-dvh">
+    <main className="min-h-dvh">
       <StatusScreen
         icon={FileQuestion}
         title="ページが見つかりません"
@@ -25,6 +25,6 @@ export default function NotFound() {
           <Link href="/">フィードへ戻る</Link>
         </Button>
       </StatusScreen>
-    </div>
+    </main>
   );
 }
