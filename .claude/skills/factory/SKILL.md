@@ -58,7 +58,7 @@ Playwright(`require('playwright')`、`chromium.launch()`)で主要ページを�
 | 2 | 壊れているもの | `bun run check` の失敗、サンドボックスで見つけた表示崩れ・エラー |
 | 3 | UI/UX の改善 | 手順 2 で見つけた読みにくさ・操作しにくさ・アクセシビリティ・空状態の不親切さ |
 | 4 | 機能の追加 | `ROADMAP.md` の未完了項目、`FEATURES.md`・`docs/features/*.md` の「今後」「未実装」、手順 2 で気づいた「あると便利」 |
-| 5 | 保守 | テストの欠け、docs と実装のずれ、AGENTS.md の規則違反(1 回の実行で 1 本まで) |
+| 5 | 保守 | テストの欠け、docs と実装のずれ、AGENTS.md の規則違反。**1 回の実行で 1 本まで(テスト追加は何本に分けても合わせて 1 本と数える)** |
 
 判断の基準:
 
@@ -88,7 +88,16 @@ bun run check            # lint + depcruise + typecheck + unit test
 bun run build            # app/・components/・features/*/web に触れたとき
 ```
 
-UI を変えたら、サンドボックス(手順 2)で変更前後を同じ条件で撮り、崩れ・エラーがないことを目で確かめる。
+UI を変えたら、サンドボックス(手順 2)で変更前後を同じ条件で撮り、崩れ・エラーがないことを目で確かめる。撮った画像は手順 7 で PR に貼る(オーナーは画像を見てマージを判断する)。
+
+```bash
+# 変更前: 実装を始める前(ブランチを切った直後。後から撮るなら変更を git stash してから)
+node scripts/pr-shots.cjs --out /tmp/shots --label before [--dark] <名前>=/<パス> ...
+# 変更後: 実装後(next dev が差分を読み込むまで数秒待つ)、同じ引数で
+node scripts/pr-shots.cjs --out /tmp/shots --label after  [--dark] <名前>=/<パス> ...
+```
+
+- 変更が効く画面を選ぶ(色・テーマに関わる変更は `--dark`、データで見え方が変わるなら複数の例)。撮った画像は必ず自分で開いて、差分が写っているか確かめる
 すべて通るまで push しない。直せない失敗が残ったらその作業は捨てて次へ進む。
 最後に `code-review` スキルで自己レビューし、見つかった問題を直してから再度 `bun run check` を通す。
 
@@ -117,7 +126,9 @@ CI の `Factory guard` と同じルールで判定する。✓ が出て、か�
 2. GitHub MCP で PR を作る。本文は `.github/PULL_REQUEST_TEMPLATE.md` の見出しに沿って埋め、冒頭に次を書く
    - 「🏭 ソフトウェアファクトリーによる自動 PR」
    - 選んだ理由(どこで何を見つけ、ユーザーにとって何が良くなるか)
-   - UI を変えたら、サンドボックスで確かめた画面・幅・テーマと、変化の説明
+   - UI を変えたら、変化の説明と **変更前後のスクリーンショットの比較表**(必須)。PR 番号が決まってから、
+     `bash scripts/pr-shots-publish.sh <PR 番号> /tmp/shots` が画像を `factory-screenshots` ブランチに置き、
+     貼り付け用の Markdown 表を出力する。それを PR 本文に足す(`update_pull_request`)。表のない UI の PR は出さない
    - Issue 起点なら `Closes #N`
 3. ラベル `factory` を付ける
 4. 自動マージ対象なら、さらに `factory:automerge` を付け、`enable_pr_auto_merge`(squash)を有効にする
