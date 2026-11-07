@@ -65,7 +65,7 @@ function TagsSkeleton() {
 }
 
 async function TagSections() {
-  // ビルド時プリレンダで DB を叩かないよう動的化する(/companies と同じ扱い)。
+  // ビルド時プリレンダで DB を叩かないよう動的化する。
   // 外枠(見出し・説明・skeleton)は静的シェルに残り、集計は 'use cache' でリクエスト時にストリームされる。
   await connection();
   const { recent, all } = await getPopularTags();

@@ -37,7 +37,7 @@
 | [0027](./0027-tag-filtering-from-display-tags.md) | AI生成の表示タグを固定キュレーションのタグ絞り込みに流用する | Accepted(一部 ADR-0032 で更新) |
 | [0028](./0028-seo-baseline-robots-sitemap-structured-data.md) | SEO ベースライン(robots / sitemap / 構造化データ) | Accepted |
 | [0029](./0029-share-og-image-strategy.md) | 共有OGP画像は元画像があればホットリンク、無ければ自前生成(タイトル主役) | Accepted |
-| [0030](./0030-company-landing-pages-for-seo.md) | SEO向けに企業ランディングページ(/companies)を新設する | Accepted |
+| [0030](./0030-company-landing-pages-for-seo.md) | SEO向けに企業ランディングページ(/companies)を新設する | Superseded by ADR-0048 |
 | [0031](./0031-seo-thin-content-and-canonical-refinements.md) | SEO 薄コンテンツ対策と canonical の精緻化 | Accepted |
 | [0032](./0032-tag-curation-synonym-grouping.md) | タグ絞り込みを類義語グループ化 + 人気ベースの固定キュレーションにする | Accepted |
 | [0033](./0033-migrate-neon-to-supabase-postgres-js.md) | DB を Neon から Supabase(東京)へ移行・postgres-js ドライバ化 | Accepted |
@@ -55,6 +55,7 @@
 | [0045](./0045-software-factory.md) | 定期起動エージェント(ソフトウェアファクトリー)と、CI のガードによる条件付き自動マージ | Accepted |
 | [0046](./0046-factory-features-and-multi-pr.md) | ファクトリーの作業範囲を機能追加・UI/UX 改善に広げ、1 回の実行で複数 PR を出す | Accepted |
 | [0047](./0047-pr-before-after-screenshots.md) | UI を変える PR に変更前後のスクリーンショットを付ける | Accepted |
+| [0048](./0048-remove-company-landing-pages.md) | 企業ページ(/companies)を廃止し、フィードの企業絞り込みに寄せる | Accepted |
 | [0047](./0047-reduce-runtime-cache-writes.md) | Runtime Cache の書き込みを減らすため、記事ページの remote キャッシュを記事タグ + 長い寿命にする | Accepted |
 
 ※ 0013 と 0014 は同日に並行して採番され、番号が2件ずつ重複している。コードやドキュメントから

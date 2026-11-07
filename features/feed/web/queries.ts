@@ -249,7 +249,7 @@ export async function getSidebarCompanies(): Promise<CompanyWithCount[]> {
 }
 
 /**
- * slug で1社の詳細を取得する(企業ページ /companies/[slug] 用)。存在しなければ null。
+ * slug で1社の詳細を取得する(フィードの企業絞り込みの見出し・企業別 RSS 用)。存在しなければ null。
  * 企業マスタは滅多に変わらないので companies タグで 'days' キャッシュし、
  * 取込で増える記事数の鮮度は feed タグの無効化に乗せる(getCompanies と同方針)。
  */
@@ -265,37 +265,6 @@ export async function getCompanyBySlug(slug: string): Promise<CompanyDetailDto |
     throw new Error('企業情報の取得に失敗しました', { cause: result.error });
   }
   return result.value;
-}
-
-/** サイトマップ1エントリ(企業ページ /companies/[slug] 用)。 */
-export type SitemapCompanyEntry = { slug: string };
-
-/**
- * サイトマップ用に公開中の全企業 slug を取得する。
- * 企業数は少数(有界)なので listCompanies をそのまま使い、slug だけ取り出す。
- */
-export async function getSitemapCompanies(): Promise<SitemapCompanyEntry[]> {
-  'use cache';
-  cacheTag(CACHE_TAGS.companies);
-  cacheLife('days');
-
-  // Repository は Result ではなく例外を投げる(drizzle/postgres のエラー)ため、
-  // ok 判定だけでなく catch も要る。sitemap.xml はビルド時にプリレンダされるので、
-  // DB 非到達のビルド(CI はダミーの DATABASE_URL を渡す)でも落とさず静的エントリだけ返す。
-  // getSidebarCompanies と同じく失敗を 'days' で焼かず 'minutes' にして自己回復させる。
-  try {
-    const result = await listCompanies({ companies: companyRepo })();
-    if (!result.ok) {
-      logger.warn('getSitemapCompanies: listCompanies failed(空で返す)', { error: result.error });
-      cacheLife('minutes');
-      return [];
-    }
-    return result.value.map((c) => ({ slug: c.slug }));
-  } catch (error) {
-    logger.warn('getSitemapCompanies: 企業一覧の取得に失敗(空で返す)', { error });
-    cacheLife('minutes');
-    return [];
-  }
 }
 
 /** サイトマップ1エントリ(記事ページ /a/[id] 用)。 */

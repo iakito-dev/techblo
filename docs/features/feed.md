@@ -70,16 +70,14 @@
 - モバイルの情報密度(`FEED_GAP_CLASS`): カード間の行間はモバイル 24px / md+ 40px。カード内もモバイルだけ詰める(メタ行下 10px・最終行上 12px、md+ は 12px・16px)。保存アクションは 44px の当たり判定を維持したまま `-my-2.5` の負マージンでフッターの行高から切り離す(44px をそのまま積むと 1 枚あたり 20px が余白になり、1 画面に入る記事数が減る)。行間は一覧・棚・スケルトンで同じ定数を使い、読み込み中と読み込み後でリズムがずれないようにする
 - タッチ操作: カードと保存アクションに `touch-manipulation`(iOS のダブルタップズーム待ち=タップ遅延を切る)。タッチ端末は hover が無いため、押した手応えは `active`(押下中の塗り + 押し込み)で返す
 
-### 企業ページ(/companies、ADR-0030)
+### 企業ページは持たない(ADR-0048)
 
-SEO の主力導線。「企業名 × 技術ブログ」のロングテール検索の着地先。
+企業ごとの専用ページ(`/companies`・`/companies/[slug]`、ADR-0030)は SEO 施策をやめるのに合わせて廃止した。企業で絞った一覧はフィードの `/?company=<slug>` で見る。
 
-- `/companies` — 全企業へのリンク集約ハブ(クローラビリティ + 「技術ブログ 一覧」のインデックス対象)。`getCompanies()` をカード一覧で描画
-- `/companies/[slug]` — 企業ごとの記事まとめ。企業名(見出しは本文色。ブランド色は見出し下のアクセントバー。明るいブランド色だと白背景でコントラスト不足になるため) + 紹介文 + 公式ブログ導線 + その企業の記事グリッド(初期30件 SSR)。記事一覧は**購読スコープ非依存**(`getCompanyArticles`)で、ログイン購読に関わらず当該企業の全記事を見せる
-- カード描画は `CompanyArticleGrid`(フィードの `FeedRow` を共用: カード + 保存アクション + AI要約)。初期30件は SSR(クローラ向け)で、続きは Server Action `loadMoreCompanyArticles`(`app/_composition/article/company-articles-actions.ts`。入力は Zod 検証・認証不要・購読スコープ非依存)が同じ30件単位(`COMPANY_PAGE_SIZE`)で返し末尾に追記する。自動読み込み + 「もっと読む」ボタンは `LoadMoreTrigger`(企業ページ専用)
-- `/companies` のハブは企業名のインクリメンタル絞り込み(`CompaniesFilter`)付き。カードは SSR で全件 HTML に出したまま、クライアントで非一致の `li` を `hidden` にするだけ(リンクを HTML から消さない)。一致0件は空状態メッセージ
-- メタ: title「〇〇のテックブログ新着記事まとめ」/ 自己参照 canonical / OG。JSON-LD は `CollectionPage` + `BreadcrumbList`(ハブは企業 `ItemList`)。`lib/seo.ts` のビルダ
-- 内部リンク: 記事ページ `/a/[id]` の企業名 → `/companies/[slug]`。sitemap にハブと各企業ページを追加
+- 旧 URL は `next.config.ts` の `redirects()` で転送する(`/companies` → `/`、`/companies/<slug>` → `/?company=<slug>`。いずれも恒久)
+- 記事ページ `/a/[id]` の企業名は `/?company=<slug>` へのリンク
+- 企業別 RSS(`/companies/[slug]/feed.xml`)は購読者がいるため残す。チャンネルの `link` は `/?company=<slug>`
+- sitemap・構造化データ(`CollectionPage` / 企業 `ItemList`)からは外した
 
 ## データモデル(該当テーブル)
 
@@ -102,14 +100,12 @@ getFeed(input?: ListFeedInput): Promise<FeedPage>            // sort/page/limit/
 getReadFilteredFeed(userId, mode, input?): Promise<FeedPage> // 未読/既読フィルタ済み(reads と EXISTS/NOT EXISTS)。per-user キャッシュ tag=[feed,userReads](ADR-0021)
 getCompanies(): Promise<CompanyWithCount[]>                  // 企業一覧 + 記事数('use cache' / ADR-0016)
 getSidebarCompanies(): Promise<CompanyWithCount[]>          // サイドバー/既定ツールバー用。throw せず失敗時は空配列('use cache')
-getCompanyBySlug(slug): Promise<CompanyDetailDto | null>    // 企業ページ(/companies/[slug])用。slug で1社+紹介文('use cache' tag=[companies,feed]。ADR-0030)
+getCompanyBySlug(slug): Promise<CompanyDetailDto | null>    // 企業絞り込みの見出し・企業別 RSS 用。slug で1社+紹介文('use cache' tag=[companies,feed])
 getSitemapCompanies(): Promise<{ slug }[]>                   // sitemap 用の全企業 slug('use cache')
 getArticleById(id: string): Promise<ArticleCard | null>     // 単発参照(OGP プレースホルダー生成等)
 getRelatedArticles(id: string): Promise<ArticleCard[]>      // 記事ページの関連記事(最大6件。'use cache: remote' tag=article(id) days(ADR-0047)、失敗時は空+minutes。ADR-0037)
 
 // app/_composition/article/feed-load-more.tsx(app 層の合成点・RSC から呼ぶ。ADR-0013)
-getCompanyArticles({ slug, page, limit }): Promise<{ items: ComposedArticle[]; hasMore; isGuest }>
-//   企業ページ用。購読スコープ非依存でその企業の公開記事を新着順に。ログイン時のみ保存状態を上乗せ(ADR-0030)
 searchFeed(input: ListFeedInput): Promise<FeedPage>          // 検索(?q=)付きフィード。'use cache' なし(q はバリアント非有界のためキャッシュをバイパス。既読フィルタは input.readFilter で併用。ADR-0022)
 
 // features/feed/web/actions.ts(Server Action)
@@ -217,7 +213,7 @@ PostHog のイベント(一覧と規約は [observability.md §4](../architectur
 
 カードとイベント行のタイトルは記事ページ `/a/[id]` への内部リンク(`next/link`)。X / Threads と同じ「タイムライン → 個別ページ」の形で、通常クリックで遷移、⌘/Ctrl/Shift+クリックは記事ページを新規タブで開く(ADR-0036)。元記事へはページ内の「元記事を開く」から。
 - `app/(app)/a/[id]/page.tsx`: 共有リンクの着地先と一覧からの遷移先を兼ねる。シェル(Header / Sidebar / MobileNav)は `(app)/layout.tsx` が保持するため、遷移で差し替わるのはコンテンツ領域だけ。
-- 中身は 上罫(1.5px hairline)→ 見出し行(企業ファビコン 20px + 企業名(企業ページへのリンク)+ 著者 / 右端に相対日時)→ タイトル → AI要約(RSS 抜粋は要約が無い時だけ、200字)→ 元記事ブロック(プレビュー画像は OGP がある時だけ。画像全体が元記事へのリンク。+ 遷移先ドメイン)→ アクション行(保存・お気に入り・共有のアイコン + 右端に「元記事を開く」)→ 関連記事。xl 以上は2カラム(`max-w-[66rem]`、本文 | 18rem の右レール)で、右レール(`<aside>`)に元記事ブロック・アクション行(「元記事を開く」を幅いっぱいで先頭、アイコンはその下)・関連記事を置く。DOM は1つで並びは CSS のみ、xl 未満は従来の1カラム。
+- 中身は 上罫(1.5px hairline)→ 見出し行(企業ファビコン 20px + 企業名(その企業で絞ったフィード `/?company=` へのリンク)+ 著者 / 右端に相対日時)→ タイトル → AI要約(RSS 抜粋は要約が無い時だけ、200字)→ 元記事ブロック(プレビュー画像は OGP がある時だけ。画像全体が元記事へのリンク。+ 遷移先ドメイン)→ アクション行(保存・お気に入り・共有のアイコン + 右端に「元記事を開く」)→ 関連記事。xl 以上は2カラム(`max-w-[66rem]`、本文 | 18rem の右レール)で、右レール(`<aside>`)に元記事ブロック・アクション行(「元記事を開く」を幅いっぱいで先頭、アイコンはその下)・関連記事を置く。DOM は1つで並びは CSS のみ、xl 未満は従来の1カラム。
 - デザインは一覧のカード(ADR-0035)を「1枚開いた」続きに見せる: カードと同じ上罫・見出し行・字間(tracking -0.015em)を使い、面・影・角丸・ブランド色は使わない。画像はカードが持たない要素なのでタイトル直下ではなく本文の後ろ(X のリンクカードの位置)に置く。OGP が無い記事は自前生成カードを出さずドメイン行だけにする(タイトルの繰り返しが面を占有するため。共有メタデータ・JSON-LD のフォールバック画像はそのまま)。「元記事を開く」はページ唯一の主アクションで、ink の塗り(`bg-primary`。teal の塗りは使わない)。AI要約のタグはカードの AI タグと同じ輪郭のみのバッジで、同じく `?tag=` へのリンク。
 - 戻る導線は `ArticleBackLink`。履歴があれば `router.back()`(一覧はルーターキャッシュから復帰し、スクロール位置もブラウザが復元する)。共有リンクで直接開いた場合だけ `/` への通常リンクになる。<lg は sticky な共有 Header がロゴの代わりにこれを出し(どこまでスクロールしても戻れる)、本文側の戻る行は lg+ だけに出す。
 - モバイル(<lg)は**右スワイプでも戻る**(`MobileSwipeNavigation`)。主要4画面のタブ間スワイプと同じ物理で、記事ページだけ行き先を「隣のタブ」ではなく「戻る」に割り当てる。左スワイプには何も割り当てない(進む先が無いため)。戻り先の決め方は `ArticleBackLink` と同じ規則。
@@ -246,7 +242,7 @@ PostHog のイベント(一覧と規約は [observability.md §4](../architectur
 
 ## タグ一覧ページ(/tags、ADR-0040)
 
-- 公開・SEO 対象のハブ(`app/tags/page.tsx`)。構成は `/companies` と同じ(Header / 静的シェル + `connection()` + Suspense でストリーム)。h1「タグから探す」、canonical は自己参照 `/tags`、JSON-LD は `breadcrumbJsonLd`(ホーム → タグから探す)。
+- 公開・SEO 対象のハブ(`app/tags/page.tsx`)。構成は Header / 静的シェル + `connection()` + Suspense でストリーム)。h1「タグから探す」、canonical は自己参照 `/tags`、JSON-LD は `breadcrumbJsonLd`(ホーム → タグから探す)。
 - 2セクション: 「最近よく書かれているタグ」(直近90日・上位40)と「すべてのタグ」(全期間・上位120)。各タグは `/?tag=<encodeURIComponent(tag)>` への輪郭バッジ + 件数(`text-fg-subtle`)。0件なら空状態メッセージ。直近セクションは0件なら出さない。
 - 集計: `ArticleRepository.listPopularTags(limit, sinceDays?)` が `article_summaries.tags`(jsonb)を `jsonb_array_elements_text` で展開し、削除済み除外・`status='ready'` で `group by tag`、`count(distinct a.id) desc, tag asc`。`sinceDays` 指定時は `articles.published_at` で絞る。空白タグは除外。
 - usecase `listPopularTags(deps)(limit = 120, sinceDays?)`(`features/feed/application/list-popular-tags.ts`): limit を 1..200 に丸め、空白タグを除外し `Result` で返す。
