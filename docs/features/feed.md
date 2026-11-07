@@ -75,7 +75,7 @@
 SEO の主力導線。「企業名 × 技術ブログ」のロングテール検索の着地先。
 
 - `/companies` — 全企業へのリンク集約ハブ(クローラビリティ + 「技術ブログ 一覧」のインデックス対象)。`getCompanies()` をカード一覧で描画
-- `/companies/[slug]` — 企業ごとの記事まとめ。企業名 + 紹介文 + 公式ブログ導線 + その企業の記事グリッド(初期30件 SSR)。記事一覧は**購読スコープ非依存**(`getCompanyArticles`)で、ログイン購読に関わらず当該企業の全記事を見せる
+- `/companies/[slug]` — 企業ごとの記事まとめ。企業名(見出しは本文色。ブランド色は見出し下のアクセントバー。明るいブランド色だと白背景でコントラスト不足になるため) + 紹介文 + 公式ブログ導線 + その企業の記事グリッド(初期30件 SSR)。記事一覧は**購読スコープ非依存**(`getCompanyArticles`)で、ログイン購読に関わらず当該企業の全記事を見せる
 - カード描画は `CompanyArticleGrid`(フィードの `FeedRow` を共用: カード + 保存アクション + AI要約)。初期30件は SSR(クローラ向け)で、続きは Server Action `loadMoreCompanyArticles`(`app/_composition/article/company-articles-actions.ts`。入力は Zod 検証・認証不要・購読スコープ非依存)が同じ30件単位(`COMPANY_PAGE_SIZE`)で返し末尾に追記する。自動読み込み + 「もっと読む」ボタンは `LoadMoreTrigger`(企業ページ専用)
 - `/companies` のハブは企業名のインクリメンタル絞り込み(`CompaniesFilter`)付き。カードは SSR で全件 HTML に出したまま、クライアントで非一致の `li` を `hidden` にするだけ(リンクを HTML から消さない)。一致0件は空状態メッセージ
 - メタ: title「〇〇のテックブログ新着記事まとめ」/ 自己参照 canonical / OG。JSON-LD は `CollectionPage` + `BreadcrumbList`(ハブは企業 `ItemList`)。`lib/seo.ts` のビルダ
