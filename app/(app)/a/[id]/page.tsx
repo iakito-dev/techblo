@@ -1,6 +1,6 @@
 import { ExternalLink } from 'lucide-react';
 import type { Metadata } from 'next';
-import { cacheLife } from 'next/cache';
+import { cacheLife, cacheTag } from 'next/cache';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
@@ -20,13 +20,12 @@ import { RelatedArticles } from '@/features/feed/web/components/related-articles
 import { ShareButton } from '@/features/feed/web/components/share-button';
 import { getArticleById, getRelatedArticles } from '@/features/feed/web/queries';
 import { toExcerpt } from '@/features/feed/web/strip-html';
+import { CACHE_TAGS } from '@/lib/cache/tags';
 import { articleJsonLd } from '@/lib/seo';
 import { resolveBaseUrl } from '@/lib/site-url';
 import { formatRelative } from '@/shared/date';
 import { MOBILE_GUTTER_CLASS } from '@/shared/layout';
-
-// article.id は uuid。不正な形式は DB エラーになるため事前に弾いて not-found 扱いにする。
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+import { isUuid } from '@/shared/uuid';
 
 /**
  * 主アクションの遷移先を示すドメイン表示。`www.` は情報量が無いので落とす。
@@ -48,10 +47,12 @@ function hostname(url: string): string {
  * 記事ページはリクエスト時に描画される(id が動的で静的シェルに入らない)ので、in-memory の
  * 'use cache' はサーバーレスのインスタンスごとに空から始まり、ほぼ毎回 Supabase まで往復していた。
  * インスタンス間で共有される 'use cache: remote'(Vercel Runtime Cache)にする(ADR-0042)。
+ * 記事タグを付けて分類 cron の無効化を受け、寿命は 'days' にして再検証の書き込みを減らす(ADR-0047)。
  */
 async function loadArticle(id: string) {
   'use cache: remote';
-  cacheLife('hours');
+  cacheTag(CACHE_TAGS.article(id));
+  cacheLife('days');
   return getArticleById(id);
 }
 
@@ -61,7 +62,7 @@ async function loadArticle(id: string) {
  * 不正な id は DB エラーになるため、どちらも呼ぶ前に弾く(要約側には UUID 検証が無い)。
  */
 async function loadArticleWithSummary(id: string) {
-  if (!UUID_RE.test(id)) return { article: null, summary: null };
+  if (!isUuid(id)) return { article: null, summary: null };
   const [article, summary] = await Promise.all([loadArticle(id), getSummaryByArticleId(id)]);
   return { article, summary };
 }
@@ -128,7 +129,7 @@ export default function ArticlePage({ params }: { params: Promise<{ id: string }
           記事は上から読み始めるものなので、戻る行をヘッダー直下に寄せて本文の頭出しを早める。
           max-lg の -mt-4 は Header の mb-8 を半分食う分(lg+ は Header 自体が出ないため
           lg:pt-6 で自前の上余白を持つ)。 */}
-      <main
+      <div
         className={`mx-auto max-w-2xl max-lg:-mt-4 xl:max-w-[66rem] ${MOBILE_GUTTER_CLASS} pb-8 md:px-6 md:pb-10 lg:px-8 lg:pt-6`}
       >
         {/* フィードの途中から来ても記事の頭から開く(Next の遷移時スクロールの補正)。 */}
@@ -137,7 +138,7 @@ export default function ArticlePage({ params }: { params: Promise<{ id: string }
         <Suspense fallback={<ArticleDetailSkeleton />}>
           <ArticleContent params={params} />
         </Suspense>
-      </main>
+      </div>
     </div>
   );
 }
@@ -147,7 +148,7 @@ async function ArticleContent({ params }: { params: Promise<{ id: string }> }) {
   // 関連記事は本文の下(右レール)で別にストリームするが、本文の取得を待ってから引き始めると
   // 往復が直列に積まれる。ここで先に投げて、表示側(Suspense の内側)では結果を待つだけにする。
   // getRelatedArticles は失敗時も [] を返す(reject しない)ので、notFound で捨てても安全。
-  const relatedPromise = UUID_RE.test(id) ? getRelatedArticles(id) : Promise.resolve([]);
+  const relatedPromise = isUuid(id) ? getRelatedArticles(id) : Promise.resolve([]);
   const { article, summary } = await loadArticleWithSummary(id);
   if (!article) notFound();
 

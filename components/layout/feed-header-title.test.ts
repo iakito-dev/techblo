@@ -10,12 +10,23 @@ describe('resolveFeedHeaderTitle', () => {
     expect(resolveFeedHeaderTitle({ sort: 'latest' })).toBe('新着');
   });
 
-  it('検索・企業・既読・人気順などその他の条件は「フィード」を返す', () => {
-    expect(resolveFeedHeaderTitle({ q: 'nextjs' })).toBe('フィード');
+  it('企業・既読などその他の条件は「フィード」を返す', () => {
     expect(resolveFeedHeaderTitle({ company: 'acme' })).toBe('フィード');
     expect(resolveFeedHeaderTitle({ read: 'unread' })).toBe('フィード');
-    expect(resolveFeedHeaderTitle({ sort: 'popular' })).toBe('フィード');
+    expect(resolveFeedHeaderTitle({ sort: 'popular', company: 'acme' })).toBe('フィード');
+    expect(resolveFeedHeaderTitle({ sort: 'popular', read: 'unread' })).toBe('フィード');
     expect(resolveFeedHeaderTitle({})).toBe('フィード');
+  });
+
+  it('検索中は「検索結果」を返す', () => {
+    expect(resolveFeedHeaderTitle({ q: 'nextjs' })).toBe('検索結果');
+    expect(resolveFeedHeaderTitle({ q: 'nextjs', sort: 'popular' })).toBe('検索結果');
+    expect(resolveFeedHeaderTitle({ q: '  ' })).toBe('フィード');
+  });
+
+  it('人気順は「人気の記事」を返す(期間の指定は可)', () => {
+    expect(resolveFeedHeaderTitle({ sort: 'popular' })).toBe('人気の記事');
+    expect(resolveFeedHeaderTitle({ sort: 'popular', period: '7d' })).toBe('人気の記事');
   });
 
   it('tag ありは「#タグ名」を返す(前後の空白は除く)', () => {

@@ -12,6 +12,7 @@ import { useFeedCompany } from '../view-models/use-feed-company';
 import { useFeedFilters } from '../view-models/use-feed-filters';
 import { useFeedPeriod } from '../view-models/use-feed-period';
 import { useFeedSort } from '../view-models/use-feed-sort';
+import { RemovableChip } from './feed-chip';
 import { DefaultFeedSearchBox, FeedSearchBox } from './feed-search-box';
 
 const PERIOD_OPTIONS: { value: PopularPeriod; label: string }[] = [
@@ -32,6 +33,8 @@ type FeedControlsViewProps = {
   searchSlot?: ReactNode;
   /** マイフィードフィルタ(ライブ版のみ。既定版は URL 非依存のため差し込まない)。 */
   userFeedSlot?: ReactNode;
+  /** 適用中タグ(?tag=)のチップ。タグ指定時のみ(ライブ版のみ)。ツールバーの下に1行足す。 */
+  tagSlot?: ReactNode;
   companies: FilterCompany[];
   sort: FeedSort;
   period: PopularPeriod;
@@ -75,6 +78,7 @@ export function FeedControls({
     <FeedControlsView
       searchSlot={<FeedSearchBox />}
       userFeedSlot={userFeeds.length > 0 ? <UserFeedFilter userFeeds={userFeeds} /> : undefined}
+      tagSlot={<ActiveTagChip />}
       companies={companies}
       sort={sort}
       period={period}
@@ -136,10 +140,26 @@ export function DefaultFeedControls({ companies }: { companies: FilterCompany[] 
   );
 }
 
+/**
+ * 適用中のタグ(?tag=)を ✕ で解除できるチップとして見せる。タブレット(md〜lg)は見出しが無く、
+ * モバイルのチップ行も出ないため、これが無いと「なぜこの記事だけ?」が分からず解除もできない。
+ * タグ未指定なら何も描画しない。
+ */
+function ActiveTagChip() {
+  const { tag, removeTag } = useFeedFilters();
+  if (tag === null) return null;
+  return (
+    <div className="mt-2 hidden md:flex">
+      <RemovableChip label={`タグ: ${tag}`} onRemove={removeTag} />
+    </div>
+  );
+}
+
 /** ツールバーの見た目本体。状態と操作はすべて props で受ける(URL 非依存)。 */
 function FeedControlsView({
   searchSlot,
   userFeedSlot,
+  tagSlot,
   companies,
   sort,
   period,
@@ -219,6 +239,7 @@ function FeedControlsView({
           {userFeedSlot}
         </div>
       </div>
+      {tagSlot}
     </section>
   );
 }

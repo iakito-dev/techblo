@@ -4,6 +4,7 @@ import { CACHE_TAGS } from '@/lib/cache/tags';
 import { logger } from '@/lib/observability/logger';
 import { SHELF_CATEGORIES } from '@/shared/categories';
 import { asArticleId, asCompanyId } from '@/shared/type-utils';
+import { isUuid } from '@/shared/uuid';
 import { countByCategory } from '../application/count-by-category';
 import type {
   ArticleCard,
@@ -325,6 +326,8 @@ export async function getSitemapArticles(limit: number): Promise<SitemapArticleE
  * 1記事を表示 DTO で取得(OGP 画像生成等の単発参照用)。存在しなければ null。
  */
 export async function getArticleById(id: string): Promise<ArticleCard | null> {
+  // URL 由来の id(/api/og/[id])が uuid でないと DB エラーで 500 になるため、「無い」扱いにする。
+  if (!isUuid(id)) return null;
   const article = await articleRepo.findById(asArticleId(id));
   return article ? toArticleCard(article) : null;
 }
@@ -347,8 +350,10 @@ export async function getArticlesByIds(ids: string[]): Promise<ArticleCard[]> {
   cacheTag(CACHE_TAGS.feed);
   cacheLife('days');
 
-  if (ids.length === 0) return [];
-  const articles = await articleRepo.listByIds(ids.map(asArticleId));
+  // ゲストの localStorage や Server Action 引数由来の不正な id が 1 つ混ざっても一覧全体を落とさない。
+  const validIds = ids.filter(isUuid);
+  if (validIds.length === 0) return [];
+  const articles = await articleRepo.listByIds(validIds.map(asArticleId));
   const byId = new Map(articles.map((a) => [a.id as string, toArticleCard(a)]));
   return ids.map((id) => byId.get(id)).filter((c): c is ArticleCard => c !== undefined);
 }
@@ -361,10 +366,15 @@ export async function getArticlesByIds(ids: string[]): Promise<ArticleCard[]> {
  * タグ重なりの集計は ready 要約を全件走査する重いクエリなので、インスタンス間で共有される
  * 'use cache: remote' にして「1記事1回の走査」を実際に成り立たせる(in-memory だとインスタンスの
  * 数だけ走査が走る。ADR-0042)。
+ *
+ * タグは feed ではなく記事単位にする(ADR-0047)。feed は取込・要約・分類の cron で 1 時間に
+ * 数回無効化されるため、feed タグだと閲覧された記事の数だけ Runtime Cache の書き直しが毎時走る。
+ * 関連記事の主な入力は自記事の要約タグなので、要約生成・分類時の article タグ無効化で足りる
+ * (新着が候補に入るのは寿命切れの再検証時になる)。
  */
 export async function getRelatedArticles(id: string): Promise<ArticleCard[]> {
   'use cache: remote';
-  cacheTag(CACHE_TAGS.feed);
+  cacheTag(CACHE_TAGS.article(id));
   cacheLife('days');
 
   try {
