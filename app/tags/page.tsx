@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { connection } from 'next/server';
 import { Suspense } from 'react';
+import { DesktopHomeBar } from '@/components/layout/desktop-home-bar';
 import { Header } from '@/components/layout/header';
 import { JsonLd } from '@/components/seo/json-ld';
 import { getPopularTags, type TagIndex } from '@/features/feed/web/queries';
@@ -41,6 +42,7 @@ export default function TagsPage() {
       </Suspense>
 
       <main className="mx-auto max-w-[84rem] px-4 py-8 md:px-6 lg:px-8">
+        <DesktopHomeBar className="mb-8" />
         <header className="mb-8">
           <h1 className="font-bold text-2xl tracking-tight md:text-3xl">{TITLE}</h1>
           <p className="mt-3 max-w-2xl text-fg-muted leading-relaxed">{DESCRIPTION}</p>
