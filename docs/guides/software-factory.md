@@ -48,6 +48,7 @@ claude.ai の Claude Code で、このリポジトリを対象に「実行ごと
 
 ## 2. 日々の運用
 
+- **PR の見た目を確かめる**: UI を変える PR には、変更前後のスクリーンショットの比較表が付く(ADR-0047)。画像は `factory-screenshots` ブランチにある。実データでの見え方は PR の Vercel Preview で見る
 - **画面を手元で確かめる**: `bash scripts/sandbox.sh up` で使い捨て DB + デモ記事 + `next dev`(http://localhost:3100)が立つ。`down` で止める。`.env.local` には触れない
 - **タスクを投げ込む**: Issue を作って `factory` ラベルを付ける。何より先に取り組む。完了条件がはっきりしたものが向いている
 - **やめさせる**: 却下したい PR は close する。ファクトリーは直近 30 日に close された題材を繰り返さない
