@@ -191,13 +191,13 @@ async function ArticleContent({ params }: { params: Promise<{ id: string }> }) {
           )}
         />
         {/* 見出し行: カードと同じ「ファビコン 20px + 企業名 11.5px 太字 / 右端に相対日時」。
-          企業名は企業ページへのリンク(下線は hover 時だけ。常時下線だとカードの見出し行と
+          企業名はその企業で絞り込んだフィードへのリンク(下線は hover 時だけ。常時下線だとカードの見出し行と
           見た目が変わる)。著者は記事ページにしか無い情報で、企業名より従属的なので
           企業名の後ろに通常ウェイト・muted で添える。 */}
         <div className="mb-3 flex items-center gap-[7px] font-semibold text-[11.5px] text-fg-default">
           <CompanyFavicon url={article.url} name={article.company.name} size={20} />
           <Link
-            href={`/companies/${article.company.slug}`}
+            href={`/?company=${encodeURIComponent(article.company.slug)}`}
             className="min-w-0 truncate transition-colors hover:text-accent hover:underline hover:decoration-[1.5px] hover:underline-offset-4"
           >
             {article.company.name}

@@ -88,7 +88,7 @@ export async function renderPublicFeed(scope: PublicFeedScope): Promise<Response
     const xml = buildFeedXml({
       title,
       link: scope.company
-        ? `${baseUrl}/companies/${scope.company.slug}`
+        ? `${baseUrl}/?company=${encodeURIComponent(scope.company.slug)}`
         : tag
           ? `${baseUrl}/?tag=${encodeURIComponent(tag)}`
           : `${baseUrl}/`,

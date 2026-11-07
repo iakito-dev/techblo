@@ -69,7 +69,7 @@ async function singleCompanyName(param: string | undefined): Promise<string | un
  * トップのメタデータ。
  * - canonical は常にクエリ無しの `/` に固定し、?sort=/?company=/?period=/?tag= などの
  *   パラメータ違いを `/` の重複として正規化する(クロール枠の浪費とインデックス分散を防ぐ)。
- *   企業/タグ別の検索面は専用ページ(/companies 等)に委ねる。
+ *   タグ別の検索面は専用ページ(/tags)に委ねる。企業別のページは持たない(ADR-0048)。
  * - 検索結果(?q=)は無限のクエリ基数でインデックス価値が無いため noindex(リンクは follow)。
  */
 export async function generateMetadata({

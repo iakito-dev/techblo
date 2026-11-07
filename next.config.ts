@@ -52,6 +52,16 @@ const config: NextConfig = {
     ],
   },
 
+  // 企業ページ(/companies, /companies/[slug])は廃止した(ADR-0048)。外部や検索結果に残る URL は
+  // フィードの企業絞り込みへ寄せる。企業別 RSS(/companies/[slug]/feed.xml)は購読者がいるので残し、
+  // 1 セグメントだけに一致するこの規則では転送されない。
+  async redirects() {
+    return [
+      { source: '/companies', destination: '/', permanent: true },
+      { source: '/companies/:slug', destination: '/?company=:slug', permanent: true },
+    ];
+  },
+
   async headers() {
     return [
       {

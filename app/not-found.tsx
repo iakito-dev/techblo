@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 };
 
 /**
- * shell を持たないルート(/about, /companies/[slug] 等)の 404。
+ * shell を持たないルート(/about, /tags 等)の 404。
  * (app) 配下は同名ファイルが shell 付きで受けるため、こちらはトップへの導線だけを置く。
  */
 export default function NotFound() {

@@ -200,9 +200,8 @@ export function FeedList({
     <>
       {/*
         トップ(/)の棚(feed-section.tsx)と列構成を揃える(md+ でコンテナクエリ 1〜4列。
-        ADR-0035。祖先の @container は page.tsx の本文ラッパーが持つ)。企業ページ等の
-        CompanyArticleGrid / 保存記事一覧は共通の feed-grid ユーティリティ(auto-fill)のままにし、
-        影響をこのコンポーネント(/ 専用)に閉じる。
+        ADR-0035。祖先の @container は page.tsx の本文ラッパーが持つ)。保存記事一覧は共通の
+        feed-grid ユーティリティ(auto-fill)のままにし、影響をこのコンポーネント(/ 専用)に閉じる。
       */}
       <div
         aria-busy={navPending}

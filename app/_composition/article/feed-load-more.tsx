@@ -405,57 +405,6 @@ export async function getSectionsPageData(): Promise<SectionsPageData> {
 }
 
 /**
- * 企業ページ(/companies/[slug])用に、その企業の公開記事を新着順で取得する合成点。
- *
- * getFeedPageData と違い **購読スコープを一切かけない**: 企業ページは公開ランディングなので、
- * 未購読のログインユーザーにもその企業の全記事を見せる必要がある(SEO 面 + 発見導線)。
- * そのためゲスト共通でキャッシュ済みの getFeed(companyIds=[id])経路を使い、
- * ログイン時のみ保存状態(bm/fav)を上乗せする。AI要約も同時に合成する。
- *
- * 返り値は getFeedPageData と同じ ComposedArticle 配列(カード描画を共通化するため)。
- * 企業が見つからない時は呼び出し側(ページ)が getCompanyBySlug で notFound 済みなので、
- * ここでは items が空になりうるだけ(記事ゼロの企業)。
- */
-export async function getCompanyArticles({
-  slug,
-  page,
-  limit = INITIAL_PAGE_SIZE,
-}: {
-  slug: string;
-  page: number;
-  limit?: number;
-}): Promise<{ items: ComposedArticle[]; hasMore: boolean; isGuest: boolean }> {
-  const companies = await getCompanies();
-  const company = companies.find((c) => c.slug === slug);
-  // 企業が無い/無効なら記事も無い(ページ側で notFound 済みのため通常は通らない)。
-  if (!company) return { items: [], hasMore: false, isGuest: true };
-
-  const feed = await getFeed({ sort: 'latest', page, limit, companyIds: [company.id] });
-  const session = await getSession();
-
-  const [bookmarkedIds, favoritedIds] = session
-    ? await Promise.all([
-        getBookmarkedArticleIds(asUserId(session.user.id)),
-        getFavoritedArticleIds(asUserId(session.user.id)),
-      ])
-    : [[], []];
-  const bookmarkedSet = new Set(bookmarkedIds);
-  const favoritedSet = new Set(favoritedIds);
-  const summaries = await resolveSummaries(feed.items.map((a) => a.id));
-
-  return {
-    items: feed.items.map((article, i) => ({
-      article,
-      bookmarked: bookmarkedSet.has(article.id),
-      favorited: favoritedSet.has(article.id),
-      summary: summaries[i] ?? null,
-    })),
-    hasMore: feed.hasMore,
-    isGuest: !session,
-  };
-}
-
-/**
  * 企業フィルタのチップに並べる企業を返す(ADR-0013 追補)。
  * - ログイン: 購読 ON の企業のみ(「すべて」が見せる集合と一致)
  * - 未ログイン: 全企業

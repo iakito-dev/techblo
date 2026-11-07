@@ -183,7 +183,7 @@ Cron(毎時0分) → [Trigger.dev v4]
 | `/a/[id]` | PPR | 記事データを `'use cache: remote'`(ADR-0042) |
 | `/bookmarks` `/favorites` `/history` | PPR | ユーザー別タグでキャッシュ(ADR-0016) |
 | `/settings/*` | PPR | ユーザー別タグでキャッシュ |
-| `/companies/*` `/tags` | PPR | `'use cache'` |
+| `/tags` | PPR | `'use cache'` |
 | `/lp` | Static | ビルド時生成 |
 | `/login` | PPR | 静的シェル + Suspense 内でセッション判定 |
 | `/api/og/[id]` | Dynamic | 1日 |

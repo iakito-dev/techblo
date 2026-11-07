@@ -65,7 +65,7 @@ export type CompanyWithCount = {
 };
 
 /**
- * 企業ページ(/companies/[slug])用の企業詳細 DTO。
+ * 企業の詳細 DTO(フィードの企業絞り込みの見出し・企業別 RSS 用)。
  * 一覧用 CompanyWithCount に紹介文を加えたもの。
  */
 export type CompanyDetailDto = CompanyWithCount & {
