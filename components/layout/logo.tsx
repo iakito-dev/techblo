@@ -9,10 +9,10 @@ import { cn } from '@/shared/utils';
 export function LogoMark({ className }: { className?: string }) {
   return (
     <span aria-hidden className={cn('grid shrink-0 grid-cols-2 gap-1', className)}>
-      <span className="size-[7px] rounded-full bg-fg-default" />
-      <span className="size-[7px] rounded-full bg-accent" />
-      <span className="size-[7px] rounded-full bg-accent" />
-      <span className="size-[7px] rounded-full bg-fg-default" />
+      <span className="bg-fg-default size-[7px] rounded-full" />
+      <span className="bg-accent size-[7px] rounded-full" />
+      <span className="bg-accent size-[7px] rounded-full" />
+      <span className="bg-fg-default size-[7px] rounded-full" />
     </span>
   );
 }
@@ -45,14 +45,14 @@ export function Logo({
           style={{ fontFamily: 'var(--font-noto-sans-jp), var(--font-sans)' }}
           className="inline-flex items-baseline text-[1.375rem] leading-none tracking-[0.015em]"
         >
-          <span className="font-bold text-fg-default">テク</span>
-          <span className="font-medium text-accent">ブロ</span>
+          <span className="text-fg-default font-bold">テク</span>
+          <span className="text-accent font-medium">ブロ</span>
         </span>
         {showOrigin && (
           // 由来表示(tech blog 由来)。"Tech" のみティールにする。
           // ワードマーク幅に対して中央寄せする。
-          <span className="text-center font-editorial text-[0.6875rem] text-fg-subtle leading-none tracking-[0.06em]">
-            <span className="mr-[0.25em] text-accent">Tech</span>Blog Reader
+          <span className="font-editorial text-fg-subtle text-center text-[0.6875rem] leading-none tracking-[0.06em]">
+            <span className="text-accent mr-[0.25em]">Tech</span>Blog Reader
           </span>
         )}
       </span>

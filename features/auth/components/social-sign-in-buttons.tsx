@@ -124,9 +124,9 @@ export function SocialSignInButtons({ callbackURL }: { callbackURL?: string }) {
       </Button>
 
       <div className="flex items-center gap-3" aria-hidden="true">
-        <span className="h-px flex-1 bg-border-default" />
+        <span className="bg-border-default h-px flex-1" />
         <span className="text-fg-muted text-xs">または</span>
-        <span className="h-px flex-1 bg-border-default" />
+        <span className="bg-border-default h-px flex-1" />
       </div>
 
       <div className="flex gap-3">

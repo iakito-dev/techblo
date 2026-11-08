@@ -174,12 +174,12 @@ export function FeedFilterSheet({
       contentClassName="h-[85dvh]"
     >
       <header className="flex shrink-0 items-center justify-between px-5 pb-3">
-        <h2 className="font-semibold text-fg-default text-lg">絞り込み</h2>
+        <h2 className="text-fg-default text-lg font-semibold">絞り込み</h2>
         <button
           type="button"
           onClick={() => onOpenChange(false)}
           aria-label="絞り込みを閉じる"
-          className="-mr-2 grid size-11 touch-manipulation place-items-center rounded-full text-fg-secondary transition-colors active:bg-bg-surface-2"
+          className="text-fg-secondary active:bg-bg-surface-2 -mr-2 grid size-11 touch-manipulation place-items-center rounded-full transition-colors"
         >
           <X aria-hidden="true" className="size-5" />
         </button>
@@ -208,14 +208,14 @@ export function FeedFilterSheet({
 
         <Section label="企業">
           <div className="relative mb-2">
-            <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-fg-subtle" />
+            <Search className="text-fg-subtle absolute top-1/2 left-3 size-4 -translate-y-1/2" />
             <input
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="企業名で検索"
               aria-label="企業名で検索"
-              className="h-11 w-full rounded-md border border-border-default bg-bg-surface-2 pr-3 pl-9 text-sm outline-none placeholder:text-fg-subtle focus-visible:ring-2 focus-visible:ring-primary"
+              className="border-border-default bg-bg-surface-2 placeholder:text-fg-subtle focus-visible:ring-primary h-11 w-full rounded-md border pr-3 pl-9 text-sm outline-none focus-visible:ring-2"
             />
           </div>
           <ul className="-mx-1">
@@ -227,7 +227,7 @@ export function FeedFilterSheet({
                     type="button"
                     onClick={() => toggle(c.slug)}
                     aria-pressed={checked}
-                    className="flex min-h-12 w-full items-center gap-3 rounded-md px-1 text-left transition-colors active:bg-bg-surface-2"
+                    className="active:bg-bg-surface-2 flex min-h-12 w-full items-center gap-3 rounded-md px-1 text-left transition-colors"
                   >
                     {/* 複数選択と分かるよう角丸を小さめの四角(チェックボックス)にする。
                         丸だと単一選択ラジオに見える(現行UIの課題)。 */}
@@ -241,15 +241,15 @@ export function FeedFilterSheet({
                       {checked && <Check aria-hidden="true" className="size-3.5" strokeWidth={3} />}
                     </span>
                     <CompanyFavicon url={c.siteUrl} name={c.name} />
-                    <span className="min-w-0 flex-1 truncate text-fg-default text-sm">
+                    <span className="text-fg-default min-w-0 flex-1 truncate text-sm">
                       {c.name}
                     </span>
                     {checked && (
-                      <span className="shrink-0 rounded-pill border border-accent/50 px-2 py-0.5 font-medium text-[0.625rem] text-accent">
+                      <span className="rounded-pill border-accent/50 text-accent shrink-0 border px-2 py-0.5 text-[0.625rem] font-medium">
                         選択中
                       </span>
                     )}
-                    <span className="shrink-0 text-fg-subtle text-xs tabular-nums">
+                    <span className="text-fg-subtle shrink-0 text-xs tabular-nums">
                       {c.articleCount}
                     </span>
                   </button>
@@ -257,7 +257,7 @@ export function FeedFilterSheet({
               );
             })}
             {query && filteredCompanies.length === 0 && (
-              <li className="px-1 py-3 text-fg-muted text-sm">該当する企業がありません</li>
+              <li className="text-fg-muted px-1 py-3 text-sm">該当する企業がありません</li>
             )}
           </ul>
         </Section>
@@ -274,7 +274,7 @@ export function FeedFilterSheet({
                       type="button"
                       onClick={() => toggleFeed(f.id)}
                       aria-pressed={checked}
-                      className="flex min-h-12 w-full items-center gap-3 rounded-md px-1 text-left transition-colors active:bg-bg-surface-2"
+                      className="active:bg-bg-surface-2 flex min-h-12 w-full items-center gap-3 rounded-md px-1 text-left transition-colors"
                     >
                       <span
                         className={`grid size-5 shrink-0 place-items-center rounded-[5px] border-2 transition-colors ${
@@ -288,15 +288,15 @@ export function FeedFilterSheet({
                         )}
                       </span>
                       <CompanyFavicon url={f.siteUrl ?? ''} name={f.title} />
-                      <span className="min-w-0 flex-1 truncate text-fg-default text-sm">
+                      <span className="text-fg-default min-w-0 flex-1 truncate text-sm">
                         {f.title}
                       </span>
                       {checked && (
-                        <span className="shrink-0 rounded-pill border border-accent/50 px-2 py-0.5 font-medium text-[0.625rem] text-accent">
+                        <span className="rounded-pill border-accent/50 text-accent shrink-0 border px-2 py-0.5 text-[0.625rem] font-medium">
                           選択中
                         </span>
                       )}
-                      <span className="shrink-0 text-fg-subtle text-xs tabular-nums">
+                      <span className="text-fg-subtle shrink-0 text-xs tabular-nums">
                         {f.articleCount}
                       </span>
                     </button>
@@ -308,19 +308,19 @@ export function FeedFilterSheet({
         )}
       </div>
 
-      <footer className="flex shrink-0 items-center gap-3 border-border-default border-t px-5 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+      <footer className="border-border-default flex shrink-0 items-center gap-3 border-t px-5 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
         <button
           type="button"
           onClick={clearAll}
           disabled={!hasFilters}
-          className="h-12 shrink-0 rounded-md px-5 font-medium text-fg-secondary text-sm transition-colors active:bg-bg-surface-2 disabled:opacity-40"
+          className="text-fg-secondary active:bg-bg-surface-2 h-12 shrink-0 rounded-md px-5 text-sm font-medium transition-colors disabled:opacity-40"
         >
           クリア
         </button>
         <button
           type="button"
           onClick={apply}
-          className="h-12 flex-1 rounded-md bg-primary font-medium text-base text-fg-inverse transition-colors active:bg-primary-hover"
+          className="bg-primary text-fg-inverse active:bg-primary-hover h-12 flex-1 rounded-md text-base font-medium transition-colors"
         >
           <span className="tabular-nums">{debouncedCount.toLocaleString()}</span>件の記事を表示
         </button>
@@ -332,7 +332,7 @@ export function FeedFilterSheet({
 function Section({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <section className="border-border-default border-b py-4 first:pt-2 last:border-b-0">
-      <h3 className="mb-2.5 font-semibold text-fg-secondary text-xs tracking-wide">{label}</h3>
+      <h3 className="text-fg-secondary mb-2.5 text-xs font-semibold tracking-wide">{label}</h3>
       {children}
     </section>
   );
@@ -350,7 +350,7 @@ function Segmented<T extends string>({
 }) {
   return (
     <div
-      className="grid gap-1 rounded-md bg-bg-surface-2 p-1"
+      className="bg-bg-surface-2 grid gap-1 rounded-md p-1"
       style={{ gridTemplateColumns: `repeat(${options.length}, minmax(0, 1fr))` }}
     >
       {options.map((option) => {
@@ -361,7 +361,7 @@ function Segmented<T extends string>({
             type="button"
             aria-pressed={active}
             onClick={() => onChange(option.value)}
-            className={`h-11 rounded-sm font-medium text-sm transition-colors ${
+            className={`h-11 rounded-sm text-sm font-medium transition-colors ${
               active ? 'bg-bg-surface text-primary shadow-xs' : 'text-fg-muted'
             }`}
           >

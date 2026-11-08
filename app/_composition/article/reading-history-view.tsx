@@ -62,14 +62,14 @@ export function ReadingHistoryView({
     <section>
       <div className="mb-4 flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <History className="size-5 text-fg-muted" />
-          <h1 className="font-bold text-xl tracking-tight">閲覧履歴</h1>
+          <History className="text-fg-muted size-5" />
+          <h1 className="text-xl font-bold tracking-tight">閲覧履歴</h1>
         </div>
       </div>
       {showControls && (
         <SavedSearchInput value={query} onChange={setQuery} ariaLabel="閲覧履歴を絞り込む" />
       )}
-      <p className={`${showControls ? 'mt-3' : '-mt-2'} mb-5 text-fg-muted text-sm`}>
+      <p className={`${showControls ? 'mt-3' : '-mt-2'} text-fg-muted mb-5 text-sm`}>
         {isFiltering
           ? `${filtered.length}件 / 全${articles.length}件`
           : `最近読んだ${articles.length}件`}
@@ -77,21 +77,21 @@ export function ReadingHistoryView({
 
       {articles.length === 0 ? (
         <div className="flex flex-col items-center justify-center px-6 py-24 text-center">
-          <History className="size-10 text-fg-subtle" />
-          <p className="mt-4 font-bold text-fg-default">まだ読んだ記事がありません</p>
-          <p className="mt-1 text-fg-muted text-sm">記事ページを開くとここに記録されます</p>
-          <Link href="/" className="mt-4 font-medium text-accent text-sm hover:underline">
+          <History className="text-fg-subtle size-10" />
+          <p className="text-fg-default mt-4 font-bold">まだ読んだ記事がありません</p>
+          <p className="text-fg-muted mt-1 text-sm">記事ページを開くとここに記録されます</p>
+          <Link href="/" className="text-accent mt-4 text-sm font-medium hover:underline">
             フィードを見る
           </Link>
         </div>
       ) : filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center px-6 py-20 text-center">
-          <Search className="size-10 text-fg-subtle" />
-          <p className="mt-4 font-bold text-fg-default">一致する記事がありません</p>
+          <Search className="text-fg-subtle size-10" />
+          <p className="text-fg-default mt-4 font-bold">一致する記事がありません</p>
           <button
             type="button"
             onClick={() => setQuery('')}
-            className="mt-3 rounded-sm font-medium text-accent text-sm hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+            className="text-accent focus-visible:ring-accent mt-3 rounded-sm text-sm font-medium hover:underline focus-visible:ring-2 focus-visible:outline-none"
           >
             絞り込みをクリア
           </button>
@@ -101,7 +101,7 @@ export function ReadingHistoryView({
           {groups.map((group) => (
             <section key={group.key} aria-label={group.label || undefined}>
               {group.label && (
-                <h2 className="mb-3 font-semibold text-fg-muted text-sm">{group.label}</h2>
+                <h2 className="text-fg-muted mb-3 text-sm font-semibold">{group.label}</h2>
               )}
               <div className={`feed-grid ${FEED_GAP_CLASS}`}>
                 {group.items.map((article) => {

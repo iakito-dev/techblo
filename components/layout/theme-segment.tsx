@@ -25,7 +25,7 @@ export function ThemeSegment() {
   return (
     <fieldset
       aria-label="テーマ"
-      className="m-0 grid min-w-0 grid-cols-3 gap-1 rounded-md border border-border-default bg-bg-surface-2 p-1"
+      className="border-border-default bg-bg-surface-2 m-0 grid min-w-0 grid-cols-3 gap-1 rounded-md border p-1"
     >
       {OPTIONS.map(({ value, label, icon: Icon }) => {
         const selected = mounted && theme === value;
@@ -35,9 +35,9 @@ export function ThemeSegment() {
             type="button"
             aria-pressed={selected}
             onClick={() => setTheme(value)}
-            className={`flex min-h-10 items-center justify-center gap-1.5 rounded-sm font-medium text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
+            className={`focus-visible:ring-accent flex min-h-10 items-center justify-center gap-1.5 rounded-sm text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none ${
               selected
-                ? 'bg-bg-surface text-fg-default shadow-xs ring-1 ring-border-strong'
+                ? 'bg-bg-surface text-fg-default ring-border-strong shadow-xs ring-1'
                 : 'text-fg-muted hover:text-fg-default'
             }`}
           >

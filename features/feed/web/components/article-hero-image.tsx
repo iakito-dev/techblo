@@ -32,7 +32,7 @@ export function ArticleHeroImage({
       }}
       className={
         // 既定は記事ページと同じ角丸なし + hairline の輪郭(ADR-0035: 面・角丸を使わない)
-        className ?? 'aspect-[1200/630] w-full object-cover ring-1 ring-border-default ring-inset'
+        className ?? 'ring-border-default aspect-[1200/630] w-full object-cover ring-1 ring-inset'
       }
     />
   );
@@ -45,7 +45,7 @@ export function ArticleHeroImage({
       target="_blank"
       rel="noopener noreferrer"
       aria-label="元記事を開く"
-      className="block cursor-pointer transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg-surface"
+      className="focus-visible:ring-accent focus-visible:ring-offset-bg-surface block cursor-pointer transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
     >
       {img}
     </a>

@@ -7,11 +7,11 @@ import { Inbox } from 'lucide-react';
 export function FeedEmptyState() {
   return (
     <div className="flex flex-col items-center justify-center px-6 py-24 text-center">
-      <div className="grid size-16 place-items-center rounded-xl border border-border-default text-accent">
+      <div className="border-border-default text-accent grid size-16 place-items-center rounded-xl border">
         <Inbox className="size-8" />
       </div>
-      <p className="mt-5 font-bold text-fg-default text-lg">記事がまだありません</p>
-      <p className="mt-2 max-w-xs text-fg-muted text-sm leading-relaxed">
+      <p className="text-fg-default mt-5 text-lg font-bold">記事がまだありません</p>
+      <p className="text-fg-muted mt-2 max-w-xs text-sm leading-relaxed">
         各社のテックブログから定期的に記事を取り込んでいます。しばらくしてから再度確認してください。
       </p>
     </div>

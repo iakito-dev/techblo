@@ -52,17 +52,17 @@ export const ArticleCard = memo(function ArticleCard({
     <div
       data-article-card
       data-article-url={article.url}
-      className="group relative flex cursor-pointer touch-manipulation flex-col border-border-default border-t-[1.5px] pt-4 transition-colors hover:border-accent has-[[data-detail-trigger]:focus-visible]:border-accent has-[[data-detail-trigger]:focus-visible]:border-t-[3px] has-[[data-detail-trigger]:focus-visible]:pt-[calc(1rem-1.5px)]"
+      className="group border-border-default hover:border-accent has-[[data-detail-trigger]:focus-visible]:border-accent relative flex cursor-pointer touch-manipulation flex-col border-t-[1.5px] pt-4 transition-colors has-[[data-detail-trigger]:focus-visible]:border-t-[3px] has-[[data-detail-trigger]:focus-visible]:pt-[calc(1rem-1.5px)]"
     >
       {/* 見出し行: 企業ファビコン + 企業名 / 右端に日時。
           日時は「いつの記事か」をカードを読む前に判断する情報なので、フッターではなく
           企業名と同じ行の右端に出す(視線が最初に通る位置)。フッター行を1行減らせるため
           カード下部の余白も詰まる。はてブ数は同じ「記事のメタ」なので日時の隣に並べる
           (人気順のときだけ表示。並び順の根拠になるため)。 */}
-      <div className="mb-2.5 flex items-center gap-[7px] font-semibold text-[11.5px] text-fg-default md:mb-3">
+      <div className="text-fg-default mb-2.5 flex items-center gap-[7px] text-[11.5px] font-semibold md:mb-3">
         <CompanyFavicon url={article.url} name={article.company.name} size={20} />
         <span className="min-w-0 truncate">{article.company.name}</span>
-        <div className="ml-auto flex shrink-0 items-center gap-1.5 font-normal text-fg-muted">
+        <div className="text-fg-muted ml-auto flex shrink-0 items-center gap-1.5 font-normal">
           <RelativeTime date={article.publishedAt} />
           {showHatenaCount && article.hatenaBookmarkCount > 0 && (
             <>
@@ -73,7 +73,7 @@ export const ArticleCard = memo(function ArticleCard({
                   はてブ
                 </span>
                 <span className="sr-only">はてなブックマーク </span>
-                <span className="font-metric font-semibold text-fg-default">
+                <span className="font-metric text-fg-default font-semibold">
                   {article.hatenaBookmarkCount}
                 </span>
               </span>
@@ -88,7 +88,7 @@ export const ArticleCard = memo(function ArticleCard({
           ただし auto の先読みは記事ページの枠(skeleton)までなので、hover / touchstart で
           本文まで含めた full prefetch に切り替える(unstable_dynamicOnHover。ADR-0042)。
           本文は 'use cache: remote' なので、この先読みもほぼ DB 往復なしで返る。 */}
-      <h2 className="mb-2 line-clamp-3 font-bold text-[1.125rem] text-fg-default leading-[1.46] tracking-[-0.015em]">
+      <h2 className="text-fg-default mb-2 line-clamp-3 text-[1.125rem] leading-[1.46] font-bold tracking-[-0.015em]">
         <ArticleLink
           article={article}
           source="feed"
@@ -96,7 +96,7 @@ export const ArticleCard = memo(function ArticleCard({
           data-detail-trigger
           // j/k ショートカットが辿る対象の目印(keyboard-shortcuts.tsx)。
           data-article-link
-          className="transition-colors after:absolute after:inset-0 focus-visible:outline-none group-hover:text-accent group-has-[[data-detail-trigger]:focus-visible]:text-accent group-has-[[data-detail-trigger]:focus-visible]:underline group-has-[[data-detail-trigger]:focus-visible]:decoration-[1.5px] group-has-[[data-detail-trigger]:focus-visible]:underline-offset-4"
+          className="group-hover:text-accent group-has-[[data-detail-trigger]:focus-visible]:text-accent transition-colors group-has-[[data-detail-trigger]:focus-visible]:underline group-has-[[data-detail-trigger]:focus-visible]:decoration-[1.5px] group-has-[[data-detail-trigger]:focus-visible]:underline-offset-4 after:absolute after:inset-0 focus-visible:outline-none"
         >
           {article.title}
         </ArticleLink>
@@ -104,7 +104,7 @@ export const ArticleCard = memo(function ArticleCard({
 
       {/* 抜粋: AI要約の概要優先、無ければ RSS 抜粋 */}
       {overviewText && (
-        <p className="line-clamp-2 text-[13.5px] text-fg-muted leading-[1.75]">{overviewText}</p>
+        <p className="text-fg-muted line-clamp-2 text-[13.5px] leading-[1.75]">{overviewText}</p>
       )}
 
       {/*
@@ -136,7 +136,7 @@ export const ArticleCard = memo(function ArticleCard({
                 <Link
                   href={`/?tag=${encodeURIComponent(tag)}`}
                   prefetch={false}
-                  className="relative block rounded-full border border-border-default px-2 text-[11px] text-fg-muted leading-5 transition-colors before:absolute before:inset-x-0 before:-inset-y-1.5 hover:border-accent hover:text-accent focus-visible:border-accent focus-visible:text-accent focus-visible:outline-none"
+                  className="border-border-default text-fg-muted hover:border-accent hover:text-accent focus-visible:border-accent focus-visible:text-accent relative block rounded-full border px-2 text-[11px] leading-5 transition-colors before:absolute before:inset-x-0 before:-inset-y-1.5 focus-visible:outline-none"
                 >
                   {tag}
                 </Link>
@@ -148,7 +148,7 @@ export const ArticleCard = memo(function ArticleCard({
             タッチ端末(coarse pointer)は hover が無いため常時表示にする。
             -my-2.5 は当たり判定(44px)を維持したまま行高だけ詰めるための負マージン
             (44px をそのまま積むと 1 枚あたり 20px が余白になる)。 */}
-        <div className="-my-2.5 ml-auto flex shrink-0 items-center gap-3 opacity-0 pointer-coarse:opacity-100 transition-opacity duration-150 group-focus-within:opacity-100 group-hover:opacity-100">
+        <div className="-my-2.5 ml-auto flex shrink-0 items-center gap-3 opacity-0 transition-opacity duration-150 group-focus-within:opacity-100 group-hover:opacity-100 pointer-coarse:opacity-100">
           {actions ?? <DisabledActions />}
         </div>
       </div>
@@ -164,13 +164,13 @@ function DisabledActions() {
     <>
       <span
         aria-hidden="true"
-        className="grid size-11 place-items-center rounded-full text-fg-subtle/50"
+        className="text-fg-subtle/50 grid size-11 place-items-center rounded-full"
       >
         <Bookmark className="size-[17px]" />
       </span>
       <span
         aria-hidden="true"
-        className="grid size-11 place-items-center rounded-full text-fg-subtle/50"
+        className="text-fg-subtle/50 grid size-11 place-items-center rounded-full"
       >
         <Heart className="size-[17px]" />
       </span>

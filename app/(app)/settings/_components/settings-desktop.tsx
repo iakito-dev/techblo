@@ -26,7 +26,7 @@ export function SettingsDesktop({ className }: { className?: string }) {
     <div className={className}>
       <div className="mx-auto max-w-[52rem] xl:grid xl:max-w-none xl:grid-cols-[minmax(0,52rem)_10rem] xl:justify-center xl:gap-12">
         <div className="min-w-0">
-          <h1 className="mb-6 font-bold text-xl tracking-tight">設定</h1>
+          <h1 className="mb-6 text-xl font-bold tracking-tight">設定</h1>
           <div id="account" className="scroll-mt-6">
             <AccountCard />
           </div>

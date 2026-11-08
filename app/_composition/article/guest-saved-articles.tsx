@@ -41,7 +41,7 @@ export function GuestSavedArticles({ kind }: { kind: Exclude<GuestSaveKind, 'rea
   }, [ready, kind]);
 
   if (articles === null) {
-    return <div className="h-64 w-full animate-pulse rounded-lg bg-bg-surface-2" />;
+    return <div className="bg-bg-surface-2 h-64 w-full animate-pulse rounded-lg" />;
   }
 
   return (

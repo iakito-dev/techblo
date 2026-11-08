@@ -21,12 +21,12 @@ export function SavedArticlesSkeleton({ kind }: { kind: keyof typeof KIND_CONFIG
     <section>
       <div className="mb-4 flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <Icon className="size-5 text-primary" />
-          <h1 className="font-bold text-xl tracking-tight">{title}</h1>
+          <Icon className="text-primary size-5" />
+          <h1 className="text-xl font-bold tracking-tight">{title}</h1>
         </div>
       </div>
       {/* 「N件」と同じ行高のプレースホルダ(-mt-2 mb-5 も SavedArticlesView と一致させる) */}
-      <div className="-mt-2 mb-5 h-5 w-20 animate-pulse rounded bg-bg-surface-3" />
+      <div className="bg-bg-surface-3 -mt-2 mb-5 h-5 w-20 animate-pulse rounded" />
       <FeedGridSkeleton />
     </section>
   );

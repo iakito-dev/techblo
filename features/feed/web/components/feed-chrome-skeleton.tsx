@@ -15,18 +15,18 @@ import { MOBILE_GUTTER_CLASS } from '@/shared/layout';
  */
 export function MobileFeedHeaderSkeleton() {
   return (
-    <div className="sticky top-0 z-30 bg-bg-app md:hidden">
+    <div className="bg-bg-app sticky top-0 z-30 md:hidden">
       {/* 1 行目: ロゴマーク + 検索 + 絞り込みアイコン(実物と同じ枠を出し、中身だけ静止させる) */}
       <div
-        className={`flex items-center gap-2 border-border-default border-b-[0.5px] ${MOBILE_GUTTER_CLASS} pt-[calc(env(safe-area-inset-top,0px)+0.625rem)] pb-2.5`}
+        className={`border-border-default flex items-center gap-2 border-b-[0.5px] ${MOBILE_GUTTER_CLASS} pt-[calc(env(safe-area-inset-top,0px)+0.625rem)] pb-2.5`}
       >
         {/* ロゴマークはデータ非依存なので skeleton でも実物を出す(遷移中も消えない)。 */}
         <LogoMark />
         <div className="relative min-w-0 flex-1">
-          <Search className="absolute top-1/2 left-3 size-[18px] -translate-y-1/2 text-fg-subtle" />
-          <div className="h-11 w-full rounded-md border border-border-default bg-bg-surface-2 pr-10 pl-9" />
+          <Search className="text-fg-subtle absolute top-1/2 left-3 size-[18px] -translate-y-1/2" />
+          <div className="border-border-default bg-bg-surface-2 h-11 w-full rounded-md border pr-10 pl-9" />
         </div>
-        <div className="grid size-11 shrink-0 place-items-center rounded-md text-fg-subtle shadow-[inset_0_0_0_1px_var(--color-border-strong)]">
+        <div className="text-fg-subtle grid size-11 shrink-0 place-items-center rounded-md shadow-[inset_0_0_0_1px_var(--color-border-strong)]">
           <ListFilter className="size-[18px]" />
         </div>
       </div>
@@ -40,16 +40,16 @@ export function MobileFeedHeaderSkeleton() {
  */
 export function FeedTopbarSkeleton() {
   return (
-    <div className="sticky top-0 z-20 hidden h-16 border-border-default border-b bg-bg-app/80 backdrop-blur-xl backdrop-saturate-150 lg:block">
+    <div className="border-border-default bg-bg-app/80 sticky top-0 z-20 hidden h-16 border-b backdrop-blur-xl backdrop-saturate-150 lg:block">
       {/* FeedTopbar と同じ最大幅(1680px)にそろえる(解決時のレイアウトシフト防止。ADR-0035)。 */}
       <div className="mx-auto flex h-16 max-w-[1680px] items-center gap-3 px-4 md:px-6 lg:px-8">
         <div className="relative max-w-md flex-1">
-          <Search className="absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-fg-subtle" />
-          <div className="h-9 w-full rounded-md border border-border-default bg-bg-surface-2" />
+          <Search className="text-fg-subtle absolute top-1/2 left-2.5 size-4 -translate-y-1/2" />
+          <div className="border-border-default bg-bg-surface-2 h-9 w-full rounded-md border" />
         </div>
         <div className="ml-auto flex items-center gap-2">
-          <div className="size-9 rounded-md bg-bg-surface-2" />
-          <div className="size-9 animate-pulse rounded-full bg-bg-surface-3" />
+          <div className="bg-bg-surface-2 size-9 rounded-md" />
+          <div className="bg-bg-surface-3 size-9 animate-pulse rounded-full" />
         </div>
       </div>
     </div>

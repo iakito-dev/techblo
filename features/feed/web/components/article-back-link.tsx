@@ -37,7 +37,7 @@ export function ArticleBackLink({ className }: { className?: string }) {
     <Link
       href="/"
       onClick={handleClick}
-      className={`-ml-2 inline-flex min-h-11 touch-manipulation items-center gap-1.5 px-2 font-medium text-fg-muted text-sm transition-colors hover:text-fg-default ${className ?? ''}`}
+      className={`text-fg-muted hover:text-fg-default -ml-2 inline-flex min-h-11 touch-manipulation items-center gap-1.5 px-2 text-sm font-medium transition-colors ${className ?? ''}`}
     >
       <ArrowLeft aria-hidden="true" className="size-4" />
       戻る

@@ -21,7 +21,7 @@ export function LegalShell({
   return (
     <div className="min-h-dvh pb-24 lg:pb-12">
       <SkipLink />
-      <Suspense fallback={<div className="h-16 border-border-default border-b bg-bg-surface" />}>
+      <Suspense fallback={<div className="border-border-default bg-bg-surface h-16 border-b" />}>
         <Header />
       </Suspense>
 
@@ -32,22 +32,22 @@ export function LegalShell({
       >
         <DesktopHomeBar className="mb-8" />
         <header className="mb-8">
-          <h1 className="font-bold text-2xl tracking-tight md:text-3xl">{title}</h1>
-          {lastUpdated && <p className="mt-2 text-fg-muted text-sm">最終更新日: {lastUpdated}</p>}
+          <h1 className="text-2xl font-bold tracking-tight md:text-3xl">{title}</h1>
+          {lastUpdated && <p className="text-fg-muted mt-2 text-sm">最終更新日: {lastUpdated}</p>}
         </header>
 
-        <div className="flex flex-col gap-8 text-fg-secondary leading-relaxed [word-break:auto-phrase]">
+        <div className="text-fg-secondary flex flex-col gap-8 leading-relaxed [word-break:auto-phrase]">
           {children}
         </div>
 
-        <nav className="mt-12 flex flex-wrap gap-x-6 gap-y-2 border-border-default border-t pt-6 text-fg-muted text-sm">
-          <Link href="/privacy" className="transition-colors hover:text-fg-default">
+        <nav className="border-border-default text-fg-muted mt-12 flex flex-wrap gap-x-6 gap-y-2 border-t pt-6 text-sm">
+          <Link href="/privacy" className="hover:text-fg-default transition-colors">
             プライバシーポリシー
           </Link>
-          <Link href="/terms" className="transition-colors hover:text-fg-default">
+          <Link href="/terms" className="hover:text-fg-default transition-colors">
             利用規約
           </Link>
-          <Link href="/about" className="transition-colors hover:text-fg-default">
+          <Link href="/about" className="hover:text-fg-default transition-colors">
             運営者情報・お問い合わせ
           </Link>
         </nav>
@@ -67,7 +67,7 @@ export function LegalSection({
 }) {
   return (
     <section className="flex flex-col gap-3">
-      <h2 className="font-semibold text-fg-default text-lg">{heading}</h2>
+      <h2 className="text-fg-default text-lg font-semibold">{heading}</h2>
       {children}
     </section>
   );

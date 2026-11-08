@@ -10,15 +10,15 @@ import { SettingsSection } from '@/components/ui/settings-section';
 export function SubscriptionListSkeleton() {
   return (
     <SettingsSection
-      title={<span className="inline-block h-5 w-40 animate-pulse rounded bg-bg-surface-2" />}
+      title={<span className="bg-bg-surface-2 inline-block h-5 w-40 animate-pulse rounded" />}
       description="フィードに表示する企業を選びます。非表示にした企業の記事は表示されません。"
     >
       {/* 検索 + 一括操作(SubscriptionList と同じ sticky・行構成) */}
-      <div className="sticky top-16 z-20 -mx-1 bg-bg-app px-1 pt-1 pb-3 lg:top-0">
+      <div className="bg-bg-app sticky top-16 z-20 -mx-1 px-1 pt-1 pb-3 lg:top-0">
         <div className="flex flex-wrap items-center gap-2">
-          <div className="hidden h-9 min-w-44 flex-1 animate-pulse rounded-sm bg-bg-surface-2 lg:block" />
-          <div className="h-9 w-24 animate-pulse rounded-sm bg-bg-surface-2" />
-          <div className="h-9 w-24 animate-pulse rounded-sm bg-bg-surface-2" />
+          <div className="bg-bg-surface-2 hidden h-9 min-w-44 flex-1 animate-pulse rounded-sm lg:block" />
+          <div className="bg-bg-surface-2 h-9 w-24 animate-pulse rounded-sm" />
+          <div className="bg-bg-surface-2 h-9 w-24 animate-pulse rounded-sm" />
         </div>
       </div>
 
@@ -26,13 +26,13 @@ export function SubscriptionListSkeleton() {
         {Array.from({ length: 6 }, (_, i) => i).map((i) => (
           <li
             key={i}
-            className="flex items-center gap-3 rounded-lg border border-border-default bg-bg-surface px-3.5 py-3 shadow-xs"
+            className="border-border-default bg-bg-surface flex items-center gap-3 rounded-lg border px-3.5 py-3 shadow-xs"
           >
             <span className="flex min-w-0 flex-1 items-center gap-2.5">
-              <span className="size-6 shrink-0 animate-pulse rounded-full bg-bg-surface-2" />
-              <span className="h-4 w-28 animate-pulse rounded bg-bg-surface-2" />
+              <span className="bg-bg-surface-2 size-6 shrink-0 animate-pulse rounded-full" />
+              <span className="bg-bg-surface-2 h-4 w-28 animate-pulse rounded" />
             </span>
-            <span className="h-6 w-11 shrink-0 animate-pulse rounded-full bg-bg-surface-2" />
+            <span className="bg-bg-surface-2 h-6 w-11 shrink-0 animate-pulse rounded-full" />
           </li>
         ))}
       </ul>

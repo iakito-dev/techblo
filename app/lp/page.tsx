@@ -30,7 +30,7 @@ export const metadata: Metadata = {
  */
 export default function LandingPage() {
   return (
-    <div className="light min-h-dvh bg-bg-app" data-theme="light">
+    <div className="light bg-bg-app min-h-dvh" data-theme="light">
       <JsonLd data={organizationJsonLd(resolveBaseUrl())} />
       <LandingNav />
       <main>

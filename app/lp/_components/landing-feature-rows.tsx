@@ -53,7 +53,7 @@ const FEATURES: Feature[] = [
  */
 export function LandingFeatureRows() {
   return (
-    <section className="relative isolate overflow-hidden bg-bg-surface/40 py-8">
+    <section className="bg-bg-surface/40 relative isolate overflow-hidden py-8">
       {/* スクロール連動で漂う装飾ブロブ(背面)。スクロールするだけで視覚的に動く。 */}
       <ParallaxBlob speed="up" className="top-24 -left-24 size-72" tone={0.1} />
       <ParallaxBlob speed="down" className="-right-20 bottom-24 size-80" tone={0.08} />
@@ -79,11 +79,11 @@ export function LandingFeatureRows() {
               <div className="flex flex-col gap-4">
                 {/* テキスト枠に最小高さを与え、全スライドで図版の上端を揃える(行数差のズレ防止)。 */}
                 <div className="min-h-[8rem] px-1 sm:min-h-[6rem]">
-                  <p className="font-medium text-accent text-sm">{f.eyebrow}</p>
-                  <h2 className="mt-1.5 font-editorial font-semibold text-fg-default text-xl leading-tight tracking-tight [word-break:auto-phrase]">
+                  <p className="text-accent text-sm font-medium">{f.eyebrow}</p>
+                  <h2 className="font-editorial text-fg-default mt-1.5 text-xl leading-tight font-semibold tracking-tight [word-break:auto-phrase]">
                     {f.title}
                   </h2>
-                  <p className="mt-2 text-fg-muted text-sm leading-relaxed [word-break:auto-phrase]">
+                  <p className="text-fg-muted mt-2 text-sm leading-relaxed [word-break:auto-phrase]">
                     {f.body}
                   </p>
                 </div>
@@ -114,11 +114,11 @@ function FeatureRow({
   return (
     <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-2 lg:gap-16">
       <div className={cn('min-w-0', reverse && 'lg:order-2')}>
-        <p className="font-medium text-accent text-sm">{eyebrow}</p>
-        <h2 className="mt-3 font-editorial font-semibold text-2xl text-fg-default leading-tight tracking-tight [word-break:auto-phrase] sm:text-3xl">
+        <p className="text-accent text-sm font-medium">{eyebrow}</p>
+        <h2 className="font-editorial text-fg-default mt-3 text-2xl leading-tight font-semibold tracking-tight [word-break:auto-phrase] sm:text-3xl">
           {title}
         </h2>
-        <p className="mt-4 max-w-md text-balance text-fg-muted leading-relaxed [word-break:auto-phrase]">
+        <p className="text-fg-muted mt-4 max-w-md leading-relaxed text-balance [word-break:auto-phrase]">
           {body}
         </p>
       </div>
@@ -130,7 +130,7 @@ function FeatureRow({
 /** 図版を載せる共通の台座(ソフトな影 + 角丸 + 淡い背景)。 */
 function VisualFrame({ children }: { children: ReactNode }) {
   return (
-    <div className="rounded-2xl border border-border-default bg-bg-surface p-5 shadow-lg">
+    <div className="border-border-default bg-bg-surface rounded-2xl border p-5 shadow-lg">
       {children}
     </div>
   );
@@ -142,8 +142,8 @@ function PopularVisual() {
   return (
     <VisualFrame>
       <div className="mb-3 flex items-center gap-2">
-        <span className="rounded-md px-2.5 py-1 font-medium text-fg-muted text-xs">新着順</span>
-        <span className="rounded-md bg-primary px-2.5 py-1 font-medium text-fg-inverse text-xs">
+        <span className="text-fg-muted rounded-md px-2.5 py-1 text-xs font-medium">新着順</span>
+        <span className="bg-primary text-fg-inverse rounded-md px-2.5 py-1 text-xs font-medium">
           人気順
         </span>
       </div>
@@ -151,19 +151,19 @@ function PopularVisual() {
         {ranked.map((a, i) => (
           <li
             key={a.title}
-            className="flex items-center gap-3 rounded-lg border border-border-default px-3 py-2.5"
+            className="border-border-default flex items-center gap-3 rounded-lg border px-3 py-2.5"
           >
-            <span className="w-4 shrink-0 text-center font-bold text-fg-faint text-sm tabular-nums">
+            <span className="text-fg-faint w-4 shrink-0 text-center text-sm font-bold tabular-nums">
               {i + 1}
             </span>
             <div className="min-w-0 flex-1">
-              <p className="truncate font-semibold text-fg-default text-sm">{a.title}</p>
-              <span className="flex items-center gap-1.5 text-[0.6875rem] text-fg-faint">
+              <p className="text-fg-default truncate text-sm font-semibold">{a.title}</p>
+              <span className="text-fg-faint flex items-center gap-1.5 text-[0.6875rem]">
                 <CompanyGlyph label={a.glyph} />
                 {a.company}
               </span>
             </div>
-            <span className="inline-flex shrink-0 items-center gap-1 font-semibold text-fg-secondary text-xs tabular-nums">
+            <span className="text-fg-secondary inline-flex shrink-0 items-center gap-1 text-xs font-semibold tabular-nums">
               <Flame fill="currentColor" className="size-3.5 text-[#ea580c]" />
               {a.hatena}
             </span>
@@ -179,27 +179,27 @@ function SavedVisual() {
   const saved = FAUX_ARTICLES.slice(0, 3);
   return (
     <VisualFrame>
-      <div className="mb-3 flex items-center gap-2 font-semibold text-fg-default text-sm">
-        <Bookmark className="size-4 text-accent" />
+      <div className="text-fg-default mb-3 flex items-center gap-2 text-sm font-semibold">
+        <Bookmark className="text-accent size-4" />
         ブックマーク
       </div>
       <ul className="flex flex-col gap-2">
         {saved.map((a, i) => (
           <li
             key={a.title}
-            className="flex items-center gap-3 rounded-lg border border-border-default px-3 py-2.5"
+            className="border-border-default flex items-center gap-3 rounded-lg border px-3 py-2.5"
           >
             <div className="min-w-0 flex-1">
-              <p className="truncate font-semibold text-fg-default text-sm">{a.title}</p>
-              <span className="flex items-center gap-1.5 text-[0.6875rem] text-fg-faint">
+              <p className="text-fg-default truncate text-sm font-semibold">{a.title}</p>
+              <span className="text-fg-faint flex items-center gap-1.5 text-[0.6875rem]">
                 <CompanyGlyph label={a.glyph} />
                 {a.company}
               </span>
             </div>
             {i === 0 ? (
-              <Heart fill="currentColor" className="size-4 shrink-0 text-accent" />
+              <Heart fill="currentColor" className="text-accent size-4 shrink-0" />
             ) : (
-              <Bookmark fill="currentColor" className="size-4 shrink-0 text-fg-faint" />
+              <Bookmark fill="currentColor" className="text-fg-faint size-4 shrink-0" />
             )}
           </li>
         ))}
@@ -213,24 +213,24 @@ function SubscriptionVisual() {
   const subs = FAUX_FEEDS;
   return (
     <VisualFrame>
-      <p className="mb-3 font-semibold text-fg-default text-sm">表示する企業</p>
+      <p className="text-fg-default mb-3 text-sm font-semibold">表示する企業</p>
       <ul className="flex flex-col gap-2">
         {subs.map((c, i) => {
           const on = i % 3 !== 2;
           return (
             <li
               key={c.name}
-              className="flex items-center gap-3 rounded-lg border border-border-default px-3 py-2.5"
+              className="border-border-default flex items-center gap-3 rounded-lg border px-3 py-2.5"
             >
               <CompanyGlyph label={c.glyph} />
-              <span className="flex-1 font-medium text-fg-default text-sm">{c.name}</span>
+              <span className="text-fg-default flex-1 text-sm font-medium">{c.name}</span>
               <span
                 className={cn(
-                  'flex h-5 w-9 items-center rounded-pill px-0.5 transition-colors',
-                  on ? 'justify-end bg-accent' : 'justify-start bg-bg-surface-3',
+                  'rounded-pill flex h-5 w-9 items-center px-0.5 transition-colors',
+                  on ? 'bg-accent justify-end' : 'bg-bg-surface-3 justify-start',
                 )}
               >
-                <span className="grid size-4 place-items-center rounded-full bg-bg-surface text-accent">
+                <span className="bg-bg-surface text-accent grid size-4 place-items-center rounded-full">
                   {on && <Check className="size-3" />}
                 </span>
               </span>
@@ -251,14 +251,14 @@ function MyFeedVisual() {
   ];
   return (
     <VisualFrame>
-      <p className="mb-3 font-semibold text-fg-default text-sm">マイフィード</p>
+      <p className="text-fg-default mb-3 text-sm font-semibold">マイフィード</p>
       {/* URL 入力 + 登録ボタン(faux)。 */}
       <div className="mb-3 flex items-center gap-2">
-        <span className="flex flex-1 items-center gap-2 rounded-lg border border-border-default px-3 py-2 text-fg-faint text-xs">
-          <Rss className="size-3.5 text-accent" />
+        <span className="border-border-default text-fg-faint flex flex-1 items-center gap-2 rounded-lg border px-3 py-2 text-xs">
+          <Rss className="text-accent size-3.5" />
           https://example.com/feed
         </span>
-        <span className="inline-flex items-center gap-1 rounded-md bg-primary px-3 py-2 font-medium text-fg-inverse text-xs">
+        <span className="bg-primary text-fg-inverse inline-flex items-center gap-1 rounded-md px-3 py-2 text-xs font-medium">
           <Plus className="size-3.5" />
           登録
         </span>
@@ -267,14 +267,14 @@ function MyFeedVisual() {
         {feeds.map((f) => (
           <li
             key={f.name}
-            className="flex items-center gap-3 rounded-lg border border-border-default px-3 py-2.5"
+            className="border-border-default flex items-center gap-3 rounded-lg border px-3 py-2.5"
           >
             <CompanyGlyph label={f.glyph} />
-            <span className="min-w-0 flex-1 truncate font-medium text-fg-default text-sm">
+            <span className="text-fg-default min-w-0 flex-1 truncate text-sm font-medium">
               {f.name}
             </span>
-            <span className="flex h-5 w-9 items-center justify-end rounded-pill bg-accent px-0.5">
-              <span className="grid size-4 place-items-center rounded-full bg-bg-surface text-accent">
+            <span className="rounded-pill bg-accent flex h-5 w-9 items-center justify-end px-0.5">
+              <span className="bg-bg-surface text-accent grid size-4 place-items-center rounded-full">
                 <Check className="size-3" />
               </span>
             </span>
@@ -299,15 +299,15 @@ function SummaryVisual() {
   const tags = ['Kafka', 'インフラ', 'コスト最適化'];
   return (
     <VisualFrame>
-      <div className="rounded-md bg-accent-soft px-4 py-3">
+      <div className="bg-accent-soft rounded-md px-4 py-3">
         <div className="mb-2 flex items-center gap-1.5">
-          <Sparkles className="size-3.5 text-accent" aria-hidden />
-          <span className="font-bold text-accent text-xs tracking-wide">AI要約</span>
+          <Sparkles className="text-accent size-3.5" aria-hidden />
+          <span className="text-accent text-xs font-bold tracking-wide">AI要約</span>
         </div>
         <ul className="flex flex-col gap-1.5">
           {bullets.map((b) => (
-            <li key={b} className="flex gap-2 text-fg-default text-sm leading-snug">
-              <Check className="mt-0.5 size-3.5 shrink-0 text-accent" aria-hidden />
+            <li key={b} className="text-fg-default flex gap-2 text-sm leading-snug">
+              <Check className="text-accent mt-0.5 size-3.5 shrink-0" aria-hidden />
               <span>{b}</span>
             </li>
           ))}
@@ -316,13 +316,13 @@ function SummaryVisual() {
           {tags.map((tag) => (
             <span
               key={tag}
-              className="rounded-full bg-bg-surface px-2 py-0.5 font-medium text-accent text-xs"
+              className="bg-bg-surface text-accent rounded-full px-2 py-0.5 text-xs font-medium"
             >
               {tag}
             </span>
           ))}
         </div>
-        <p className="mt-2.5 text-accent/80 text-xs">
+        <p className="text-accent/80 mt-2.5 text-xs">
           元記事の内容を AI が要約したものです。正確性は保証されません。
         </p>
       </div>

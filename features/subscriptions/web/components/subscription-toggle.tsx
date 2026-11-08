@@ -23,7 +23,7 @@ export function SubscriptionToggle({
     <span className="flex shrink-0 items-center gap-1.5">
       <Check
         aria-hidden="true"
-        className={`size-4 text-accent transition-opacity duration-300 ${
+        className={`text-accent size-4 transition-opacity duration-300 ${
           justSaved ? 'opacity-100' : 'opacity-0'
         }`}
       />

@@ -24,8 +24,8 @@ export default function SettingsPage() {
     <SettingsFrame>
       <SettingsDesktop className="hidden lg:block" />
       <div className="lg:hidden" data-swipe-nav-ignore>
-        <h1 className="mb-6 font-bold text-xl tracking-tight">設定</h1>
-        <Suspense fallback={<div className="h-64 animate-pulse rounded-lg bg-bg-surface-2" />}>
+        <h1 className="mb-6 text-xl font-bold tracking-tight">設定</h1>
+        <Suspense fallback={<div className="bg-bg-surface-2 h-64 animate-pulse rounded-lg" />}>
           <SettingsMobileMenu />
         </Suspense>
       </div>

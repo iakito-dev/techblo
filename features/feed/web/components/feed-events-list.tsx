@@ -25,14 +25,14 @@ export function FeedEventsList<T>({
       <div className={`mb-4 flex items-end gap-4 ${MOBILE_GUTTER_CLASS} md:px-0`}>
         <h2
           id={headingId}
-          className="relative pb-3 font-bold text-[26px] text-fg-default leading-tight tracking-tight after:absolute after:bottom-0 after:left-0 after:h-[3px] after:w-14 after:rounded-full after:bg-accent"
+          className="text-fg-default after:bg-accent relative pb-3 text-[26px] leading-tight font-bold tracking-tight after:absolute after:bottom-0 after:left-0 after:h-[3px] after:w-14 after:rounded-full"
         >
           イベント・コミュニティ
         </h2>
         <Link
           href={moreHref}
           aria-label="イベント・コミュニティをすべて見る"
-          className="ml-auto shrink-0 whitespace-nowrap pb-3.5 font-semibold text-fg-default text-sm after:content-['_→']"
+          className="text-fg-default ml-auto shrink-0 pb-3.5 text-sm font-semibold whitespace-nowrap after:content-['_→']"
         >
           すべて見る
         </Link>

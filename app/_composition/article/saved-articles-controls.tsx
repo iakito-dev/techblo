@@ -26,7 +26,7 @@ export function SavedSearchInput({
 }) {
   return (
     <div className="relative w-full lg:max-w-md">
-      <Search className="absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-fg-subtle" />
+      <Search className="text-fg-subtle absolute top-1/2 left-2.5 size-4 -translate-y-1/2" />
       <Input
         type="search"
         value={value}
@@ -53,7 +53,7 @@ export function SavedSearchInput({
           type="button"
           aria-label="絞り込みをクリア"
           onClick={() => onChange('')}
-          className="absolute top-1/2 right-2 grid size-6 -translate-y-1/2 place-items-center rounded-sm text-fg-subtle transition-colors hover:bg-bg-surface-2 hover:text-fg-default focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+          className="text-fg-subtle hover:bg-bg-surface-2 hover:text-fg-default focus-visible:ring-accent absolute top-1/2 right-2 grid size-6 -translate-y-1/2 place-items-center rounded-sm transition-colors focus-visible:ring-2 focus-visible:outline-none"
         >
           <X className="size-4" />
         </button>
@@ -75,11 +75,11 @@ export function SavedSortDropdown({
       <Button
         variant="outline"
         aria-label="並び替え"
-        className="h-9 shrink-0 gap-1.5 rounded-sm bg-bg-surface font-medium text-sm shadow-xs"
+        className="bg-bg-surface h-9 shrink-0 gap-1.5 rounded-sm text-sm font-medium shadow-xs"
       >
-        <ArrowUpDown className="size-4 shrink-0 text-fg-muted" />
+        <ArrowUpDown className="text-fg-muted size-4 shrink-0" />
         <span className="whitespace-nowrap">{currentLabel}</span>
-        <ChevronDown className="size-4 shrink-0 text-fg-subtle" />
+        <ChevronDown className="text-fg-subtle size-4 shrink-0" />
       </Button>
       <Dropdown.Popover className="w-52 rounded-sm">
         <Dropdown.Menu

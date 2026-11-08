@@ -51,11 +51,11 @@ export function LandingBento() {
       <ParallaxBlob speed="up" className="bottom-10 -left-16 size-72" tone={0.07} />
 
       <Reveal className="mx-auto max-w-2xl text-center">
-        <p className="font-medium text-accent text-sm">巡回の手間をゼロに</p>
-        <h2 className="mt-3 text-balance font-editorial font-semibold text-3xl text-fg-default leading-tight tracking-tight [word-break:auto-phrase] sm:text-4xl">
+        <p className="text-accent text-sm font-medium">巡回の手間をゼロに</p>
+        <h2 className="font-editorial text-fg-default mt-3 text-3xl leading-tight font-semibold tracking-tight text-balance [word-break:auto-phrase] sm:text-4xl">
           散らばった新着をひとつの画面に
         </h2>
-        <p className="mt-4 text-balance text-fg-muted leading-relaxed [word-break:auto-phrase]">
+        <p className="text-fg-muted mt-4 leading-relaxed text-balance [word-break:auto-phrase]">
           タブを埋め尽くすブックマークも何個ものブログ巡回ももう不要。テクブロが新着チェックを一本化します。
         </p>
       </Reveal>
@@ -67,14 +67,14 @@ export function LandingBento() {
             key={item.title}
             variant="scale"
             className={cn(
-              'flex flex-col gap-3 rounded-xl border border-border-default bg-bg-surface p-5 shadow-card transition-[transform,box-shadow] duration-200 hover:-translate-y-1 hover:shadow-card-hover sm:p-6',
+              'border-border-default bg-bg-surface shadow-card hover:shadow-card-hover flex flex-col gap-3 rounded-xl border p-5 transition-[transform,box-shadow] duration-200 hover:-translate-y-1 sm:p-6',
               item.span && 'col-span-2',
             )}
           >
-            <span className="grid size-9 place-items-center rounded-md bg-primary-soft text-accent sm:size-10">
+            <span className="bg-primary-soft text-accent grid size-9 place-items-center rounded-md sm:size-10">
               <item.icon className="size-4.5 sm:size-5" />
             </span>
-            <h3 className="font-bold text-base text-fg-default tracking-tight sm:text-lg">
+            <h3 className="text-fg-default text-base font-bold tracking-tight sm:text-lg">
               {item.title}
             </h3>
             <p className="text-fg-muted text-sm leading-relaxed">{item.body}</p>

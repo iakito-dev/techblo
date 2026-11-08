@@ -71,7 +71,7 @@ function UserFeedLockedPreview({ variant }: { variant: 'full' | 'inline' }) {
       title={
         <span className="inline-flex items-center gap-1.5">
           マイフィード
-          <Lock className="size-3.5 text-fg-subtle" aria-hidden="true" />
+          <Lock className="text-fg-subtle size-3.5" aria-hidden="true" />
         </span>
       }
       description="好きなブログやサイトの RSS / Atom を登録すると、新着記事がフィード画面に表示されるようになります。"
@@ -80,9 +80,9 @@ function UserFeedLockedPreview({ variant }: { variant: 'full' | 'inline' }) {
           プレビュー内に収まるだけの高さを確保する(1行だとモバイル幅で入力欄に重なる)。 */}
       <div className="relative min-h-44 overflow-hidden rounded-lg">
         {/* ログイン後の登録UIプレビュー(操作不可・ぼかし)。inert でフォーカス・操作を無効化する */}
-        <div className="select-none blur-[0.8px]" inert aria-hidden="true">
+        <div className="blur-[0.8px] select-none" inert aria-hidden="true">
           <div className="flex flex-wrap items-center gap-2">
-            <div className="flex h-9 min-w-44 flex-1 items-center rounded-sm border border-border-default bg-bg-surface px-3 text-fg-subtle text-sm shadow-xs">
+            <div className="border-border-default bg-bg-surface text-fg-subtle flex h-9 min-w-44 flex-1 items-center rounded-sm border px-3 text-sm shadow-xs">
               https://example.com/feed.xml
             </div>
             <Button type="button" size="sm" className="rounded-sm">
@@ -90,28 +90,28 @@ function UserFeedLockedPreview({ variant }: { variant: 'full' | 'inline' }) {
               登録
             </Button>
           </div>
-          <div className="mt-2.5 flex items-center gap-3 rounded-lg border border-border-default bg-bg-surface px-3.5 py-3 shadow-xs">
-            <span className="size-6 shrink-0 rounded-full bg-bg-surface-2" />
+          <div className="border-border-default bg-bg-surface mt-2.5 flex items-center gap-3 rounded-lg border px-3.5 py-3 shadow-xs">
+            <span className="bg-bg-surface-2 size-6 shrink-0 rounded-full" />
             <span className="flex flex-1 flex-col gap-1.5">
-              <span className="h-3.5 w-32 rounded bg-bg-surface-2" />
-              <span className="h-3 w-48 rounded bg-bg-surface-2" />
+              <span className="bg-bg-surface-2 h-3.5 w-32 rounded" />
+              <span className="bg-bg-surface-2 h-3 w-48 rounded" />
             </span>
           </div>
-          <div className="mt-2.5 flex items-center gap-3 rounded-lg border border-border-default bg-bg-surface px-3.5 py-3 shadow-xs">
-            <span className="size-6 shrink-0 rounded-full bg-bg-surface-2" />
+          <div className="border-border-default bg-bg-surface mt-2.5 flex items-center gap-3 rounded-lg border px-3.5 py-3 shadow-xs">
+            <span className="bg-bg-surface-2 size-6 shrink-0 rounded-full" />
             <span className="flex flex-1 flex-col gap-1.5">
-              <span className="h-3.5 w-32 rounded bg-bg-surface-2" />
-              <span className="h-3 w-48 rounded bg-bg-surface-2" />
+              <span className="bg-bg-surface-2 h-3.5 w-32 rounded" />
+              <span className="bg-bg-surface-2 h-3 w-48 rounded" />
             </span>
           </div>
         </div>
 
         {/* ロックオーバーレイ */}
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2.5 rounded-lg bg-bg-app/60 px-4 text-center backdrop-blur-[1px]">
-          <span className="grid size-9 place-items-center rounded-full bg-bg-surface shadow-xs ring-1 ring-border-default">
-            <Lock className="size-4 text-fg-muted" aria-hidden="true" />
+        <div className="bg-bg-app/60 absolute inset-0 flex flex-col items-center justify-center gap-2.5 rounded-lg px-4 text-center backdrop-blur-[1px]">
+          <span className="bg-bg-surface ring-border-default grid size-9 place-items-center rounded-full shadow-xs ring-1">
+            <Lock className="text-fg-muted size-4" aria-hidden="true" />
           </span>
-          <p className="font-medium text-fg-default text-sm">
+          <p className="text-fg-default text-sm font-medium">
             ログインするとマイフィードを使えます
           </p>
           {variant === 'full' ? (
@@ -121,7 +121,7 @@ function UserFeedLockedPreview({ variant }: { variant: 'full' | 'inline' }) {
           ) : (
             <Link
               href="/login?callbackURL=%2Fsettings%2Ffeeds"
-              className="font-medium text-accent text-sm hover:underline"
+              className="text-accent text-sm font-medium hover:underline"
             >
               ログイン
             </Link>
@@ -139,15 +139,15 @@ export function SupportSettings() {
       description="サービス紹介、運営情報、個人情報の取り扱い、ご利用条件を確認できます。"
     >
       <nav aria-label="サポート">
-        <ul className="divide-y divide-border-default rounded-md border border-border-default bg-bg-surface">
+        <ul className="divide-border-default border-border-default bg-bg-surface divide-y rounded-md border">
           {SUPPORT_LINKS.map((link) => (
             <li key={link.href}>
               <Link
                 href={link.href}
-                className="flex min-h-12 items-center gap-3 px-4 py-3 text-fg-secondary text-sm transition-colors hover:bg-bg-surface-2 hover:text-fg-default focus-visible:bg-bg-surface-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                className="text-fg-secondary hover:bg-bg-surface-2 hover:text-fg-default focus-visible:bg-bg-surface-2 focus-visible:ring-accent flex min-h-12 items-center gap-3 px-4 py-3 text-sm transition-colors focus-visible:ring-2 focus-visible:outline-none"
               >
                 <span className="min-w-0 flex-1 truncate">{link.label}</span>
-                <ChevronRight className="size-4 shrink-0 text-fg-subtle" />
+                <ChevronRight className="text-fg-subtle size-4 shrink-0" />
               </Link>
             </li>
           ))}

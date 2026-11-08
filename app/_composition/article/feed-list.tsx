@@ -220,7 +220,7 @@ export function FeedList({
             type="button"
             onClick={loadMore}
             disabled={isPending}
-            className="inline-flex min-h-11 touch-manipulation items-center gap-2 rounded-sm border border-border-default bg-bg-surface px-6 py-2.5 font-medium text-fg-default text-sm transition-colors hover:bg-bg-surface-2 hover:text-fg-default focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg-app disabled:opacity-60"
+            className="border-border-default bg-bg-surface text-fg-default hover:bg-bg-surface-2 hover:text-fg-default focus-visible:ring-accent focus-visible:ring-offset-bg-app inline-flex min-h-11 touch-manipulation items-center gap-2 rounded-sm border px-6 py-2.5 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:opacity-60"
           >
             {isPending ? '読み込み中…' : 'もっと読む'}
           </button>

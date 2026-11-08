@@ -127,7 +127,7 @@ export function CompanyGlyph({ label, className }: { label: string; className?: 
     <span
       aria-hidden="true"
       className={cn(
-        'grid size-4 shrink-0 place-items-center rounded-sm bg-bg-surface-2 font-semibold text-[0.5625rem] text-fg-muted ring-1 ring-border-card',
+        'bg-bg-surface-2 text-fg-muted ring-border-card grid size-4 shrink-0 place-items-center rounded-sm text-[0.5625rem] font-semibold ring-1',
         className,
       )}
     >
@@ -139,7 +139,7 @@ export function CompanyGlyph({ label, className }: { label: string; className?: 
 /** はてブ数の指標バッジ(実カードと同じ Flame 表現)。 */
 function HatenaBadge({ count }: { count: number }) {
   return (
-    <span className="inline-flex shrink-0 items-center gap-1 font-semibold text-fg-secondary text-xs tabular-nums">
+    <span className="text-fg-secondary inline-flex shrink-0 items-center gap-1 text-xs font-semibold tabular-nums">
       <Flame aria-hidden="true" fill="currentColor" className="size-3.5 text-[#ea580c]" />
       {count}
     </span>
@@ -157,28 +157,28 @@ export function FauxArticleCard({
   return (
     <div
       className={cn(
-        'flex flex-col gap-2.5 rounded-xl border border-border-card bg-bg-surface p-4 shadow-card transition-[transform,box-shadow] duration-200 hover:-translate-y-1 hover:shadow-card-hover',
+        'border-border-card bg-bg-surface shadow-card hover:shadow-card-hover flex flex-col gap-2.5 rounded-xl border p-4 transition-[transform,box-shadow] duration-200 hover:-translate-y-1',
         className,
       )}
     >
       <div className="flex items-center gap-1.5 text-[0.6875rem] leading-tight">
         <CompanyGlyph label={article.glyph} />
-        <span className="truncate font-medium text-fg-muted tracking-wide">{article.company}</span>
+        <span className="text-fg-muted truncate font-medium tracking-wide">{article.company}</span>
         <span className="text-fg-faint">·</span>
-        <span className="shrink-0 text-fg-faint">{article.time}</span>
+        <span className="text-fg-faint shrink-0">{article.time}</span>
         <span className="ml-auto">
           <HatenaBadge count={article.hatena} />
         </span>
       </div>
-      <h3 className="font-bold text-[0.9375rem] text-fg-default leading-snug tracking-tight">
+      <h3 className="text-fg-default text-[0.9375rem] leading-snug font-bold tracking-tight">
         {article.title}
       </h3>
-      <p className="line-clamp-2 text-fg-muted text-xs leading-relaxed">{article.excerpt}</p>
-      <div className="mt-1 flex items-center gap-1.5 text-fg-faint">
-        <span className="grid size-7 place-items-center rounded-md border border-border-default">
+      <p className="text-fg-muted line-clamp-2 text-xs leading-relaxed">{article.excerpt}</p>
+      <div className="text-fg-faint mt-1 flex items-center gap-1.5">
+        <span className="border-border-default grid size-7 place-items-center rounded-md border">
           <Bookmark className="size-3.5" />
         </span>
-        <span className="grid size-7 place-items-center rounded-md border border-border-default">
+        <span className="border-border-default grid size-7 place-items-center rounded-md border">
           <Heart className="size-3.5" />
         </span>
       </div>

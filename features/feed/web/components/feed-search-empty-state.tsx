@@ -14,13 +14,13 @@ export function FeedSearchEmptyState({ query }: { query: string }) {
 
   return (
     <div className="flex flex-col items-center justify-center px-6 py-24 text-center">
-      <div className="grid size-16 place-items-center rounded-xl bg-bg-surface-2 text-fg-muted">
+      <div className="bg-bg-surface-2 text-fg-muted grid size-16 place-items-center rounded-xl">
         <SearchX className="size-8" />
       </div>
-      <p className="mt-5 font-bold text-fg-default text-lg">
+      <p className="text-fg-default mt-5 text-lg font-bold">
         「{query}」に一致する記事はありません
       </p>
-      <p className="mt-2 max-w-xs text-fg-muted text-sm leading-relaxed">
+      <p className="text-fg-muted mt-2 max-w-xs text-sm leading-relaxed">
         キーワードを変えるか、企業や期間の絞り込みを見直してみてください。
       </p>
       <Button size="lg" isDisabled={isPending} onPress={clear} className="mt-6">

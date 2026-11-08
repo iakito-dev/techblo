@@ -15,7 +15,7 @@ export function RelatedArticles({ articles }: { articles: ArticleCard[] }) {
     <section aria-labelledby="related-articles-heading" className="mt-10 xl:mt-8">
       <h2
         id="related-articles-heading"
-        className="mb-1 font-bold text-base text-fg-default tracking-[-0.015em]"
+        className="text-fg-default mb-1 text-base font-bold tracking-[-0.015em]"
       >
         関連記事
       </h2>
@@ -25,16 +25,16 @@ export function RelatedArticles({ articles }: { articles: ArticleCard[] }) {
             <ArticleLink
               article={article}
               source="related"
-              className="group flex min-h-11 touch-manipulation flex-col gap-1.5 py-3.5 focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2 xl:py-3"
+              className="group focus-visible:outline-accent flex min-h-11 touch-manipulation flex-col gap-1.5 py-3.5 focus-visible:outline-2 focus-visible:outline-offset-2 xl:py-3"
             >
-              <span className="flex items-center gap-[7px] font-semibold text-[11.5px] text-fg-default">
+              <span className="text-fg-default flex items-center gap-[7px] text-[11.5px] font-semibold">
                 <CompanyFavicon url={article.url} name={article.company.name} size={20} />
                 <span className="min-w-0 truncate">{article.company.name}</span>
-                <span className="ml-auto shrink-0 font-normal text-fg-muted">
+                <span className="text-fg-muted ml-auto shrink-0 font-normal">
                   {formatRelative(article.publishedAt)}
                 </span>
               </span>
-              <span className="line-clamp-2 font-bold text-[0.9375rem] text-fg-default leading-[1.5] tracking-[-0.015em] transition-colors group-hover:text-accent xl:text-sm">
+              <span className="text-fg-default group-hover:text-accent line-clamp-2 text-[0.9375rem] leading-[1.5] font-bold tracking-[-0.015em] transition-colors xl:text-sm">
                 {article.title}
               </span>
             </ArticleLink>

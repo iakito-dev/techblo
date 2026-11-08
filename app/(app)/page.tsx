@@ -346,11 +346,11 @@ async function SubscribedFeed({ searchParams }: { searchParams: Promise<FeedSear
 
   if (allOff) {
     return (
-      <div className="rounded-md border border-border-default bg-bg-surface p-12 text-center">
+      <div className="border-border-default bg-bg-surface rounded-md border p-12 text-center">
         <p className="text-fg-muted">表示する企業が選択されていません。</p>
         <Link
           href="/settings"
-          className="mt-3 inline-block font-medium text-accent text-sm hover:underline"
+          className="text-accent mt-3 inline-block text-sm font-medium hover:underline"
         >
           表示する企業を選ぶ
         </Link>

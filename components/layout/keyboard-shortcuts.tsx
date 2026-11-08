@@ -188,7 +188,7 @@ function ShortcutsDialog({
     <Modal isOpen={open} onOpenChange={onOpenChange}>
       <Modal.Backdrop>
         <Modal.Container>
-          <Modal.Dialog className="border border-border-default bg-bg-surface text-fg-default">
+          <Modal.Dialog className="border-border-default bg-bg-surface text-fg-default border">
             <Modal.CloseTrigger />
             <Modal.Header>
               <Modal.Heading>キーボードショートカット</Modal.Heading>
@@ -197,15 +197,15 @@ function ShortcutsDialog({
               <div className="flex flex-col gap-5">
                 {SHORTCUT_GROUPS.map((group) => (
                   <section key={group.title}>
-                    <h3 className="mb-2 font-medium text-fg-subtle text-xs">{group.title}</h3>
+                    <h3 className="text-fg-subtle mb-2 text-xs font-medium">{group.title}</h3>
                     <dl className="flex flex-col">
                       {group.items.map((item) => (
                         <div
                           key={item.label}
-                          className="flex items-center justify-between gap-4 border-border-default border-t py-2 text-sm first:border-t-0"
+                          className="border-border-default flex items-center justify-between gap-4 border-t py-2 text-sm first:border-t-0"
                         >
                           <dt className="text-fg-default">{item.label}</dt>
-                          <dd className="flex shrink-0 items-center gap-1 text-fg-muted">
+                          <dd className="text-fg-muted flex shrink-0 items-center gap-1">
                             {item.keys.map((key, i) => (
                               <Fragment key={key}>
                                 {i > 0 && (
@@ -233,7 +233,7 @@ function ShortcutsDialog({
 
 function Kbd({ children }: { children: ReactNode }) {
   return (
-    <kbd className="inline-flex min-w-6 items-center justify-center rounded-sm border border-border-default bg-bg-surface-2 px-1.5 py-0.5 font-mono text-fg-default text-xs">
+    <kbd className="border-border-default bg-bg-surface-2 text-fg-default inline-flex min-w-6 items-center justify-center rounded-sm border px-1.5 py-0.5 font-mono text-xs">
       {children}
     </kbd>
   );

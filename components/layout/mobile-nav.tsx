@@ -53,7 +53,7 @@ export function MobileNav() {
     <nav
       ref={navRef}
       aria-label="モバイルナビゲーション"
-      className={`fixed inset-x-0 bottom-0 z-30 flex justify-around border-border-default border-t bg-bg-surface/80 px-2 pt-1.5 pb-[calc(0.375rem+env(safe-area-inset-bottom))] backdrop-blur-xl backdrop-saturate-150 transition-transform duration-200 ease-out lg:hidden ${
+      className={`border-border-default bg-bg-surface/80 fixed inset-x-0 bottom-0 z-30 flex justify-around border-t px-2 pt-1.5 pb-[calc(0.375rem+env(safe-area-inset-bottom))] backdrop-blur-xl backdrop-saturate-150 transition-transform duration-200 ease-out lg:hidden ${
         hidden ? 'translate-y-[calc(var(--mobile-nav-h)+3.5rem)]' : 'translate-y-0'
       }`}
     >
@@ -67,8 +67,8 @@ export function MobileNav() {
             onPointerEnter={() => router.prefetch(href)}
             onFocus={() => router.prefetch(href)}
             aria-current={current ? 'page' : undefined}
-            className={`flex min-h-12 flex-1 touch-manipulation flex-col items-center justify-center gap-0.5 rounded-md px-3 py-1.5 font-medium text-[0.625rem] transition-all active:scale-90 ${
-              current ? 'font-semibold text-fg-default' : 'text-fg-muted'
+            className={`flex min-h-12 flex-1 touch-manipulation flex-col items-center justify-center gap-0.5 rounded-md px-3 py-1.5 text-[0.625rem] font-medium transition-all active:scale-90 ${
+              current ? 'text-fg-default font-semibold' : 'text-fg-muted'
             }`}
           >
             <Icon className="size-6" strokeWidth={current ? 2.4 : 2} />

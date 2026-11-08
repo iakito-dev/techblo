@@ -31,15 +31,15 @@ export function FeedBottomSheet({
   return (
     <Drawer.Root open={open} onOpenChange={onOpenChange} repositionInputs={false}>
       <Drawer.Portal>
-        <Drawer.Overlay className="fixed inset-0 z-50 bg-scrim" />
+        <Drawer.Overlay className="bg-scrim fixed inset-0 z-50" />
         <Drawer.Content
-          className={`fixed inset-x-0 bottom-0 z-50 flex flex-col rounded-t-2xl bg-bg-surface shadow-xl outline-none ${
+          className={`bg-bg-surface fixed inset-x-0 bottom-0 z-50 flex flex-col rounded-t-2xl shadow-xl outline-none ${
             contentClassName ?? ''
           }`}
         >
           {/* ドラッグハンドル(内容全体がドラッグ可能。視覚的な掴みどころ) */}
           <div className="flex shrink-0 justify-center pt-2.5 pb-1.5">
-            <span aria-hidden="true" className="h-1.5 w-10 rounded-pill bg-bg-surface-3" />
+            <span aria-hidden="true" className="rounded-pill bg-bg-surface-3 h-1.5 w-10" />
           </div>
           <Drawer.Title className={srOnlyTitle ? 'sr-only' : 'sr-only'}>{title}</Drawer.Title>
           {children}

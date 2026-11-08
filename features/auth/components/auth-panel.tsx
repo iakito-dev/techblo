@@ -26,21 +26,21 @@ export async function AuthPanel({
     <div className="flex w-full max-w-sm flex-col items-center">
       {/* favicon / apple-icon と同じブランドマーク(2×2 ドット)。
           ティール地に対角=白 / 反対角=ミントで「複数ソースの集約」を象徴する。 */}
-      <span aria-hidden className="grid size-12 place-items-center rounded-md bg-accent">
+      <span aria-hidden className="bg-accent grid size-12 place-items-center rounded-md">
         <span className="grid grid-cols-2 gap-1.5">
-          <span className="size-2 rounded-full bg-fg-inverse" />
-          <span className="size-2 rounded-full bg-border-strong" />
-          <span className="size-2 rounded-full bg-border-strong" />
-          <span className="size-2 rounded-full bg-fg-inverse" />
+          <span className="bg-fg-inverse size-2 rounded-full" />
+          <span className="bg-border-strong size-2 rounded-full" />
+          <span className="bg-border-strong size-2 rounded-full" />
+          <span className="bg-fg-inverse size-2 rounded-full" />
         </span>
       </span>
       <AuthHeading />
 
-      <div className="mt-8 w-full rounded-lg border border-border-default bg-bg-surface p-6 shadow-sm">
+      <div className="border-border-default bg-bg-surface mt-8 w-full rounded-lg border p-6 shadow-sm">
         <ul className="mb-6 flex flex-col gap-3">
           {BENEFITS.map(({ icon: Icon, text }) => (
-            <li key={text} className="flex items-center gap-3 text-fg-secondary text-sm">
-              <span className="grid size-7 shrink-0 place-items-center rounded-md bg-bg-surface-2 text-accent">
+            <li key={text} className="text-fg-secondary flex items-center gap-3 text-sm">
+              <span className="bg-bg-surface-2 text-accent grid size-7 shrink-0 place-items-center rounded-md">
                 <Icon className="size-4" />
               </span>
               {text}
@@ -50,7 +50,7 @@ export async function AuthPanel({
         <SocialSignInButtons callbackURL={callbackURL} />
       </div>
 
-      <p className="mt-6 text-center text-fg-secondary text-xs [word-break:auto-phrase]">
+      <p className="text-fg-secondary mt-6 text-center text-xs [word-break:auto-phrase]">
         続けると
         <Link href="/terms" className="text-accent hover:underline">
           利用規約
@@ -69,16 +69,16 @@ export async function AuthPanel({
 export function AuthPanelSkeleton() {
   return (
     <div className="flex w-full max-w-sm flex-col items-center">
-      <span className="size-12 animate-pulse rounded-md bg-bg-surface-2" />
-      <div className="mt-5 h-7 w-44 animate-pulse rounded bg-bg-surface-2" />
-      <div className="mt-2 h-4 w-32 animate-pulse rounded bg-bg-surface-2" />
-      <div className="mt-8 w-full rounded-lg border border-border-default bg-bg-surface p-6 shadow-sm">
-        <div className="mb-6 h-[7rem] animate-pulse rounded bg-bg-surface-2" />
+      <span className="bg-bg-surface-2 size-12 animate-pulse rounded-md" />
+      <div className="bg-bg-surface-2 mt-5 h-7 w-44 animate-pulse rounded" />
+      <div className="bg-bg-surface-2 mt-2 h-4 w-32 animate-pulse rounded" />
+      <div className="border-border-default bg-bg-surface mt-8 w-full rounded-lg border p-6 shadow-sm">
+        <div className="bg-bg-surface-2 mb-6 h-[7rem] animate-pulse rounded" />
         <div className="flex flex-col gap-3">
-          <div className="h-12 w-full animate-pulse rounded-md bg-bg-surface-2" />
+          <div className="bg-bg-surface-2 h-12 w-full animate-pulse rounded-md" />
           <div className="flex gap-3">
-            <div className="h-12 flex-1 animate-pulse rounded-md bg-bg-surface-2" />
-            <div className="h-12 flex-1 animate-pulse rounded-md bg-bg-surface-2" />
+            <div className="bg-bg-surface-2 h-12 flex-1 animate-pulse rounded-md" />
+            <div className="bg-bg-surface-2 h-12 flex-1 animate-pulse rounded-md" />
           </div>
         </div>
       </div>

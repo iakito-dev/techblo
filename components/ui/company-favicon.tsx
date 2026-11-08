@@ -62,7 +62,7 @@ export function CompanyFavicon({
     return (
       <span
         aria-hidden="true"
-        className={`grid ${box} ${text} shrink-0 place-items-center rounded-sm bg-bg-surface-2 font-semibold text-fg-muted ring-1 ring-border-card`}
+        className={`grid ${box} ${text} bg-bg-surface-2 text-fg-muted ring-border-card shrink-0 place-items-center rounded-sm font-semibold ring-1`}
       >
         {name.charAt(0)}
       </span>
@@ -79,7 +79,7 @@ export function CompanyFavicon({
       referrerPolicy="no-referrer"
       onError={() => setFailed(true)}
       // 白背景ロゴ対策: 薄グレー地 + 極薄リングで「ロゴタイル」として輪郭を出す
-      className={`${box} shrink-0 rounded-sm bg-bg-surface-2 ring-1 ring-border-card`}
+      className={`${box} bg-bg-surface-2 ring-border-card shrink-0 rounded-sm ring-1`}
     />
   );
 }
