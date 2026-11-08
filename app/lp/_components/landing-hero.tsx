@@ -31,18 +31,18 @@ export function LandingHero() {
       />
 
       <div className="mx-auto w-full max-w-6xl px-6 pt-20 pb-16 text-center sm:pt-24">
-        <span className="lp-enter inline-flex items-center gap-2 rounded-pill border border-border-default bg-bg-surface px-3 py-1 font-medium text-fg-muted text-xs shadow-xs">
-          <Rss className="size-3.5 text-accent" />
+        <span className="lp-enter rounded-pill border-border-default bg-bg-surface text-fg-muted inline-flex items-center gap-2 border px-3 py-1 text-xs font-medium shadow-xs">
+          <Rss className="text-accent size-3.5" />
           有名テック企業のブログを毎日自動で集約
         </span>
 
-        <h1 className="lp-enter mx-auto mt-6 max-w-4xl font-editorial font-semibold text-4xl text-fg-default leading-[1.1] tracking-tight [--lp-delay:80ms] [word-break:auto-phrase] sm:text-5xl">
+        <h1 className="lp-enter font-editorial text-fg-default mx-auto mt-6 max-w-4xl text-4xl leading-[1.1] font-semibold tracking-tight [word-break:auto-phrase] [--lp-delay:80ms] sm:text-5xl">
           有名テック企業の
           <br className="hidden sm:block" />
           新着ブログ記事をまとめてチェック<span className="text-accent">.</span>
         </h1>
 
-        <p className="lp-enter mx-auto mt-6 max-w-xl text-balance text-base text-fg-muted leading-relaxed [--lp-delay:160ms] [word-break:auto-phrase] sm:text-lg">
+        <p className="lp-enter text-fg-muted mx-auto mt-6 max-w-xl text-base leading-relaxed text-balance [word-break:auto-phrase] [--lp-delay:160ms] sm:text-lg">
           各社のエンジニアブログの新着をまとめて表示。気になる記事は保存してあとでじっくり読めます。
         </p>
 
@@ -70,7 +70,7 @@ export function LandingHero() {
             </Button>
           </Magnetic>
         </div>
-        <p className="lp-enter mt-4 text-fg-faint text-xs [--lp-delay:320ms]">
+        <p className="lp-enter text-fg-faint mt-4 text-xs [--lp-delay:320ms]">
           クレジットカード不要 · Google ですぐログイン
         </p>
       </div>
@@ -79,15 +79,15 @@ export function LandingHero() {
       <div className="lp-enter relative mx-auto w-full max-w-5xl px-6 [--lp-delay:400ms]">
         <Tilt
           max={5}
-          className="relative overflow-hidden rounded-t-2xl border border-border-default border-b-0 bg-bg-surface-2/60 p-3 shadow-lg sm:p-5"
+          className="border-border-default bg-bg-surface-2/60 relative overflow-hidden rounded-t-2xl border border-b-0 p-3 shadow-lg sm:p-5"
         >
           {/* faux ツールバー(並び替えタブ)。 */}
           <div className="mb-3 flex items-center gap-2">
-            <span className="rounded-md bg-primary px-3 py-1.5 font-medium text-fg-inverse text-xs">
+            <span className="bg-primary text-fg-inverse rounded-md px-3 py-1.5 text-xs font-medium">
               新着順
             </span>
-            <span className="rounded-md px-3 py-1.5 font-medium text-fg-muted text-xs">人気順</span>
-            <span className="ml-auto hidden text-fg-faint text-xs sm:block">新着順に表示中</span>
+            <span className="text-fg-muted rounded-md px-3 py-1.5 text-xs font-medium">人気順</span>
+            <span className="text-fg-faint ml-auto hidden text-xs sm:block">新着順に表示中</span>
           </div>
           {/* モバイルも 2 カラム + 末尾2枚を隠して縦を圧縮(下端はフェードで「続き」を示唆)。 */}
           <div className="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-3">
@@ -100,11 +100,11 @@ export function LandingHero() {
             ))}
           </div>
           {/* 画面はイメージである旨を明示(記事は架空。フッターの免責と併せて誤認を防ぐ)。 */}
-          <p className="absolute right-4 bottom-3 z-10 text-[0.625rem] text-fg-faint">
+          <p className="text-fg-faint absolute right-4 bottom-3 z-10 text-[0.625rem]">
             ※ 画面はイメージです
           </p>
           {/* 下端フェード。 */}
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-bg-app to-transparent" />
+          <div className="from-bg-app pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t to-transparent" />
         </Tilt>
       </div>
     </section>

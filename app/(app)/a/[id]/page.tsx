@@ -194,28 +194,28 @@ async function ArticleContent({ params }: { params: Promise<{ id: string }> }) {
           企業名はその企業で絞り込んだフィードへのリンク(下線は hover 時だけ。常時下線だとカードの見出し行と
           見た目が変わる)。著者は記事ページにしか無い情報で、企業名より従属的なので
           企業名の後ろに通常ウェイト・muted で添える。 */}
-        <div className="mb-3 flex items-center gap-[7px] font-semibold text-[11.5px] text-fg-default">
+        <div className="text-fg-default mb-3 flex items-center gap-[7px] text-[11.5px] font-semibold">
           <CompanyFavicon url={article.url} name={article.company.name} size={20} />
           <Link
             href={`/?company=${encodeURIComponent(article.company.slug)}`}
-            className="min-w-0 truncate transition-colors hover:text-accent hover:underline hover:decoration-[1.5px] hover:underline-offset-4"
+            className="hover:text-accent min-w-0 truncate transition-colors hover:underline hover:decoration-[1.5px] hover:underline-offset-4"
           >
             {article.company.name}
           </Link>
           {article.author && (
-            <span className="min-w-0 truncate font-normal text-fg-muted">
+            <span className="text-fg-muted min-w-0 truncate font-normal">
               <span aria-hidden="true">・</span>
               {article.author}
             </span>
           )}
-          <span className="ml-auto shrink-0 font-normal text-fg-muted">
+          <span className="text-fg-muted ml-auto shrink-0 font-normal">
             {formatRelative(article.publishedAt)}
           </span>
         </div>
 
         {/* タイトル: カード(18px・3行クランプ)の拡大版。クランプは外し、字間・行送りは
           カードと同じ比率(tracking -0.015em)にして「同じ活字の続き」に見せる。 */}
-        <h1 className="font-bold text-[1.375rem] text-fg-default leading-[1.4] tracking-[-0.015em] md:text-[1.625rem]">
+        <h1 className="text-fg-default text-[1.375rem] leading-[1.4] font-bold tracking-[-0.015em] md:text-[1.625rem]">
           {article.title}
         </h1>
 
@@ -234,7 +234,7 @@ async function ArticleContent({ params }: { params: Promise<{ id: string }> }) {
           なりがちで、要約の直下に置くとノイズになるため。カードの抜粋(13.5px・muted・1.75)と
           同じ声色で、本文として読める 15px に上げる。 */}
         {!summary && article.description && (
-          <p className="mt-5 text-[15px] text-fg-muted leading-[1.8]">
+          <p className="text-fg-muted mt-5 text-[15px] leading-[1.8]">
             {toExcerpt(article.description, 200)}
           </p>
         )}
@@ -255,10 +255,10 @@ async function ArticleContent({ params }: { params: Promise<{ id: string }> }) {
             <ArticleHeroImage
               article={article}
               href={article.url}
-              className="aspect-[1200/630] w-full object-cover ring-1 ring-border-default ring-inset"
+              className="ring-border-default aspect-[1200/630] w-full object-cover ring-1 ring-inset"
             />
           )}
-          <p className={`truncate text-[11.5px] text-fg-subtle ${article.ogImage ? 'mt-2' : ''}`}>
+          <p className={`text-fg-subtle truncate text-[11.5px] ${article.ogImage ? 'mt-2' : ''}`}>
             {hostname(article.url)}
           </p>
         </div>
@@ -270,7 +270,7 @@ async function ArticleContent({ params }: { params: Promise<{ id: string }> }) {
           (aside の上罫と二重になるため)。
           主アクションなので ink の塗りにする(design.md がプライマリボタンへの ink 塗りを
           許容する範囲。teal の塗りは引き続き使わない)。 */}
-        <div className="mt-6 flex flex-wrap items-center gap-1 border-border-default border-t pt-4 xl:mt-3 xl:border-t-0 xl:pt-0">
+        <div className="border-border-default mt-6 flex flex-wrap items-center gap-1 border-t pt-4 xl:mt-3 xl:border-t-0 xl:pt-0">
           {/* 保存系だけがユーザー依存。ここだけをストリームさせ、本文は待たせない。
             fallback はボタン2つ分(size-11 + gap-1)の枠で、解決時に共有ボタンが動かないようにする。 */}
           <Suspense fallback={<div className="h-11 w-[5.75rem]" />}>
@@ -281,7 +281,7 @@ async function ArticleContent({ params }: { params: Promise<{ id: string }> }) {
           <ShareButton articleId={article.id} title={article.title} />
           <ArticleSourceLink
             article={article}
-            className="ml-auto inline-flex min-h-12 touch-manipulation items-center gap-2 rounded-md bg-primary px-5 font-semibold text-fg-inverse text-sm transition-colors hover:bg-primary-hover xl:order-first xl:ml-0 xl:w-full xl:justify-center"
+            className="bg-primary text-fg-inverse hover:bg-primary-hover ml-auto inline-flex min-h-12 touch-manipulation items-center gap-2 rounded-md px-5 text-sm font-semibold transition-colors xl:order-first xl:ml-0 xl:w-full xl:justify-center"
           >
             元記事を開く
             <ExternalLink aria-hidden="true" className="size-4" />

@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.5.15/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.6.6/schema.json",
   "vcs": {
     "enabled": true,
     "clientKind": "git",
@@ -24,7 +24,13 @@
       "!**/*.css"
     ]
   },
-  "assist": { "actions": { "source": { "organizeImports": "on" } } },
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": "on"
+      }
+    }
+  },
   "formatter": {
     "enabled": true,
     "indentStyle": "space",
@@ -46,12 +52,22 @@
         "useImportType": "error",
         "useExportType": "error",
         "useShorthandFunctionType": "error",
-        "useConsistentArrayType": { "level": "error", "options": { "syntax": "shorthand" } }
+        "useConsistentArrayType": {
+          "level": "error",
+          "options": {
+            "syntax": "shorthand"
+          }
+        }
       },
       "suspicious": {
         "noExplicitAny": "error",
         "noDoubleEquals": "error",
-        "noConsole": { "level": "warn", "options": { "allow": ["log"] } }
+        "noConsole": {
+          "level": "warn",
+          "options": {
+            "allow": ["log"]
+          }
+        }
       },
       "complexity": {
         "noUselessTypeConstraint": "error"
@@ -60,11 +76,8 @@
         "noDelete": "error"
       },
       "nursery": {
-        "useSortedClasses": {
-          "level": "warn",
-          "options": {
-            "functions": ["clsx", "cva", "cn", "tw"]
-          }
+        "useTailwindSortedClasses": {
+          "level": "warn"
         }
       }
     }
@@ -95,6 +108,20 @@
     "formatter": {
       "indentWidth": 2,
       "trailingCommas": "none"
+    }
+  },
+  "tailwind": {
+    "mergeFunctions": ["clsx", "cn", "tw"],
+    "variantFunctions": ["cva"]
+  },
+  "markdown": {
+    "formatter": {
+      "enabled": false
+    }
+  },
+  "yaml": {
+    "formatter": {
+      "enabled": false
     }
   }
 }

@@ -97,18 +97,18 @@ export function MobileSearchOverlay({ open, onClose }: { open: boolean; onClose:
   if (!open) return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-50 flex flex-col bg-bg-surface lg:hidden">
-      <div className="flex items-center gap-2 border-border-default border-b px-3 pt-[calc(env(safe-area-inset-top,0px)+0.5rem)] pb-2">
+    <div className="bg-bg-surface fixed inset-0 z-50 flex flex-col lg:hidden">
+      <div className="border-border-default flex items-center gap-2 border-b px-3 pt-[calc(env(safe-area-inset-top,0px)+0.5rem)] pb-2">
         <button
           type="button"
           onClick={onClose}
           aria-label="検索を閉じる"
-          className="grid size-11 shrink-0 touch-manipulation place-items-center rounded-full text-fg-secondary transition-colors active:bg-bg-surface-2"
+          className="text-fg-secondary active:bg-bg-surface-2 grid size-11 shrink-0 touch-manipulation place-items-center rounded-full transition-colors"
         >
           <ArrowLeft className="size-[18px]" />
         </button>
         <div className="relative flex-1">
-          <Search className="absolute top-1/2 left-3 size-[18px] -translate-y-1/2 text-fg-subtle" />
+          <Search className="text-fg-subtle absolute top-1/2 left-3 size-[18px] -translate-y-1/2" />
           <input
             ref={inputRef}
             type="search"
@@ -136,16 +136,16 @@ export function MobileSearchOverlay({ open, onClose }: { open: boolean; onClose:
               e.preventDefault();
               onSubmit();
             }}
-            className="h-11 w-full rounded-md border border-border-default bg-bg-surface-2 pr-10 pl-9 text-base outline-none placeholder:text-fg-subtle focus-visible:ring-2 focus-visible:ring-primary [&::-webkit-search-cancel-button]:hidden"
+            className="border-border-default bg-bg-surface-2 placeholder:text-fg-subtle focus-visible:ring-primary h-11 w-full rounded-md border pr-10 pl-9 text-base outline-none focus-visible:ring-2 [&::-webkit-search-cancel-button]:hidden"
           />
           {isPending ? (
-            <Loader2 className="absolute top-1/2 right-3 size-4 -translate-y-1/2 animate-spin text-fg-subtle" />
+            <Loader2 className="text-fg-subtle absolute top-1/2 right-3 size-4 -translate-y-1/2 animate-spin" />
           ) : value ? (
             <button
               type="button"
               aria-label="検索をクリア"
               onClick={clear}
-              className="absolute top-1/2 right-1.5 grid size-8 -translate-y-1/2 place-items-center rounded-full text-fg-subtle transition-colors active:bg-bg-surface-3"
+              className="text-fg-subtle active:bg-bg-surface-3 absolute top-1/2 right-1.5 grid size-8 -translate-y-1/2 place-items-center rounded-full transition-colors"
             >
               <X className="size-4" />
             </button>
@@ -156,11 +156,11 @@ export function MobileSearchOverlay({ open, onClose }: { open: boolean; onClose:
       {value === '' && history.length > 0 ? (
         <section aria-label="最近の検索" className="flex-1 overflow-y-auto px-3 pt-2">
           <div className="flex items-center justify-between">
-            <h2 className="font-medium text-fg-muted text-xs">最近の検索</h2>
+            <h2 className="text-fg-muted text-xs font-medium">最近の検索</h2>
             <button
               type="button"
               onClick={clearHistory}
-              className="min-h-11 touch-manipulation px-2 text-fg-subtle text-xs active:bg-bg-surface-2"
+              className="text-fg-subtle active:bg-bg-surface-2 min-h-11 touch-manipulation px-2 text-xs"
             >
               すべて消去
             </button>
@@ -171,16 +171,16 @@ export function MobileSearchOverlay({ open, onClose }: { open: boolean; onClose:
                 <button
                   type="button"
                   onClick={() => selectHistory(term)}
-                  className="flex min-h-11 min-w-0 flex-1 touch-manipulation items-center gap-3 rounded-md px-2 text-left text-fg-default text-sm active:bg-bg-surface-2"
+                  className="text-fg-default active:bg-bg-surface-2 flex min-h-11 min-w-0 flex-1 touch-manipulation items-center gap-3 rounded-md px-2 text-left text-sm"
                 >
-                  <Clock className="size-4 shrink-0 text-fg-subtle" />
+                  <Clock className="text-fg-subtle size-4 shrink-0" />
                   <span className="truncate">{term}</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => remove(term)}
                   aria-label={`「${term}」を履歴から削除`}
-                  className="grid size-11 shrink-0 touch-manipulation place-items-center rounded-full text-fg-subtle active:bg-bg-surface-2"
+                  className="text-fg-subtle active:bg-bg-surface-2 grid size-11 shrink-0 touch-manipulation place-items-center rounded-full"
                 >
                   <X className="size-4" />
                 </button>

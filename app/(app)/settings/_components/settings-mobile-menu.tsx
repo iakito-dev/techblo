@@ -48,7 +48,7 @@ export async function SettingsMobileMenu() {
       <AccountCard />
       <nav
         aria-label="設定メニュー"
-        className="divide-y divide-border-default overflow-hidden rounded-lg border border-border-default bg-bg-surface"
+        className="divide-border-default border-border-default bg-bg-surface divide-y overflow-hidden rounded-lg border"
       >
         <SettingsMenuRow
           href="/settings/companies"

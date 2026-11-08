@@ -67,7 +67,7 @@ export function SettingsToc() {
 
   return (
     <nav aria-label="設定の目次" className="sticky top-6">
-      <ul className="flex flex-col gap-0.5 border-border-default border-l">
+      <ul className="border-border-default flex flex-col gap-0.5 border-l">
         {SETTINGS_SECTIONS.map((s) => (
           <li key={s.id}>
             <a
@@ -77,10 +77,10 @@ export function SettingsToc() {
                 clicked.current = s.id;
                 setActive(s.id);
               }}
-              className={`-ml-px block border-l-2 py-1.5 pl-3 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
+              className={`focus-visible:ring-accent -ml-px block border-l-2 py-1.5 pl-3 text-sm transition-colors focus-visible:ring-2 focus-visible:outline-none ${
                 active === s.id
-                  ? 'border-accent font-medium text-fg-default'
-                  : 'border-transparent text-fg-muted hover:text-fg-default'
+                  ? 'border-accent text-fg-default font-medium'
+                  : 'text-fg-muted hover:text-fg-default border-transparent'
               }`}
             >
               {s.label}

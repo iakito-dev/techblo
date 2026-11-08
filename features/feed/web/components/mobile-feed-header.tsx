@@ -188,7 +188,7 @@ function MobileFeedHeaderView({
   // 検索行の下罫はヘッダーとリストの境目。チップ行があるときはチップ行が下端になる。
 
   return (
-    <div className="sticky top-0 z-30 bg-bg-app md:hidden">
+    <div className="bg-bg-app sticky top-0 z-30 md:hidden">
       {/*
         1 行目: ロゴマーク + 検索 + 絞り込みアイコン。
         モバイルのフィードは共通 Header(ロゴ帯)を隠すため、ここにマークを置かないと
@@ -215,12 +215,12 @@ function MobileFeedHeaderView({
             'relative grid size-11 shrink-0 touch-manipulation place-items-center rounded-md transition-colors',
             activeCount > 0
               ? 'bg-accent text-fg-inverse'
-              : 'text-fg-secondary shadow-[inset_0_0_0_1px_var(--color-border-strong)] active:bg-bg-surface-2',
+              : 'text-fg-secondary active:bg-bg-surface-2 shadow-[inset_0_0_0_1px_var(--color-border-strong)]',
           )}
         >
           <ListFilter className="size-[18px]" />
           {activeCount > 0 && (
-            <span className="absolute -top-1 -right-1 grid min-w-[1.125rem] place-items-center rounded-full bg-fg-default px-1 font-semibold text-[0.625rem] text-bg-surface tabular-nums">
+            <span className="bg-fg-default text-bg-surface absolute -top-1 -right-1 grid min-w-[1.125rem] place-items-center rounded-full px-1 text-[0.625rem] font-semibold tabular-nums">
               {activeCount}
             </span>
           )}
@@ -231,7 +231,7 @@ function MobileFeedHeaderView({
       {showChips && (
         <div
           className={cn(
-            'scrollbar-none flex items-center gap-2 overflow-x-auto border-border-default border-b-[0.5px] pb-2',
+            'border-border-default flex scrollbar-none items-center gap-2 overflow-x-auto border-b-[0.5px] pb-2',
             MOBILE_GUTTER_CLASS,
           )}
         >
@@ -293,7 +293,7 @@ function MobileSearchFieldView({
   const composingRef = useRef(false);
   return (
     <div className="relative min-w-0 flex-1">
-      <Search className="absolute top-1/2 left-3 size-[18px] -translate-y-1/2 text-fg-subtle" />
+      <Search className="text-fg-subtle absolute top-1/2 left-3 size-[18px] -translate-y-1/2" />
       <input
         type="search"
         value={value}
@@ -326,13 +326,13 @@ function MobileSearchFieldView({
         className={SEARCH_INPUT_CLASS}
       />
       {pending ? (
-        <Loader2 className="absolute top-1/2 right-3 size-4 -translate-y-1/2 animate-spin text-fg-subtle" />
+        <Loader2 className="text-fg-subtle absolute top-1/2 right-3 size-4 -translate-y-1/2 animate-spin" />
       ) : value ? (
         <button
           type="button"
           aria-label="検索をクリア"
           onClick={onClear}
-          className="absolute top-1/2 right-2 grid size-8 -translate-y-1/2 touch-manipulation place-items-center rounded-full text-fg-subtle transition-colors active:bg-bg-surface-3"
+          className="text-fg-subtle active:bg-bg-surface-3 absolute top-1/2 right-2 grid size-8 -translate-y-1/2 touch-manipulation place-items-center rounded-full transition-colors"
         >
           <X className="size-4" />
         </button>

@@ -188,13 +188,13 @@ function FeedControlsView({
           role="tablist"
           aria-label="並び替え"
           aria-busy={sortPending}
-          className={`relative grid shrink-0 grid-cols-2 rounded-sm bg-bg-surface-2 p-1 transition-opacity ${
+          className={`bg-bg-surface-2 relative grid shrink-0 grid-cols-2 rounded-sm p-1 transition-opacity ${
             sortPending ? 'pointer-events-none opacity-60' : ''
           }`}
         >
           <span
             aria-hidden="true"
-            className="pointer-events-none absolute bottom-1 left-1 h-0.5 w-[calc(50%-0.25rem)] rounded-full bg-accent transition-transform duration-200 ease-out"
+            className="bg-accent pointer-events-none absolute bottom-1 left-1 h-0.5 w-[calc(50%-0.25rem)] rounded-full transition-transform duration-200 ease-out"
             style={{ transform: sort === 'popular' ? 'translateX(100%)' : 'translateX(0)' }}
           />
           {SORT_OPTIONS.map((option) => {
@@ -208,7 +208,7 @@ function FeedControlsView({
                 onClick={() => onSort(option.value)}
                 onMouseEnter={() => prefetchSort(option.value)}
                 onFocus={() => prefetchSort(option.value)}
-                className={`relative z-10 h-9 min-w-24 rounded-sm px-4 text-center font-medium text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
+                className={`focus-visible:ring-accent relative z-10 h-9 min-w-24 rounded-sm px-4 text-center text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none ${
                   active ? 'text-accent' : 'text-fg-muted'
                 }`}
               >
@@ -289,32 +289,32 @@ function CompanyFilter({
         variant="outline"
         aria-label="企業フィルタ"
         aria-busy={pending}
-        className={`h-11 gap-2 rounded-sm bg-bg-surface font-medium shadow-xs transition-opacity ${
+        className={`bg-bg-surface h-11 gap-2 rounded-sm font-medium shadow-xs transition-opacity ${
           pending ? 'opacity-60' : ''
         } ${fullWidth ? 'min-w-0 flex-1 justify-start' : ''}`}
       >
         {selected ? (
           <CompanyFavicon url={selected.siteUrl} name={selected.name} />
         ) : (
-          <ListFilter className="size-4 shrink-0 text-fg-muted" />
+          <ListFilter className="text-fg-muted size-4 shrink-0" />
         )}
         <span
           className={fullWidth ? 'min-w-0 flex-1 truncate text-left' : 'max-w-[10rem] truncate'}
         >
           {selected ? selected.name : 'すべての企業'}
         </span>
-        <ChevronDown className="size-4 shrink-0 text-fg-subtle" />
+        <ChevronDown className="text-fg-subtle size-4 shrink-0" />
       </Button>
       <Dropdown.Popover className="flex max-h-[60vh] w-56 flex-col rounded-sm">
         {showSearch && (
-          <div className="shrink-0 border-border-default border-b p-2">
+          <div className="border-border-default shrink-0 border-b p-2">
             <input
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="企業を検索"
               aria-label="企業を検索"
-              className="h-9 w-full rounded-sm bg-bg-surface-2 px-2.5 text-sm outline-none placeholder:text-fg-subtle focus-visible:ring-2 focus-visible:ring-accent"
+              className="bg-bg-surface-2 placeholder:text-fg-subtle focus-visible:ring-accent h-9 w-full rounded-sm px-2.5 text-sm outline-none focus-visible:ring-2"
             />
           </div>
         )}
@@ -376,15 +376,15 @@ function UserFeedFilter({ userFeeds }: { userFeeds: FilterUserFeed[] }) {
         variant="outline"
         aria-label="マイフィードフィルタ"
         aria-busy={isPending}
-        className={`h-11 gap-2 rounded-sm bg-bg-surface font-medium shadow-xs transition-opacity ${
+        className={`bg-bg-surface h-11 gap-2 rounded-sm font-medium shadow-xs transition-opacity ${
           isPending ? 'opacity-60' : ''
         }`}
       >
-        <Rss className="size-4 shrink-0 text-fg-muted" />
+        <Rss className="text-fg-muted size-4 shrink-0" />
         <span className="max-w-[10rem] truncate">
           {count > 0 ? `マイフィード(${count})` : 'マイフィード'}
         </span>
-        <ChevronDown className="size-4 shrink-0 text-fg-subtle" />
+        <ChevronDown className="text-fg-subtle size-4 shrink-0" />
       </Button>
       <Dropdown.Popover className="flex max-h-[60vh] w-56 flex-col rounded-sm">
         <Dropdown.Menu
@@ -436,11 +436,11 @@ function PeriodDropdown({
         variant="outline"
         isDisabled={pending}
         aria-label="集計期間"
-        className="h-11 shrink-0 gap-1 rounded-sm bg-bg-surface font-medium shadow-xs sm:gap-1.5"
+        className="bg-bg-surface h-11 shrink-0 gap-1 rounded-sm font-medium shadow-xs sm:gap-1.5"
       >
-        <CalendarDays className="hidden size-4 shrink-0 text-fg-muted sm:block" />
+        <CalendarDays className="text-fg-muted hidden size-4 shrink-0 sm:block" />
         <span className="whitespace-nowrap">{currentLabel}</span>
-        <ChevronDown className="size-4 shrink-0 text-fg-subtle" />
+        <ChevronDown className="text-fg-subtle size-4 shrink-0" />
       </Button>
       <Dropdown.Popover className="w-36 rounded-sm">
         <Dropdown.Menu

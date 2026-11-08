@@ -14,7 +14,7 @@ const NAV_LINKS = [
  */
 export function LandingNav() {
   return (
-    <header className="sticky top-0 z-50 border-border-default/70 border-b bg-bg-app/80 backdrop-blur-md">
+    <header className="border-border-default/70 bg-bg-app/80 sticky top-0 z-50 border-b backdrop-blur-md">
       <nav className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-6">
         <Logo />
         <div className="hidden items-center gap-8 md:flex">
@@ -22,7 +22,7 @@ export function LandingNav() {
             <a
               key={link.href}
               href={link.href}
-              className="relative font-medium text-fg-muted text-sm transition-colors after:absolute after:-bottom-1 after:left-0 after:h-px after:w-0 after:bg-fg-default after:transition-all after:duration-300 hover:text-fg-default hover:after:w-full"
+              className="text-fg-muted after:bg-fg-default hover:text-fg-default relative text-sm font-medium transition-colors after:absolute after:-bottom-1 after:left-0 after:h-px after:w-0 after:transition-all after:duration-300 hover:after:w-full"
             >
               {link.label}
             </a>

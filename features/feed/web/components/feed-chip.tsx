@@ -14,7 +14,7 @@ export function RemovableChip({ label, onRemove }: { label: string; onRemove: ()
   return (
     <span
       className={cn(
-        'inline-flex h-11 shrink-0 items-center gap-1 whitespace-nowrap rounded-pill pr-1.5 pl-3.5 font-medium text-accent text-sm shadow-[inset_0_0_0_1px_var(--color-accent)]',
+        'rounded-pill text-accent inline-flex h-11 shrink-0 items-center gap-1 pr-1.5 pl-3.5 text-sm font-medium whitespace-nowrap shadow-[inset_0_0_0_1px_var(--color-accent)]',
       )}
     >
       <span className="max-w-[8rem] truncate">{label}</span>
@@ -22,7 +22,7 @@ export function RemovableChip({ label, onRemove }: { label: string; onRemove: ()
         type="button"
         onClick={onRemove}
         aria-label={`${label} のフィルタを解除`}
-        className="-mr-0.5 grid size-7 shrink-0 touch-manipulation place-items-center rounded-full text-accent transition-colors active:bg-accent/15"
+        className="text-accent active:bg-accent/15 -mr-0.5 grid size-7 shrink-0 touch-manipulation place-items-center rounded-full transition-colors"
       >
         <X aria-hidden="true" className="size-3.5" />
       </button>

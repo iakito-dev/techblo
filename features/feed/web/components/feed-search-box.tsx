@@ -151,7 +151,7 @@ function SearchBoxView({
 
   return (
     <div className="relative max-w-md flex-1">
-      <Search className="absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-fg-subtle" />
+      <Search className="text-fg-subtle absolute top-1/2 left-2.5 size-4 -translate-y-1/2" />
       <Input
         ref={inputRef}
         data-feed-search
@@ -223,16 +223,16 @@ function SearchBoxView({
         // ポップオーバー内の mousedown は preventDefault してフォーカスを保つ。
         // biome-ignore lint/a11y/noStaticElementInteractions: フォーカス維持のための mousedown 抑止のみで、操作要素ではない
         <div
-          className="absolute top-full right-0 left-0 z-30 mt-1 overflow-hidden rounded-md border border-border-default bg-bg-surface shadow-md"
+          className="border-border-default bg-bg-surface absolute top-full right-0 left-0 z-30 mt-1 overflow-hidden rounded-md border shadow-md"
           onMouseDown={(e) => e.preventDefault()}
         >
           <div className="flex items-center justify-between px-3 pt-2 pb-1">
-            <span className="font-medium text-fg-muted text-xs">最近の検索</span>
+            <span className="text-fg-muted text-xs font-medium">最近の検索</span>
             <button
               type="button"
               tabIndex={-1}
               onClick={history.onClearAll}
-              className="rounded-sm px-1 text-fg-subtle text-xs transition-colors hover:bg-bg-surface-2 hover:text-fg-default"
+              className="text-fg-subtle hover:bg-bg-surface-2 hover:text-fg-default rounded-sm px-1 text-xs transition-colors"
             >
               すべて消去
             </button>
@@ -245,14 +245,14 @@ function SearchBoxView({
                 id={`${baseId}-opt-${i}`}
                 role="option"
                 aria-selected={i === activeIndex}
-                className={`flex cursor-pointer items-center gap-2 px-3 py-1.5 text-fg-default text-sm ${i === activeIndex ? 'bg-bg-surface-2' : 'hover:bg-bg-surface-2'}`}
+                className={`text-fg-default flex cursor-pointer items-center gap-2 px-3 py-1.5 text-sm ${i === activeIndex ? 'bg-bg-surface-2' : 'hover:bg-bg-surface-2'}`}
                 onMouseMove={() => setActiveIndex(i)}
                 onClick={() => {
                   history.onSelect(term);
                   inputRef.current?.blur();
                 }}
               >
-                <Clock className="size-4 shrink-0 text-fg-subtle" />
+                <Clock className="text-fg-subtle size-4 shrink-0" />
                 <span className="min-w-0 flex-1 truncate">{term}</span>
                 <button
                   type="button"
@@ -262,7 +262,7 @@ function SearchBoxView({
                     e.stopPropagation();
                     history.onRemove(term);
                   }}
-                  className="grid size-6 shrink-0 place-items-center rounded-sm text-fg-subtle transition-colors hover:text-fg-default"
+                  className="text-fg-subtle hover:text-fg-default grid size-6 shrink-0 place-items-center rounded-sm transition-colors"
                 >
                   <X className="size-3.5" />
                 </button>
@@ -272,13 +272,13 @@ function SearchBoxView({
         </div>
       ) : null}
       {pending ? (
-        <Loader2 className="absolute top-1/2 right-2.5 size-4 -translate-y-1/2 animate-spin text-fg-subtle" />
+        <Loader2 className="text-fg-subtle absolute top-1/2 right-2.5 size-4 -translate-y-1/2 animate-spin" />
       ) : value ? (
         <button
           type="button"
           aria-label="検索をクリア"
           onClick={onClear}
-          className="absolute top-1/2 right-2 grid size-6 -translate-y-1/2 place-items-center rounded-sm text-fg-subtle transition-colors hover:bg-bg-surface-2 hover:text-fg-default focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+          className="text-fg-subtle hover:bg-bg-surface-2 hover:text-fg-default focus-visible:ring-accent absolute top-1/2 right-2 grid size-6 -translate-y-1/2 place-items-center rounded-sm transition-colors focus-visible:ring-2 focus-visible:outline-none"
         >
           <X className="size-4" />
         </button>

@@ -100,7 +100,7 @@ export function AppSidebar({
   }, [onFeed, activeCategory]);
 
   return (
-    <aside className="fixed inset-y-0 left-0 z-20 hidden w-64 flex-col border-border-default border-r bg-bg-app lg:flex">
+    <aside className="border-border-default bg-bg-app fixed inset-y-0 left-0 z-20 hidden w-64 flex-col border-r lg:flex">
       {/* 上部: ロゴ */}
       <div className="flex h-16 shrink-0 items-center px-4">
         <Logo showOrigin />
@@ -146,7 +146,7 @@ export function AppSidebar({
             {/* 企業(クリックで /?company=slug 絞り込み・折りたたみ) */}
             <Collapsible defaultOpen className="mt-1">
               <div className="flex items-center justify-between px-2.5">
-                <CollapsibleTrigger className="group flex items-center gap-1 py-1 font-medium rounded-sm text-fg-subtle text-xs outline-none focus-visible:ring-2 focus-visible:ring-accent">
+                <CollapsibleTrigger className="group text-fg-subtle focus-visible:ring-accent flex items-center gap-1 rounded-sm py-1 text-xs font-medium outline-none focus-visible:ring-2">
                   <ChevronRight className="size-3.5 transition-transform group-data-[state=open]:rotate-90" />
                   企業
                 </CollapsibleTrigger>
@@ -163,13 +163,13 @@ export function AppSidebar({
                       className={cn(
                         'relative flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-sm transition-colors before:absolute before:inset-y-[5px] before:left-0 before:w-0.5 before:rounded-full',
                         active
-                          ? 'font-semibold text-fg-default before:bg-accent'
-                          : 'text-fg-muted before:bg-transparent hover:text-fg-default',
+                          ? 'text-fg-default before:bg-accent font-semibold'
+                          : 'text-fg-muted hover:text-fg-default before:bg-transparent',
                       )}
                     >
                       <CompanyFavicon url={c.siteUrl} name={c.name} />
                       <span className="min-w-0 flex-1 truncate">{c.name}</span>
-                      <span className="shrink-0 text-fg-subtle text-xs tabular-nums">
+                      <span className="text-fg-subtle shrink-0 text-xs tabular-nums">
                         {c.articleCount}
                       </span>
                     </Link>
@@ -182,7 +182,7 @@ export function AppSidebar({
             {userFeeds.length > 0 && (
               <Collapsible defaultOpen className="mt-1">
                 <div className="flex items-center justify-between px-2.5">
-                  <CollapsibleTrigger className="group flex items-center gap-1 py-1 font-medium rounded-sm text-fg-subtle text-xs outline-none focus-visible:ring-2 focus-visible:ring-accent">
+                  <CollapsibleTrigger className="group text-fg-subtle focus-visible:ring-accent flex items-center gap-1 rounded-sm py-1 text-xs font-medium outline-none focus-visible:ring-2">
                     <ChevronRight className="size-3.5 transition-transform group-data-[state=open]:rotate-90" />
                     マイフィード
                   </CollapsibleTrigger>
@@ -200,13 +200,13 @@ export function AppSidebar({
                         className={cn(
                           'relative flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-sm transition-colors before:absolute before:inset-y-[5px] before:left-0 before:w-0.5 before:rounded-full',
                           active
-                            ? 'font-semibold text-fg-default before:bg-accent'
-                            : 'text-fg-muted before:bg-transparent hover:text-fg-default',
+                            ? 'text-fg-default before:bg-accent font-semibold'
+                            : 'text-fg-muted hover:text-fg-default before:bg-transparent',
                         )}
                       >
                         <CompanyFavicon url={f.siteUrl ?? ''} name={f.title} />
                         <span className="min-w-0 flex-1 truncate">{f.title}</span>
-                        <span className="shrink-0 text-fg-subtle text-xs tabular-nums">
+                        <span className="text-fg-subtle shrink-0 text-xs tabular-nums">
                           {f.articleCount}
                         </span>
                       </Link>
@@ -219,7 +219,7 @@ export function AppSidebar({
 
           {/* フォルダ(一旦空。将来ユーザー定義フォルダを入れる枠) */}
           <Section label="フォルダ">
-            <p className="px-2.5 py-1.5 text-fg-subtle text-xs">まだフォルダがありません</p>
+            <p className="text-fg-subtle px-2.5 py-1.5 text-xs">まだフォルダがありません</p>
           </Section>
 
           {/* カテゴリ(?category= 絞り込み・職能軸7種。shared/categories.ts が単一の真実の源。ADR-0034)。
@@ -257,7 +257,7 @@ export function AppSidebar({
       </ScrollArea>
 
       {/* 下部ユーティリティ */}
-      <div className="shrink-0 border-border-default border-t px-3 py-3">
+      <div className="border-border-default shrink-0 border-t px-3 py-3">
         <NavRow
           asLink
           href="/settings"
@@ -274,7 +274,7 @@ export function AppSidebar({
 function Section({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="flex flex-col gap-0.5">
-      <span className="px-2 py-1 font-medium text-fg-subtle text-xs uppercase tracking-wider">
+      <span className="text-fg-subtle px-2 py-1 text-xs font-medium tracking-wider uppercase">
         {label}
       </span>
       {children}
@@ -331,8 +331,8 @@ function NavRow({
         className={cn(
           base,
           active
-            ? 'font-semibold text-fg-default before:bg-accent'
-            : 'text-fg-muted before:bg-transparent hover:text-fg-default',
+            ? 'text-fg-default before:bg-accent font-semibold'
+            : 'text-fg-muted hover:text-fg-default before:bg-transparent',
         )}
       >
         {inner}
@@ -345,7 +345,7 @@ function NavRow({
       <button
         type="button"
         onClick={onClick}
-        className={cn(base, 'text-fg-muted before:bg-transparent hover:text-fg-default')}
+        className={cn(base, 'text-fg-muted hover:text-fg-default before:bg-transparent')}
       >
         {inner}
       </button>
@@ -359,7 +359,7 @@ function NavRow({
       disabled
       aria-disabled="true"
       title="準備中"
-      className={cn(base, 'cursor-default text-fg-subtle')}
+      className={cn(base, 'text-fg-subtle cursor-default')}
     >
       {inner}
     </button>

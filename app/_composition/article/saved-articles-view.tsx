@@ -172,8 +172,8 @@ export function SavedArticlesView({
     <section>
       <div className="mb-4 flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <Icon className="size-5 text-fg-muted" />
-          <h1 className="font-bold text-xl tracking-tight">{title}</h1>
+          <Icon className="text-fg-muted size-5" />
+          <h1 className="text-xl font-bold tracking-tight">{title}</h1>
         </div>
       </div>
       {showControls && <SavedSearchInput value={query} onChange={setQuery} />}
@@ -188,21 +188,21 @@ export function SavedArticlesView({
 
       {visibleCount === 0 ? (
         <div className="flex flex-col items-center justify-center px-6 py-24 text-center">
-          <Inbox className="size-10 text-fg-subtle" />
-          <p className="mt-4 font-bold text-fg-default">{emptyTitle}</p>
-          <p className="mt-1 text-fg-muted text-sm">{emptyHint}</p>
-          <Link href="/" className="mt-4 font-medium text-accent text-sm hover:underline">
+          <Inbox className="text-fg-subtle size-10" />
+          <p className="text-fg-default mt-4 font-bold">{emptyTitle}</p>
+          <p className="text-fg-muted mt-1 text-sm">{emptyHint}</p>
+          <Link href="/" className="text-accent mt-4 text-sm font-medium hover:underline">
             フィードを見る
           </Link>
         </div>
       ) : matchedCount === 0 && isFiltering ? (
         <div className="flex flex-col items-center justify-center px-6 py-20 text-center">
-          <Search className="size-10 text-fg-subtle" />
-          <p className="mt-4 font-bold text-fg-default">一致する記事がありません</p>
+          <Search className="text-fg-subtle size-10" />
+          <p className="text-fg-default mt-4 font-bold">一致する記事がありません</p>
           <button
             type="button"
             onClick={() => setQuery('')}
-            className="mt-3 rounded-sm font-medium text-accent text-sm hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+            className="text-accent focus-visible:ring-accent mt-3 rounded-sm text-sm font-medium hover:underline focus-visible:ring-2 focus-visible:outline-none"
           >
             絞り込みをクリア
           </button>
@@ -246,9 +246,9 @@ export function SavedArticlesView({
           </div>
           {/* 件数が少ないと左上に寄って空白が広がるため、薄い補足で「これから増える」ことを示す */}
           {visibleCount <= 2 && !isFiltering && (
-            <p className="mt-8 text-center text-fg-subtle text-sm">
+            <p className="text-fg-subtle mt-8 text-center text-sm">
               {emptyHint}。
-              <Link href="/" className="ml-1 text-accent hover:underline">
+              <Link href="/" className="text-accent ml-1 hover:underline">
                 フィードを見る →
               </Link>
             </p>

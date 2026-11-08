@@ -108,7 +108,7 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`${inter.variable} ${notoSansJp.variable} ${outfit.variable} ${newsreader.variable}`}
     >
-      <body className="min-h-dvh bg-bg-app text-fg-default antialiased">
+      <body className="bg-bg-app text-fg-default min-h-dvh antialiased">
         {/* 画面最上部のローディングバー・PostHog 等のクライアント provider(app/providers.tsx) */}
         <Providers
           posthog={{ key: env.NEXT_PUBLIC_POSTHOG_KEY, host: env.NEXT_PUBLIC_POSTHOG_HOST }}

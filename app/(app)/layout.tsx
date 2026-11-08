@@ -39,7 +39,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       */}
         <Suspense
           fallback={
-            <div className="sticky top-0 z-20 mb-8 h-16 border-border-default border-b bg-bg-surface/80 pt-[env(safe-area-inset-top)] lg:hidden" />
+            <div className="border-border-default bg-bg-surface/80 sticky top-0 z-20 mb-8 h-16 border-b pt-[env(safe-area-inset-top)] lg:hidden" />
           }
         >
           <Header />
@@ -63,7 +63,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </Suspense>
         <Suspense
           fallback={
-            <div className="fixed inset-x-0 bottom-0 z-30 h-[var(--mobile-nav-h)] border-border-default border-t bg-bg-surface/80 lg:hidden" />
+            <div className="border-border-default bg-bg-surface/80 fixed inset-x-0 bottom-0 z-30 h-[var(--mobile-nav-h)] border-t lg:hidden" />
           }
         >
           <MobileNav />

@@ -17,8 +17,8 @@ export function SettingsSection({
   return (
     <section className="flex flex-col gap-4">
       <div>
-        <h2 className="font-semibold text-base text-fg-default">{title}</h2>
-        {description && <p className="mt-1 text-fg-muted text-sm">{description}</p>}
+        <h2 className="text-fg-default text-base font-semibold">{title}</h2>
+        {description && <p className="text-fg-muted mt-1 text-sm">{description}</p>}
       </div>
       {children}
     </section>

@@ -54,7 +54,7 @@ export function ScrollToTop() {
       aria-label="ページの先頭へ戻る"
       inert={!visible}
       tabIndex={visible ? 0 : -1}
-      className={`fixed right-4 z-40 flex size-11 items-center justify-center rounded-full border border-border-default bg-bg-surface text-fg-default shadow-md transition-[opacity,translate,bottom] duration-200 ease-out hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent motion-reduce:transition-none lg:right-6 lg:bottom-6 ${
+      className={`border-border-default bg-bg-surface text-fg-default hover:text-accent focus-visible:ring-accent fixed right-4 z-40 flex size-11 items-center justify-center rounded-full border shadow-md transition-[opacity,translate,bottom] duration-200 ease-out focus-visible:ring-2 focus-visible:outline-none motion-reduce:transition-none lg:right-6 lg:bottom-6 ${
         navHidden ? 'bottom-6' : 'bottom-[calc(var(--mobile-nav-h)+1rem)]'
       } ${visible ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-2 opacity-0'}`}
     >

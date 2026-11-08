@@ -84,7 +84,7 @@ export function Slider({
             onClick={() => scrollTo(i)}
             className={cn(
               'h-1.5 rounded-full transition-all duration-200',
-              i === selected ? 'w-5 bg-accent' : 'w-1.5 bg-border-strong hover:bg-fg-faint',
+              i === selected ? 'bg-accent w-5' : 'bg-border-strong hover:bg-fg-faint w-1.5',
             )}
           />
         ))}

@@ -47,10 +47,10 @@ export function LandingTestimonials() {
   return (
     <section id="voices" className="mx-auto w-full max-w-6xl px-6 py-16 sm:py-24">
       <Reveal className="mx-auto max-w-2xl text-center">
-        <h2 className="text-balance font-editorial font-semibold text-3xl text-fg-default leading-tight tracking-tight [word-break:auto-phrase] sm:text-4xl">
+        <h2 className="font-editorial text-fg-default text-3xl leading-tight font-semibold tracking-tight text-balance [word-break:auto-phrase] sm:text-4xl">
           エンジニアの“読む”を軽くする
         </h2>
-        <p className="mt-4 text-fg-muted leading-relaxed">こんな使われ方を想定しています。</p>
+        <p className="text-fg-muted mt-4 leading-relaxed">こんな使われ方を想定しています。</p>
       </Reveal>
 
       {/* デスクトップ(lg+): グリッド。 */}
@@ -69,7 +69,7 @@ export function LandingTestimonials() {
         />
       </div>
 
-      <p className="mt-6 text-center text-fg-faint text-xs">※ 掲載内容は利用イメージです。</p>
+      <p className="text-fg-faint mt-6 text-center text-xs">※ 掲載内容は利用イメージです。</p>
     </section>
   );
 }
@@ -77,18 +77,18 @@ export function LandingTestimonials() {
 function VoiceCard({ voice }: { voice: Voice }) {
   const Icon = voice.icon;
   return (
-    <figure className="flex h-full flex-col gap-4 rounded-xl border border-border-default bg-bg-surface p-5 shadow-card transition-[transform,box-shadow] duration-200 hover:-translate-y-1 hover:shadow-card-hover">
-      <Quote aria-hidden className="size-5 text-accent/40" fill="currentColor" />
-      <blockquote className="flex-1 text-fg-default text-sm leading-relaxed">
+    <figure className="border-border-default bg-bg-surface shadow-card hover:shadow-card-hover flex h-full flex-col gap-4 rounded-xl border p-5 transition-[transform,box-shadow] duration-200 hover:-translate-y-1">
+      <Quote aria-hidden className="text-accent/40 size-5" fill="currentColor" />
+      <blockquote className="text-fg-default flex-1 text-sm leading-relaxed">
         {voice.quote}
       </blockquote>
-      <figcaption className="flex items-center gap-3 border-border-default/70 border-t pt-4">
-        <span className="grid size-9 shrink-0 place-items-center rounded-full bg-accent-soft text-accent">
+      <figcaption className="border-border-default/70 flex items-center gap-3 border-t pt-4">
+        <span className="bg-accent-soft text-accent grid size-9 shrink-0 place-items-center rounded-full">
           <Icon className="size-4.5" />
         </span>
         <span className="flex min-w-0 flex-col leading-tight">
-          <span className="truncate font-semibold text-fg-default text-sm">{voice.name}</span>
-          <span className="truncate text-fg-faint text-xs">{voice.role}</span>
+          <span className="text-fg-default truncate text-sm font-semibold">{voice.name}</span>
+          <span className="text-fg-faint truncate text-xs">{voice.role}</span>
         </span>
       </figcaption>
     </figure>

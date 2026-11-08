@@ -19,9 +19,9 @@ export function StatusScreen({
 }) {
   return (
     <div className="flex flex-col items-center justify-center px-6 py-24 text-center">
-      <Icon className="size-10 text-fg-subtle" />
-      <h1 className="mt-4 font-bold text-fg-default text-lg">{title}</h1>
-      <p className="mt-1 max-w-sm text-fg-muted text-sm">{description}</p>
+      <Icon className="text-fg-subtle size-10" />
+      <h1 className="text-fg-default mt-4 text-lg font-bold">{title}</h1>
+      <p className="text-fg-muted mt-1 max-w-sm text-sm">{description}</p>
       {children && (
         <div className="mt-6 flex flex-wrap items-center justify-center gap-3">{children}</div>
       )}

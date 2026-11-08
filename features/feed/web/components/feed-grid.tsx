@@ -57,11 +57,11 @@ export function FeedGridSkeleton({
  */
 export function ArticleCardSkeleton({ withExcerpt = true }: { withExcerpt?: boolean }) {
   return (
-    <div className="flex animate-pulse flex-col gap-2.5 border-border-default border-t-[1.5px] pt-4">
-      <div className="h-3 w-28 rounded bg-bg-surface-3" />
-      <div className="h-5 w-full rounded bg-bg-surface-3" />
-      <div className="h-4 w-4/5 rounded bg-bg-surface-3" />
-      {withExcerpt && <div className="mt-2 h-8 w-full rounded bg-bg-surface-3" />}
+    <div className="border-border-default flex animate-pulse flex-col gap-2.5 border-t-[1.5px] pt-4">
+      <div className="bg-bg-surface-3 h-3 w-28 rounded" />
+      <div className="bg-bg-surface-3 h-5 w-full rounded" />
+      <div className="bg-bg-surface-3 h-4 w-4/5 rounded" />
+      {withExcerpt && <div className="bg-bg-surface-3 mt-2 h-8 w-full rounded" />}
     </div>
   );
 }

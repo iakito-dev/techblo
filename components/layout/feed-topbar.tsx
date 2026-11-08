@@ -36,7 +36,7 @@ export function FeedTopbar() {
   return (
     // z-20: カード最終行(タグ・保存ボタン)が relative z-10 を持つため、同じ z-10 だと DOM 順で
     // カード側が上に描画され、スクロール時にバーへ重なる(検索履歴のポップオーバーも隠れる)。
-    <div className="sticky top-0 z-20 hidden h-16 border-border-default border-b bg-bg-app lg:block">
+    <div className="border-border-default bg-bg-app sticky top-0 z-20 hidden h-16 border-b lg:block">
       {/* 本体(コンテンツ)と同じ最大幅(1680px)・中央寄せにして検索バーの左端を揃える(ADR-0035) */}
       <div className="mx-auto flex h-16 max-w-[1680px] items-center gap-3 px-4 md:px-6 lg:px-8">
         {/*
@@ -100,14 +100,14 @@ export function FeedHeader({
       {showBackLink && (
         <Link
           href="/"
-          className="w-fit text-fg-muted text-xs transition-colors hover:text-fg-default"
+          className="text-fg-muted hover:text-fg-default w-fit text-xs transition-colors"
         >
           ← トップ
         </Link>
       )}
       <div className="flex items-center justify-between gap-3">
-        <h1 className="flex items-center gap-2 font-bold text-fg-default text-xl tracking-tight">
-          <Icon className="size-5 text-fg-muted" />
+        <h1 className="text-fg-default flex items-center gap-2 text-xl font-bold tracking-tight">
+          <Icon className="text-fg-muted size-5" />
           {resolvedTitle}
         </h1>
         {showControls && <SortControl />}
@@ -131,9 +131,9 @@ function SortControl() {
 
   const chipClass = (active: boolean) =>
     cn(
-      'rounded-[0.3rem] font-medium text-sm transition-colors',
+      'rounded-[0.3rem] text-sm font-medium transition-colors',
       active
-        ? 'font-semibold text-fg-default shadow-[inset_0_-2px_0_var(--color-accent)]'
+        ? 'text-fg-default font-semibold shadow-[inset_0_-2px_0_var(--color-accent)]'
         : 'text-fg-secondary',
     );
 
@@ -174,14 +174,14 @@ function SortControl() {
               variant="ghost"
               aria-label={`集計期間: ${periodLabel}`}
               onHoverStart={() => prefetchSort('popular')}
-              className="h-auto min-w-0 gap-0.5 rounded-[0.3rem] py-1 pr-2.5 pl-1 font-medium text-inherit text-sm"
+              className="h-auto min-w-0 gap-0.5 rounded-[0.3rem] py-1 pr-2.5 pl-1 text-sm font-medium text-inherit"
             >
               <span aria-hidden="true" className="text-fg-faint">
                 ・
               </span>
               {/* 最長ラベル「全期間」(3字)で幅を固定し、期間切替でチップ幅が動かないようにする */}
               <span className="w-[3em] shrink-0 text-center">{periodLabel}</span>
-              <ChevronDown aria-hidden="true" className="size-3.5 text-fg-faint" />
+              <ChevronDown aria-hidden="true" className="text-fg-faint size-3.5" />
             </HeroButton>
             <Dropdown.Popover className="w-36 rounded-sm">
               <Dropdown.Menu
@@ -287,7 +287,7 @@ function TopbarAuth() {
   }, []);
 
   if (!mounted || isPending) {
-    return <span className="size-9 animate-pulse rounded-full bg-bg-surface-2" />;
+    return <span className="bg-bg-surface-2 size-9 animate-pulse rounded-full" />;
   }
   if (session) {
     return (

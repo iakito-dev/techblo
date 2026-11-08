@@ -9,7 +9,7 @@ import { SettingsFrame } from './_components/settings-frame';
 export default function Loading() {
   return (
     <SettingsFrame>
-      <h1 className="mb-6 font-bold text-xl tracking-tight">設定</h1>
+      <h1 className="mb-6 text-xl font-bold tracking-tight">設定</h1>
       <SubscriptionListSkeleton />
     </SettingsFrame>
   );

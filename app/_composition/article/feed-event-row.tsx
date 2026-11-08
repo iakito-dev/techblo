@@ -18,17 +18,17 @@ export function FeedEventRow({ item }: { item: ComposedArticle }) {
       data-article-url={article.url}
       className="flex items-baseline gap-4 py-3 text-sm"
     >
-      <RelativeTime date={article.publishedAt} className="w-14 shrink-0 text-fg-muted text-xs" />
+      <RelativeTime date={article.publishedAt} className="text-fg-muted w-14 shrink-0 text-xs" />
       {/* ArticleCard のタイトルリンクと同じ遷移先(記事ページ)。 */}
       <ArticleLink
         article={article}
         source="event_list"
         data-article-link
-        className="min-w-0 flex-1 truncate font-medium text-fg-default transition-colors hover:text-accent"
+        className="text-fg-default hover:text-accent min-w-0 flex-1 truncate font-medium transition-colors"
       >
         {article.title}
       </ArticleLink>
-      <span className="shrink-0 text-fg-muted text-xs">{article.company.name}</span>
+      <span className="text-fg-muted shrink-0 text-xs">{article.company.name}</span>
     </div>
   );
 }

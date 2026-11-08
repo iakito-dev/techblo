@@ -27,7 +27,7 @@ function FeedSectionSkeletonRow({ count, cutoff }: { count: number; cutoff: 'lat
   const cutoffClass = feedCutoffClass(cutoff);
   return (
     <div className="py-8 first:pt-0 md:py-10">
-      <div className="mb-6 h-7 w-40 animate-pulse rounded bg-bg-surface-3" />
+      <div className="bg-bg-surface-3 mb-6 h-7 w-40 animate-pulse rounded" />
       <div className={`grid grid-cols-1 ${FEED_GAP_CLASS} ${FEED_COLUMNS_CLASS} ${cutoffClass}`}>
         {Array.from({ length: count }, (_, i) => i).map((i) => (
           <ArticleCardSkeleton key={i} withExcerpt={false} />

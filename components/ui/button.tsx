@@ -10,14 +10,14 @@ import { cn } from '@/shared/utils';
  * asChild で Link 等にスタイルだけ移譲できる。
  */
 const buttonVariants = cva(
-  'inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-md font-medium text-sm outline-none transition-colors focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg-app disabled:pointer-events-none disabled:opacity-50 [&_svg]:shrink-0',
+  'focus-visible:ring-accent focus-visible:ring-offset-bg-app inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-colors outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:shrink-0',
   {
     variants: {
       variant: {
         primary: 'bg-primary text-fg-inverse hover:bg-primary-hover',
         secondary: 'bg-bg-surface-2 text-fg-default hover:bg-bg-surface-3',
         outline:
-          'border border-border-default bg-bg-surface text-fg-default shadow-xs hover:bg-bg-surface-2',
+          'border-border-default bg-bg-surface text-fg-default hover:bg-bg-surface-2 border shadow-xs',
         ghost: 'text-fg-muted hover:bg-bg-surface-2 hover:text-fg-default',
       },
       size: {

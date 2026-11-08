@@ -68,9 +68,9 @@ export function ShareButton({ articleId, title }: { articleId: string; title: st
             aria-label="共有"
             isDisabled={pending}
             onPress={handleShare}
-            className="relative z-10 size-11 rounded-full text-fg-subtle transition-colors hover:bg-bg-surface-2"
+            className="text-fg-subtle hover:bg-bg-surface-2 relative z-10 size-11 rounded-full transition-colors"
           >
-            {copied ? <Check className="size-5 text-accent" /> : <Share2 className="size-5" />}
+            {copied ? <Check className="text-accent size-5" /> : <Share2 className="size-5" />}
           </Button>
         </TooltipTrigger>
         <TooltipContent>{copied ? 'コピーしました' : '共有'}</TooltipContent>

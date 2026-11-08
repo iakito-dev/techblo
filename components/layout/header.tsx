@@ -38,7 +38,7 @@ export function Header() {
   // 置き換えるため、ここでは出さない(md〜lg のタブレットでは従来どおり表示する)。
   return (
     <header
-      className={`sticky top-0 z-20 mb-8 border-border-default border-b bg-bg-surface/80 pt-[env(safe-area-inset-top)] backdrop-blur-xl backdrop-saturate-150 lg:hidden ${
+      className={`border-border-default bg-bg-surface/80 sticky top-0 z-20 mb-8 border-b pt-[env(safe-area-inset-top)] backdrop-blur-xl backdrop-saturate-150 lg:hidden ${
         isFeed ? 'max-md:hidden' : ''
       }`}
     >
@@ -52,7 +52,7 @@ export function Header() {
               type="button"
               onClick={() => setSearchOpen(true)}
               aria-label="記事を検索"
-              className="grid size-11 touch-manipulation place-items-center rounded-full text-fg-secondary transition-colors active:bg-bg-surface-2"
+              className="text-fg-secondary active:bg-bg-surface-2 grid size-11 touch-manipulation place-items-center rounded-full transition-colors"
             >
               <Search className="size-5" />
             </button>
@@ -60,7 +60,7 @@ export function Header() {
           {/* ログイン導線は設定タブの登録カードへ集約した。ここではゲストに何も出さない
               (ログイン済みのアバターのみ。docs/features/auth.md)。 */}
           {!mounted || isPending ? (
-            <span className="size-9 animate-pulse rounded-full bg-bg-surface-2" />
+            <span className="bg-bg-surface-2 size-9 animate-pulse rounded-full" />
           ) : session ? (
             <UserMenu
               name={session.user.name}

@@ -24,19 +24,19 @@ export default function PrivacyPage() {
         <p>本サービスは、サービスの提供に必要な範囲で次の情報を取得します。</p>
         <ul className="ml-5 flex list-disc flex-col gap-2">
           <li>
-            <strong className="font-medium text-fg-default">Google アカウント情報</strong>: Google
+            <strong className="text-fg-default font-medium">Google アカウント情報</strong>: Google
             アカウントでログインした際に、メールアドレス・氏名(表示名)・プロフィール画像を取得します。
           </li>
           <li>
-            <strong className="font-medium text-fg-default">利用者が保存したデータ</strong>:
+            <strong className="text-fg-default font-medium">利用者が保存したデータ</strong>:
             ブックマーク、お気に入り、購読する企業の設定、既読状態など、本サービス上での操作内容。
           </li>
           <li>
-            <strong className="font-medium text-fg-default">Cookie・セッション情報</strong>:
+            <strong className="text-fg-default font-medium">Cookie・セッション情報</strong>:
             ログイン状態を維持するための認証用 Cookie。
           </li>
           <li>
-            <strong className="font-medium text-fg-default">利用状況・不具合情報</strong>:
+            <strong className="text-fg-default font-medium">利用状況・不具合情報</strong>:
             ページの閲覧状況やエラー発生時の技術情報(後述の外部サービスを通じて取得)。
           </li>
         </ul>
@@ -56,21 +56,21 @@ export default function PrivacyPage() {
         </p>
         <ul className="ml-5 flex list-disc flex-col gap-2">
           <li>
-            <strong className="font-medium text-fg-default">Google(認証)</strong>:
+            <strong className="text-fg-default font-medium">Google(認証)</strong>:
             ログイン(OAuth)に利用します。
           </li>
           <li>
-            <strong className="font-medium text-fg-default">
+            <strong className="text-fg-default font-medium">
               Vercel(ホスティング・アクセス解析)
             </strong>
             : 本サービスの配信およびアクセス状況の把握に利用します。
           </li>
           <li>
-            <strong className="font-medium text-fg-default">Neon(データベース)</strong>:
+            <strong className="text-fg-default font-medium">Neon(データベース)</strong>:
             アカウント情報および保存データの保管に利用します。
           </li>
           <li>
-            <strong className="font-medium text-fg-default">Sentry(エラー監視)</strong>:
+            <strong className="text-fg-default font-medium">Sentry(エラー監視)</strong>:
             不具合の検知・調査のために技術情報を送信します。
           </li>
         </ul>

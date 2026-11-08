@@ -8,9 +8,9 @@ import { Reveal } from './reveal';
  */
 export function LandingCompanies() {
   return (
-    <section id="companies" className="border-border-default/60 border-y bg-bg-surface/40 py-12">
+    <section id="companies" className="border-border-default/60 bg-bg-surface/40 border-y py-12">
       <Reveal className="w-full">
-        <p className="px-6 text-center font-medium text-fg-faint text-xs uppercase tracking-[0.18em]">
+        <p className="text-fg-faint px-6 text-center text-xs font-medium tracking-[0.18em] uppercase">
           集約しているテックブログ(一部)
         </p>
         {/*
@@ -22,7 +22,7 @@ export function LandingCompanies() {
             {LP_COMPANIES.map((name) => (
               <li
                 key={name}
-                className="shrink-0 font-semibold text-fg-secondary text-sm sm:text-base"
+                className="text-fg-secondary shrink-0 text-sm font-semibold sm:text-base"
               >
                 {name}
               </li>
@@ -32,7 +32,7 @@ export function LandingCompanies() {
               <li
                 key={`dup-${name}`}
                 aria-hidden="true"
-                className="lp-marquee-dupe shrink-0 font-semibold text-fg-secondary text-sm sm:text-base"
+                className="lp-marquee-dupe text-fg-secondary shrink-0 text-sm font-semibold sm:text-base"
               >
                 {name}
               </li>

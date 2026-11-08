@@ -26,7 +26,7 @@ export function AccountCard() {
   useEffect(() => setMounted(true), []);
 
   if (!mounted || isPending) {
-    return <div className="h-28 animate-pulse rounded-lg bg-bg-surface-2" />;
+    return <div className="bg-bg-surface-2 h-28 animate-pulse rounded-lg" />;
   }
 
   if (session) {
@@ -37,23 +37,23 @@ export function AccountCard() {
       router.refresh();
     }
     return (
-      <div className="flex items-center gap-3 rounded-lg border border-border-default bg-bg-surface p-4 shadow-xs">
+      <div className="border-border-default bg-bg-surface flex items-center gap-3 rounded-lg border p-4 shadow-xs">
         <Avatar size="md">
           {image ? <Avatar.Image src={image} alt="" /> : null}
-          <Avatar.Fallback className="bg-bg-inverse font-medium text-fg-inverse">
+          <Avatar.Fallback className="bg-bg-inverse text-fg-inverse font-medium">
             {(name ?? email).charAt(0).toUpperCase()}
           </Avatar.Fallback>
         </Avatar>
         <div className="flex min-w-0 flex-1 flex-col">
-          <span className="truncate font-medium text-fg-default text-sm">{name ?? email}</span>
-          {name && <span className="truncate text-fg-muted text-xs">{email}</span>}
+          <span className="text-fg-default truncate text-sm font-medium">{name ?? email}</span>
+          {name && <span className="text-fg-muted truncate text-xs">{email}</span>}
         </div>
         <Button
           variant="outline"
           size="sm"
           isPending={signingOut}
           onPress={() => void handleSignOut()}
-          className="shrink-0 rounded-sm bg-bg-surface"
+          className="bg-bg-surface shrink-0 rounded-sm"
         >
           <LogOut aria-hidden="true" className="size-4" />
           ログアウト
@@ -63,19 +63,19 @@ export function AccountCard() {
   }
 
   return (
-    <div className="rounded-lg border border-border-default bg-bg-surface p-5 shadow-xs">
-      <h2 className="font-bold text-fg-default text-lg">アカウント登録して設定を引き継ぐ</h2>
-      <p className="mt-1.5 text-fg-secondary text-sm leading-relaxed">
+    <div className="border-border-default bg-bg-surface rounded-lg border p-5 shadow-xs">
+      <h2 className="text-fg-default text-lg font-bold">アカウント登録して設定を引き継ぐ</h2>
+      <p className="text-fg-secondary mt-1.5 text-sm leading-relaxed">
         あとで読むやお気に入り、フィード画面の表示設定がすべての端末で同期されます。
       </p>
       <div className="mt-4">
         <SocialSignInButtons callbackURL="/settings" />
       </div>
-      <p className="mt-3 text-center text-fg-secondary text-sm">
+      <p className="text-fg-secondary mt-3 text-center text-sm">
         登録済みの方は
         <Link
           href="/login?callbackURL=%2Fsettings"
-          className="font-medium text-accent hover:underline"
+          className="text-accent font-medium hover:underline"
         >
           ログイン
         </Link>

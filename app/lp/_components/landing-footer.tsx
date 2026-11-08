@@ -30,22 +30,22 @@ const COLUMNS = [
 /** LP フッター。ワードマーク + タグライン + リンク列(Dewey のフッターに対応)。 */
 export function LandingFooter() {
   return (
-    <footer className="border-border-default border-t bg-bg-surface/40">
+    <footer className="border-border-default bg-bg-surface/40 border-t">
       <div className="mx-auto grid w-full max-w-6xl gap-10 px-6 py-14 sm:grid-cols-2 lg:grid-cols-5">
         <div className="lg:col-span-2">
           <Logo />
-          <p className="mt-4 max-w-xs text-fg-muted text-sm leading-relaxed">
+          <p className="text-fg-muted mt-4 max-w-xs text-sm leading-relaxed">
             有名テック企業の技術ブログを、AI要約と人気順で効率的にキャッチアップ。
           </p>
         </div>
         {COLUMNS.map((col) => (
           <nav key={col.heading} className="flex flex-col gap-3">
-            <p className="font-semibold text-fg-default text-sm">{col.heading}</p>
+            <p className="text-fg-default text-sm font-semibold">{col.heading}</p>
             {col.links.map((link) => (
               <Link
                 key={link.label}
                 href={link.href}
-                className="text-fg-muted text-sm transition-colors hover:text-fg-default"
+                className="text-fg-muted hover:text-fg-default text-sm transition-colors"
               >
                 {link.label}
               </Link>

@@ -115,7 +115,7 @@ export function UserFeedList({ feeds, limit }: { feeds: UserFeedSetting[]; limit
           placeholder="https://example.com/feed.xml"
           aria-label="RSS / Atom の URL"
           disabled={adding || atLimit}
-          className="h-9 min-w-44 flex-1 rounded-sm border border-border-default bg-bg-surface px-3 text-sm shadow-xs outline-none placeholder:text-fg-subtle focus-visible:ring-2 focus-visible:ring-accent disabled:opacity-60"
+          className="border-border-default bg-bg-surface placeholder:text-fg-subtle focus-visible:ring-accent h-9 min-w-44 flex-1 rounded-sm border px-3 text-sm shadow-xs outline-none focus-visible:ring-2 disabled:opacity-60"
         />
         <Button
           type="submit"
@@ -135,7 +135,7 @@ export function UserFeedList({ feeds, limit }: { feeds: UserFeedSetting[]; limit
       )}
 
       {feeds.length === 0 ? (
-        <p className="py-8 text-center text-fg-muted text-sm">
+        <p className="text-fg-muted py-8 text-center text-sm">
           まだ登録がありません。上の欄に RSS の URL を入力して登録してください。
         </p>
       ) : (
@@ -146,7 +146,7 @@ export function UserFeedList({ feeds, limit }: { feeds: UserFeedSetting[]; limit
             return (
               <li
                 key={feed.id}
-                className={`flex items-center gap-3 rounded-lg border border-border-default bg-bg-surface px-3.5 py-3 shadow-xs ${
+                className={`border-border-default bg-bg-surface flex items-center gap-3 rounded-lg border px-3.5 py-3 shadow-xs ${
                   busy ? 'pointer-events-none opacity-60' : ''
                 }`}
               >
@@ -155,12 +155,12 @@ export function UserFeedList({ feeds, limit }: { feeds: UserFeedSetting[]; limit
                 >
                   <CompanyFavicon url={feed.siteUrl ?? feed.rssUrl} name={feed.title} />
                   <span className="flex min-w-0 flex-col">
-                    <span className="truncate font-medium text-sm">{feed.title}</span>
-                    <span className="truncate text-fg-subtle text-xs" title={feed.rssUrl}>
+                    <span className="truncate text-sm font-medium">{feed.title}</span>
+                    <span className="text-fg-subtle truncate text-xs" title={feed.rssUrl}>
                       {feed.rssUrl}
                     </span>
                     {feed.lastError && (
-                      <span className="truncate text-danger text-xs">
+                      <span className="text-danger truncate text-xs">
                         取得エラー: {feed.lastError}
                       </span>
                     )}
@@ -193,7 +193,7 @@ export function UserFeedList({ feeds, limit }: { feeds: UserFeedSetting[]; limit
                   isDisabled={busy}
                   onPress={() => setPendingDelete(feed)}
                 >
-                  <Trash2 aria-hidden="true" className="size-4 text-danger" />
+                  <Trash2 aria-hidden="true" className="text-danger size-4" />
                 </Button>
               </li>
             );

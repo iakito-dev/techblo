@@ -37,15 +37,15 @@ export const metadata: Metadata = {
 export default function TagsPage() {
   return (
     <div className="min-h-dvh pb-24 lg:pb-12">
-      <Suspense fallback={<div className="h-16 border-border-default border-b bg-bg-surface" />}>
+      <Suspense fallback={<div className="border-border-default bg-bg-surface h-16 border-b" />}>
         <Header />
       </Suspense>
 
       <main className="mx-auto max-w-[84rem] px-4 py-8 md:px-6 lg:px-8">
         <DesktopHomeBar className="mb-8" />
         <header className="mb-8">
-          <h1 className="font-bold text-2xl tracking-tight md:text-3xl">{TITLE}</h1>
-          <p className="mt-3 max-w-2xl text-fg-muted leading-relaxed">{DESCRIPTION}</p>
+          <h1 className="text-2xl font-bold tracking-tight md:text-3xl">{TITLE}</h1>
+          <p className="text-fg-muted mt-3 max-w-2xl leading-relaxed">{DESCRIPTION}</p>
         </header>
 
         <Suspense fallback={<TagsSkeleton />}>
@@ -60,7 +60,7 @@ function TagsSkeleton() {
   return (
     <div className="flex flex-wrap gap-2">
       {Array.from({ length: 24 }, (_, i) => i).map((i) => (
-        <div key={i} className="h-7 w-24 animate-pulse rounded-full bg-bg-surface" />
+        <div key={i} className="bg-bg-surface h-7 w-24 animate-pulse rounded-full" />
       ))}
     </div>
   );
@@ -82,7 +82,7 @@ async function TagSections() {
         ])}
       />
       {all.length === 0 ? (
-        <p className="rounded-xl border border-border-card bg-bg-surface p-8 text-center text-fg-muted">
+        <p className="border-border-card bg-bg-surface text-fg-muted rounded-xl border p-8 text-center">
           まだタグがありません。記事の AI 要約が生成されると、ここに表示されます。
         </p>
       ) : (
@@ -108,16 +108,16 @@ function TagSection({
 }) {
   return (
     <section>
-      <h2 className="mb-4 font-semibold text-fg-default text-lg">
+      <h2 className="text-fg-default mb-4 text-lg font-semibold">
         {heading}
-        <span className="ml-2 font-normal text-fg-subtle text-xs">{note}</span>
+        <span className="text-fg-subtle ml-2 text-xs font-normal">{note}</span>
       </h2>
       <ul className="flex flex-wrap gap-2">
         {tags.map(({ tag, count }) => (
           <li key={tag}>
             <Link
               href={`/?tag=${encodeURIComponent(tag)}`}
-              className="inline-flex items-center gap-1.5 rounded-full border border-border-default px-3 py-1 text-fg-muted text-sm transition-colors hover:border-accent hover:text-accent"
+              className="border-border-default text-fg-muted hover:border-accent hover:text-accent inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-sm transition-colors"
             >
               {tag}
               <span className="text-fg-subtle text-xs tabular-nums">{count}</span>

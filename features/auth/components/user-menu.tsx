@@ -26,7 +26,7 @@ export function UserMenu({ name, email, image, full = false }: Props) {
   const avatar = (
     <Avatar size="sm">
       {image ? <Avatar.Image src={image} alt="" /> : null}
-      <Avatar.Fallback className="bg-bg-inverse font-medium text-fg-inverse text-sm">
+      <Avatar.Fallback className="bg-bg-inverse text-fg-inverse text-sm font-medium">
         {initial}
       </Avatar.Fallback>
     </Avatar>
@@ -42,8 +42,8 @@ export function UserMenu({ name, email, image, full = false }: Props) {
         >
           {avatar}
           <span className="flex min-w-0 flex-col">
-            <span className="truncate font-medium text-sm">{name ?? email}</span>
-            {name && <span className="truncate text-fg-muted text-xs">{email}</span>}
+            <span className="truncate text-sm font-medium">{name ?? email}</span>
+            {name && <span className="text-fg-muted truncate text-xs">{email}</span>}
           </span>
         </Button>
       ) : (
@@ -66,8 +66,8 @@ export function UserMenu({ name, email, image, full = false }: Props) {
         >
           <Dropdown.Section>
             <Header className="flex flex-col gap-0.5 px-3 py-2">
-              {name && <span className="truncate font-medium text-sm">{name}</span>}
-              <span className="truncate text-fg-muted text-xs">{email}</span>
+              {name && <span className="truncate text-sm font-medium">{name}</span>}
+              <span className="text-fg-muted truncate text-xs">{email}</span>
             </Header>
             <Dropdown.Item id="signout" textValue="ログアウト">
               <LogOut className="size-4" />

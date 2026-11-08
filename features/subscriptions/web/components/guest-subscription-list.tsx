@@ -61,18 +61,18 @@ export function GuestSubscriptionList({ companies }: { companies: GuestSubscript
       title={`表示する企業(${enabledCount}/${companies.length})`}
       description="フィードに表示する企業を選びます。非表示にした企業の記事は表示されません。登録すると他の端末にも引き継げます。"
     >
-      <div className="sticky top-16 z-20 -mx-1 bg-bg-app px-1 pt-1 pb-3 lg:top-0">
+      <div className="bg-bg-app sticky top-16 z-20 -mx-1 px-1 pt-1 pb-3 lg:top-0">
         <div className="flex flex-wrap items-center gap-2">
           {/* 検索はモバイルでは出さない(縦1カラムで一覧でき、一括操作を主にするため)。lg+ のみ表示。 */}
           <div className="relative hidden min-w-44 flex-1 lg:block">
-            <Search className="absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-fg-subtle" />
+            <Search className="text-fg-subtle absolute top-1/2 left-2.5 size-4 -translate-y-1/2" />
             <input
               type="search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="企業名で検索"
               aria-label="企業名で検索"
-              className="h-9 w-full rounded-sm border border-border-default bg-bg-surface pr-3 pl-8 text-sm shadow-xs outline-none placeholder:text-fg-subtle focus-visible:ring-2 focus-visible:ring-accent"
+              className="border-border-default bg-bg-surface placeholder:text-fg-subtle focus-visible:ring-accent h-9 w-full rounded-sm border pr-3 pl-8 text-sm shadow-xs outline-none focus-visible:ring-2"
             />
           </div>
           <Button
@@ -80,7 +80,7 @@ export function GuestSubscriptionList({ companies }: { companies: GuestSubscript
             size="sm"
             isDisabled={!ready || enabledCount === companies.length}
             onPress={() => setAllCompanies(true)}
-            className="rounded-sm bg-bg-surface"
+            className="bg-bg-surface rounded-sm"
           >
             すべて表示
           </Button>
@@ -89,7 +89,7 @@ export function GuestSubscriptionList({ companies }: { companies: GuestSubscript
             size="sm"
             isDisabled={!ready || enabledCount === 0}
             onPress={() => setAllCompanies(false)}
-            className="rounded-sm bg-bg-surface"
+            className="bg-bg-surface rounded-sm"
           >
             すべて非表示
           </Button>
@@ -97,7 +97,7 @@ export function GuestSubscriptionList({ companies }: { companies: GuestSubscript
       </div>
 
       {filtered.length === 0 ? (
-        <p className="py-8 text-center text-fg-muted text-sm">該当する企業がありません</p>
+        <p className="text-fg-muted py-8 text-center text-sm">該当する企業がありません</p>
       ) : (
         <ul className="isolate grid grid-cols-1 gap-2.5 md:grid-cols-2">
           {filtered.map((c) => {
@@ -106,7 +106,7 @@ export function GuestSubscriptionList({ companies }: { companies: GuestSubscript
               <li
                 key={c.slug}
                 title={c.siteUrl}
-                className="relative flex items-center gap-3 rounded-lg border border-border-default bg-bg-surface px-3.5 py-3 shadow-xs transition-colors hover:bg-bg-surface-2/60"
+                className="border-border-default bg-bg-surface hover:bg-bg-surface-2/60 relative flex items-center gap-3 rounded-lg border px-3.5 py-3 shadow-xs transition-colors"
               >
                 <button
                   type="button"
@@ -121,7 +121,7 @@ export function GuestSubscriptionList({ companies }: { companies: GuestSubscript
                   }`}
                 >
                   <CompanyFavicon url={c.siteUrl} name={c.name} />
-                  <span className="truncate font-medium text-sm">{c.name}</span>
+                  <span className="truncate text-sm font-medium">{c.name}</span>
                 </span>
                 <span className="relative z-10">
                   <SubscriptionToggle

@@ -24,9 +24,9 @@ export function AuthHeading() {
 
   return (
     <>
-      <h1 className="mt-5 font-bold text-2xl tracking-tight">{title}</h1>
+      <h1 className="mt-5 text-2xl font-bold tracking-tight">{title}</h1>
       {/* CJK を文節境界で折り返す(字面の途中で割れるのを防ぐ)。 */}
-      <p className="mt-1 text-center text-fg-muted text-sm [word-break:auto-phrase]">{subtitle}</p>
+      <p className="text-fg-muted mt-1 text-center text-sm [word-break:auto-phrase]">{subtitle}</p>
     </>
   );
 }

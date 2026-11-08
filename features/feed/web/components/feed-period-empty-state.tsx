@@ -22,13 +22,13 @@ export function FeedPeriodEmptyState({ period }: { period: PopularPeriod }) {
 
   return (
     <div className="flex flex-col items-center justify-center px-6 py-24 text-center">
-      <div className="grid size-16 place-items-center rounded-xl bg-bg-surface-2 text-fg-muted">
+      <div className="bg-bg-surface-2 text-fg-muted grid size-16 place-items-center rounded-xl">
         <CalendarX className="size-8" />
       </div>
-      <p className="mt-5 font-bold text-fg-default text-lg">
+      <p className="text-fg-default mt-5 text-lg font-bold">
         {PERIOD_LABEL[period]}の人気記事はありません
       </p>
-      <p className="mt-2 max-w-xs text-fg-muted text-sm leading-relaxed">
+      <p className="text-fg-muted mt-2 max-w-xs text-sm leading-relaxed">
         この期間に公開された記事が見つかりませんでした。集計期間を広げてみてください。
       </p>
       <Button size="lg" isDisabled={isPending} onPress={() => setPeriod('all')} className="mt-6">
