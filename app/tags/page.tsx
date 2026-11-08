@@ -8,6 +8,7 @@ import { JsonLd } from '@/components/seo/json-ld';
 import { getPopularTags, type TagIndex } from '@/features/feed/web/queries';
 import { breadcrumbJsonLd } from '@/lib/seo';
 import { resolveBaseUrl } from '@/lib/site-url';
+import { isSameTagList } from './same-tag-list';
 
 const TITLE = 'タグから探す';
 const DESCRIPTION =
@@ -87,7 +88,7 @@ async function TagSections() {
         </p>
       ) : (
         <div className="flex flex-col gap-10">
-          {recent.length > 0 && (
+          {recent.length > 0 && !isSameTagList(recent, all) && (
             <TagSection heading="最近よく書かれているタグ" note="直近90日" tags={recent} />
           )}
           <TagSection heading="すべてのタグ" note="全期間" tags={all} />
