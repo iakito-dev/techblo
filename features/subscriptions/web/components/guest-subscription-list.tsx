@@ -5,6 +5,7 @@ import { Search } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { CompanyFavicon } from '@/components/ui/company-favicon';
 import { SettingsSection } from '@/components/ui/settings-section';
+import { matchesCompanyName } from '@/shared/company-name-match';
 import { trackSubscriptionChange } from '../track-subscription';
 import { useGuestSubscriptions } from '../use-guest-subscriptions';
 import { SubscriptionToggle } from './subscription-toggle';
@@ -51,9 +52,7 @@ export function GuestSubscriptionList({ companies }: { companies: GuestSubscript
   }
 
   const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return companies;
-    return companies.filter((c) => c.name.toLowerCase().includes(q));
+    return companies.filter((c) => matchesCompanyName(c.name, query));
   }, [companies, query]);
 
   return (
