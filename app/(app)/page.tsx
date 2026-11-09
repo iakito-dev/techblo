@@ -31,6 +31,7 @@ import {
 import { feedPageTitle } from '@/features/feed/web/feed-page-title';
 import { getCompanyBySlug } from '@/features/feed/web/queries';
 import { FeedNavProvider } from '@/features/feed/web/view-models/feed-nav-context';
+import { firstSearchParams } from '@/features/feed/web/view-models/first-search-param';
 import { organizationJsonLd, websiteJsonLd } from '@/lib/seo';
 import { resolveBaseUrl } from '@/lib/site-url';
 import { MOBILE_GUTTER_CLASS } from '@/shared/layout';
@@ -46,6 +47,9 @@ type FeedSearchParams = {
   /** カテゴリ絞り込み(?category=)。指定時は既定のセクション表示ではなく既存のリスト表示になる(ADR-0034)。 */
   category?: string;
 };
+
+/** Next.js が渡す生の searchParams(キーが繰り返されると配列)。firstSearchParams で FeedSearchParams にする。 */
+type RawSearchParams = { [K in keyof FeedSearchParams]?: string | string[] };
 
 /**
  * ?company= がちょうど 1 社のときだけ企業名を引く(複数選択はタイトルにしない)。
@@ -75,9 +79,9 @@ async function singleCompanyName(param: string | undefined): Promise<string | un
 export async function generateMetadata({
   searchParams,
 }: {
-  searchParams: Promise<FeedSearchParams>;
+  searchParams: Promise<RawSearchParams>;
 }): Promise<Metadata> {
-  const sp = await searchParams;
+  const sp = firstSearchParams(await searchParams);
   const isSearch = !!sp.q?.trim();
   const tag = sp.tag?.trim();
   const companyName = await singleCompanyName(sp.company);
@@ -113,7 +117,7 @@ export async function generateMetadata({
  * 記事グリッドは Suspense でストリーミング。
  * 詳細仕様: docs/features/feed.md
  */
-export default function HomePage({ searchParams }: { searchParams: Promise<FeedSearchParams> }) {
+export default function HomePage({ searchParams }: { searchParams: Promise<RawSearchParams> }) {
   const baseUrl = resolveBaseUrl();
   return (
     <div className="min-h-dvh pb-[calc(var(--mobile-nav-h)+1rem)] lg:pb-12 lg:pl-64">
@@ -261,8 +265,8 @@ async function DefaultToolbar() {
  * getSectionsPageData を叩くため、モバイル分の SubscribedFeed とは別に DB へ問い合わせが走る。
  * 既定状態のみのオーバーヘッドとして許容する)。
  */
-async function FeedBody({ searchParams }: { searchParams: Promise<FeedSearchParams> }) {
-  const sp = await searchParams;
+async function FeedBody({ searchParams }: { searchParams: Promise<RawSearchParams> }) {
+  const sp = firstSearchParams(await searchParams);
   const isDefaultState =
     !sp.sort &&
     !sp.period &&
@@ -306,8 +310,8 @@ async function SectionsFeed() {
   return <FeedSectionsView sections={sections} isGuest={isGuest} />;
 }
 
-async function SubscribedFeed({ searchParams }: { searchParams: Promise<FeedSearchParams> }) {
-  const sp = await searchParams;
+async function SubscribedFeed({ searchParams }: { searchParams: Promise<RawSearchParams> }) {
+  const sp = firstSearchParams(await searchParams);
   const sort = parseFeedSort(sp.sort);
   // period は公開日ウィンドウのフィルタ。sort と直交させ新着順でも適用する(ADR の period×sort 分離)。
   const period: PopularPeriod = parsePeriod(sp.period);
