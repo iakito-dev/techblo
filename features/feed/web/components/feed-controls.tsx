@@ -5,6 +5,7 @@ import { CalendarDays, ChevronDown, ListFilter, Rss } from 'lucide-react';
 import type { Key, ReactNode } from 'react';
 import { useEffect, useMemo, useState } from 'react';
 import { CompanyFavicon } from '@/components/ui/company-favicon';
+import { matchesCompanyName } from '@/shared/company-name-match';
 import type { FeedSort, PopularPeriod } from '../../domain/feed-sort';
 import type { FilterCompany, FilterUserFeed } from '../view-models/feed-filter-options';
 import { useFeedNav } from '../view-models/feed-nav-context';
@@ -271,9 +272,7 @@ function CompanyFilter({
   const [query, setQuery] = useState('');
   const showSearch = companies.length > 8;
   const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return companies;
-    return companies.filter((c) => c.name.toLowerCase().includes(q));
+    return companies.filter((c) => matchesCompanyName(c.name, query));
   }, [companies, query]);
 
   function handleSelectionChange(keys: 'all' | Set<Key>) {

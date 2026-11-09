@@ -4,6 +4,7 @@ import { Check, Search, X } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { CompanyFavicon } from '@/components/ui/company-favicon';
+import { matchesCompanyName } from '@/shared/company-name-match';
 import {
   type FeedSort,
   type PopularPeriod,
@@ -92,8 +93,7 @@ export function FeedFilterSheet({
   }, [open]);
 
   const filteredCompanies = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    const base = q ? companies.filter((c) => c.name.toLowerCase().includes(q)) : companies;
+    const base = companies.filter((c) => matchesCompanyName(c.name, query));
     // 選択中の企業をリスト最上部にピン留めする(選択状態を見失わないため)。
     const selectedSet = new Set(selected);
     return [...base].sort((a, b) => {

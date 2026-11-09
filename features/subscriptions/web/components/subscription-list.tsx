@@ -6,6 +6,7 @@ import { useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { CompanyFavicon } from '@/components/ui/company-favicon';
 import { SettingsSection } from '@/components/ui/settings-section';
+import { matchesCompanyName } from '@/shared/company-name-match';
 import type { CompanyId } from '@/shared/type-utils';
 import type { SubscriptionSetting } from '../../application/dto';
 import { toggleSubscriptionAction } from '../actions';
@@ -36,9 +37,7 @@ export function SubscriptionList({ settings }: { settings: SubscriptionSetting[]
   const enabledCount = settings.filter(isEnabled).length;
 
   const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return settings;
-    return settings.filter((s) => s.name.toLowerCase().includes(q));
+    return settings.filter((s) => matchesCompanyName(s.name, query));
   }, [settings, query]);
 
   function flashSaved(companyId: CompanyId) {
