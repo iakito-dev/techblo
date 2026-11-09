@@ -37,8 +37,11 @@ export const listFeed =
     const page = Math.max(1, Math.floor(input.page ?? 1));
     // NUL(URL の %00)は Postgres が受けず 500 になるので、空白と同じく入力として落とす。
     // 空白のみは「検索なし」に正規化(ListCriteria.query は trim 済み・非空の契約)
+    // NFKC で全角英数(ＲＥＡＣＴ)→半角、半角カナ(ﾚｱｸﾄ)→全角にそろえる。IME が全角入力のままでも
+    // 記事の表記(半角英数・全角カナ)に当たるようにする。長さが変わりうるので切り詰めの前に行う。
     const query =
       stripNul(input.query ?? '')
+        .normalize('NFKC')
         .trim()
         .slice(0, MAX_QUERY_LENGTH) || undefined;
     // タグも空白のみは「絞り込みなし」に正規化(canonical なキュレーション値なので trim のみ)
