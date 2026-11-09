@@ -196,6 +196,14 @@ describe('listFeed', () => {
     expect(listCalls[0]?.query).toBe('React');
   });
 
+  it('query は NFKC で正規化する(全角英数・全角空白は半角、半角カナは全角)', async () => {
+    const { repo, listCalls } = capturingRepo();
+    await listFeed({ articles: repo })({ sort: 'latest', query: '　ＲｅａｃｔＮｅｘｔ．ｊｓ　' });
+    await listFeed({ articles: repo })({ sort: 'latest', query: 'ﾚｱｸﾄ' });
+    expect(listCalls[0]?.query).toBe('ReactNext.js');
+    expect(listCalls[1]?.query).toBe('レアクト');
+  });
+
   it('空白のみの query は undefined に正規化する', async () => {
     const { repo, listCalls } = capturingRepo();
     await listFeed({ articles: repo })({ sort: 'latest', query: '   ' });
