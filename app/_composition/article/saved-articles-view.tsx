@@ -177,14 +177,17 @@ export function SavedArticlesView({
         </div>
       </div>
       {showControls && <SavedSearchInput value={query} onChange={setQuery} />}
-      <div
-        className={`${showControls ? 'mt-3' : '-mt-2'} mb-5 flex items-center justify-between gap-3`}
-      >
-        <p className="text-fg-muted text-sm">
-          {isFiltering ? `${matchedCount}件 / 全${visibleCount}件` : `${visibleCount}件`}
-        </p>
-        {showControls && <SavedSortDropdown sort={sort} onSelect={setSort} />}
-      </div>
+      {/* 0 件のときは下の空状態が同じことを伝えるので件数行(「0件」)は出さない */}
+      {visibleCount > 0 && (
+        <div
+          className={`${showControls ? 'mt-3' : '-mt-2'} mb-5 flex items-center justify-between gap-3`}
+        >
+          <p className="text-fg-muted text-sm">
+            {isFiltering ? `${matchedCount}件 / 全${visibleCount}件` : `${visibleCount}件`}
+          </p>
+          {showControls && <SavedSortDropdown sort={sort} onSelect={setSort} />}
+        </div>
+      )}
 
       {visibleCount === 0 ? (
         <div className="flex flex-col items-center justify-center px-6 py-24 text-center">
