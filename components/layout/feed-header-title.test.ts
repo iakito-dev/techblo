@@ -29,6 +29,29 @@ describe('resolveFeedHeaderTitle', () => {
     expect(resolveFeedHeaderTitle({ sort: 'popular', period: '7d' })).toBe('人気の記事');
   });
 
+  it('企業名が渡されれば企業名を返す(人気順・既読の絞り込みと併用しても)', () => {
+    expect(resolveFeedHeaderTitle({ company: 'acme' }, { companyName: 'ACME' })).toBe('ACME');
+    expect(
+      resolveFeedHeaderTitle({ company: 'acme', sort: 'popular' }, { companyName: 'ACME' }),
+    ).toBe('ACME');
+    expect(
+      resolveFeedHeaderTitle({ company: 'acme', read: 'unread' }, { companyName: 'ACME' }),
+    ).toBe('ACME');
+  });
+
+  it('企業名より category・tag・検索を優先する', () => {
+    const options = { companyName: 'ACME' };
+    expect(resolveFeedHeaderTitle({ company: 'acme', category: 'ai' }, options)).toBe(
+      'AI・機械学習',
+    );
+    expect(resolveFeedHeaderTitle({ company: 'acme', tag: 'Go' }, options)).toBe('#Go');
+    expect(resolveFeedHeaderTitle({ company: 'acme', q: 'nextjs' }, options)).toBe('検索結果');
+  });
+
+  it('企業名が空白のみなら従来どおりの見出しに戻る', () => {
+    expect(resolveFeedHeaderTitle({ company: 'acme' }, { companyName: '  ' })).toBe('フィード');
+  });
+
   it('tag ありは「#タグ名」を返す(前後の空白は除く)', () => {
     expect(resolveFeedHeaderTitle({ tag: '生成AI' })).toBe('#生成AI');
     expect(resolveFeedHeaderTitle({ tag: ' Go ', sort: 'popular' })).toBe('#Go');

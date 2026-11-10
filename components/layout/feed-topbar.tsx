@@ -75,10 +75,13 @@ export function FeedHeader({
   title,
   icon,
   showControls = false,
+  company,
 }: {
   title?: string;
   icon: keyof typeof HEADER_ICONS;
   showControls?: boolean;
+  /** ?company= が 1 社のときの企業(サーバーで slug から名前を引いたもの)。 */
+  company?: { slug: string; name: string };
 }) {
   const searchParams = useSearchParams();
   const params = {
@@ -91,7 +94,9 @@ export function FeedHeader({
     q: searchParams.get('q'),
     tag: searchParams.get('tag'),
   };
-  const resolvedTitle = title ?? resolveFeedHeaderTitle(params);
+  // 遷移中は URL が先に変わりサーバーの company が遅れて届くため、今の URL と slug が一致するときだけ使う。
+  const companyName = company && params.company?.trim() === company.slug ? company.name : undefined;
+  const resolvedTitle = title ?? resolveFeedHeaderTitle(params, { companyName });
   // トップのセクション表示(既定状態)では戻る必要が無いため、リスト表示のときだけ出す。
   const showBackLink = !isFeedDefaultView(params);
   const Icon = HEADER_ICONS[icon];

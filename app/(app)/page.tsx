@@ -55,7 +55,9 @@ type RawSearchParams = { [K in keyof FeedSearchParams]?: string | string[] };
  * ?company= がちょうど 1 社のときだけ企業名を引く(複数選択はタイトルにしない)。
  * タイトルのためだけに失敗してページ全体を落とさないよう、取得失敗・未登録は無視する。
  */
-async function singleCompanyName(param: string | undefined): Promise<string | undefined> {
+async function singleCompany(
+  param: string | undefined,
+): Promise<{ slug: string; name: string } | undefined> {
   const slugs = param
     ?.split(',')
     .map((s) => s.trim())
@@ -63,10 +65,18 @@ async function singleCompanyName(param: string | undefined): Promise<string | un
   const slug = slugs?.length === 1 ? slugs[0] : undefined;
   if (!slug) return undefined;
   try {
-    return (await getCompanyBySlug(slug))?.name;
+    const company = await getCompanyBySlug(slug);
+    return company ? { slug, name: company.name } : undefined;
   } catch {
     return undefined;
   }
+}
+
+/** デスクトップの見出し行。?company= が 1 社なら企業名を見出しにするため、サーバーで名前を引いて渡す。 */
+async function FeedHeading({ searchParams }: { searchParams: Promise<RawSearchParams> }) {
+  const sp = firstSearchParams(await searchParams);
+  const company = await singleCompany(sp.company);
+  return <FeedHeader icon="feed" showControls company={company} />;
 }
 
 /**
@@ -84,7 +94,7 @@ export async function generateMetadata({
   const sp = firstSearchParams(await searchParams);
   const isSearch = !!sp.q?.trim();
   const tag = sp.tag?.trim();
-  const companyName = await singleCompanyName(sp.company);
+  const companyName = (await singleCompany(sp.company))?.name;
   const title = feedPageTitle({
     q: sp.q,
     tag,
@@ -174,7 +184,7 @@ export default function HomePage({ searchParams }: { searchParams: Promise<RawSe
           className={`@container mx-auto max-w-[1680px] ${MOBILE_GUTTER_CLASS} pt-4 md:px-6 md:pt-0 lg:px-8 lg:pt-6`}
         >
           <Suspense fallback={<div className="hidden h-9 lg:block" />}>
-            <FeedHeader icon="feed" showControls />
+            <FeedHeading searchParams={searchParams} />
           </Suspense>
           {/*
             購読/フィルタ/最新DBを反映する動的な FeedBody(既定状態はモバイル=リスト表示 /
