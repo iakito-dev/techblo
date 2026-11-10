@@ -46,10 +46,14 @@ export function isFeedDefaultView(params: FeedHeaderParams): boolean {
  * - ?tag=<label> があれば「#<label>」(category が有効ならそちらが優先)
  * - category 未指定 かつ 他の絞り込みも無く sort=latest だけが指定された「新着一覧」なら「新着」
  * - ?q= があれば「検索結果」
+ * - ?company= が 1 社だけで、呼び出し側がその企業名を解決できていれば企業名
  * - sort=popular のみ(期間の指定は可)なら「人気の記事」
  * - それ以外(既定状態・企業・既読など、または不正な category キー)は「フィード」
  */
-export function resolveFeedHeaderTitle(params: FeedHeaderParams): string {
+export function resolveFeedHeaderTitle(
+  params: FeedHeaderParams,
+  options: { companyName?: string } = {},
+): string {
   const rawCategory = params.category?.trim();
   if (rawCategory) {
     if (isArticleCategory(rawCategory)) return getCategoryDefinition(rawCategory).label;
@@ -63,6 +67,11 @@ export function resolveFeedHeaderTitle(params: FeedHeaderParams): string {
 
   // 検索中は「検索結果」(タブタイトル feedPageTitle と揃える。検索語は検索ボックスに出ているので省く)。
   if (nonEmpty(params.q)) return '検索結果';
+
+  // 企業で絞った一覧は企業名(企業ページ廃止後はここが企業別の一覧の入口。ADR-0048)。
+  // slug しか URL に無いため、名前は呼び出し側がサーバーで引いて渡す。
+  const companyName = options.companyName?.trim();
+  if (companyName) return companyName;
 
   if (!hasOtherFilter(params) && params.sort?.trim() === 'latest') {
     return '新着';
