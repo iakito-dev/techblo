@@ -14,6 +14,14 @@ function zennPublicationSlug(pathname: string): string | null {
   return slug ?? null;
 }
 
+/**
+ * 読み込みが終わった(complete)のに画素が無い = 失敗済み。
+ * 遅延読み込みでまだ取得していない画像は complete が false なので対象外(後で onError が来る)。
+ */
+export function hasFailedToLoad(img: Pick<HTMLImageElement, 'complete' | 'naturalWidth'>): boolean {
+  return img.complete && img.naturalWidth === 0;
+}
+
 /** 表示サイズ別のクラス。Tailwind は動的なクラス名を検出できないため静的に持つ。 */
 const SIZE_CLASS = {
   16: { box: 'size-4', text: 'text-[0.5625rem]' },
@@ -45,6 +53,12 @@ export function CompanyFavicon({
 }) {
   const { box, text } = SIZE_CLASS[size];
   const [failed, setFailed] = useState(false);
+  // SSR された <img> がハイドレーション前に読み込み失敗すると、onError は React が
+  // 付ける前に発火済みで二度と来ない(サイドバーのような above the fold の画像で起きやすい)。
+  // 取り付け時に「読み込み完了なのに画素が無い」= 失敗済みを拾って頭文字に落とす。
+  const detectEarlyError = (img: HTMLImageElement | null) => {
+    if (img && hasFailedToLoad(img)) setFailed(true);
+  };
   let domain: string | null = null;
   let src: string | null = null;
   try {
@@ -77,6 +91,7 @@ export function CompanyFavicon({
       height={size}
       loading="lazy"
       referrerPolicy="no-referrer"
+      ref={detectEarlyError}
       onError={() => setFailed(true)}
       // 白背景ロゴ対策: 薄グレー地 + 極薄リングで「ロゴタイル」として輪郭を出す
       className={`${box} bg-bg-surface-2 ring-border-card shrink-0 rounded-sm ring-1`}
