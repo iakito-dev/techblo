@@ -69,11 +69,14 @@ export function ReadingHistoryView({
       {showControls && (
         <SavedSearchInput value={query} onChange={setQuery} ariaLabel="閲覧履歴を絞り込む" />
       )}
-      <p className={`${showControls ? 'mt-3' : '-mt-2'} text-fg-muted mb-5 text-sm`}>
-        {isFiltering
-          ? `${filtered.length}件 / 全${articles.length}件`
-          : `最近読んだ${articles.length}件`}
-      </p>
+      {/* 0 件のときは下の空状態が同じことを伝えるので件数(「最近読んだ0件」)は出さない */}
+      {articles.length > 0 && (
+        <p className={`${showControls ? 'mt-3' : '-mt-2'} text-fg-muted mb-5 text-sm`}>
+          {isFiltering
+            ? `${filtered.length}件 / 全${articles.length}件`
+            : `最近読んだ${articles.length}件`}
+        </p>
+      )}
 
       {articles.length === 0 ? (
         <div className="flex flex-col items-center justify-center px-6 py-24 text-center">
