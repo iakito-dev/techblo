@@ -18,7 +18,7 @@ export default function SettingsSupportPage() {
     <SettingsFrame>
       <SettingsDesktop className="hidden lg:block" />
       <div className="lg:hidden" data-swipe-nav-ignore>
-        <SettingsBackLink />
+        <SettingsBackLink title="サポート" />
         <SupportSettings />
       </div>
     </SettingsFrame>
