@@ -78,7 +78,10 @@ export default function TermsPage() {
       <LegalSection heading="8. お問い合わせ">
         <p>
           本規約に関するお問い合わせは{' '}
-          <a href={`mailto:${CONTACT_EMAIL}`} className="text-accent hover:underline">
+          <a
+            href={`mailto:${CONTACT_EMAIL}`}
+            className="text-accent underline underline-offset-4 hover:decoration-2"
+          >
             {CONTACT_EMAIL}
           </a>{' '}
           までお願いします。
