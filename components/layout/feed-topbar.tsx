@@ -101,23 +101,30 @@ export function FeedHeader({
   const showBackLink = !isFeedDefaultView(params);
   const Icon = HEADER_ICONS[icon];
   return (
-    <div className="mb-5 hidden flex-col gap-1 lg:flex">
-      {showBackLink && (
-        <Link
-          href="/"
-          className="text-fg-muted hover:text-fg-default w-fit text-xs transition-colors"
-        >
-          ← トップ
-        </Link>
-      )}
-      <div className="flex items-center justify-between gap-3">
-        <h1 className="text-fg-default flex items-center gap-2 text-xl font-bold tracking-tight">
-          <Icon className="text-fg-muted size-5" />
-          {resolvedTitle}
-        </h1>
-        {showControls && <SortControl />}
+    <>
+      {/*
+        見える見出し行は lg+ だけ。<lg はページに h1 が 1 つも無くなり、スクリーンリーダーの
+        見出しジャンプで「今どの一覧か」(検索結果・#タグ・企業名など)が分からないため、同じ文言を sr-only で置く。
+      */}
+      <h1 className="sr-only lg:hidden">{resolvedTitle}</h1>
+      <div className="mb-5 hidden flex-col gap-1 lg:flex">
+        {showBackLink && (
+          <Link
+            href="/"
+            className="text-fg-muted hover:text-fg-default w-fit text-xs transition-colors"
+          >
+            ← トップ
+          </Link>
+        )}
+        <div className="flex items-center justify-between gap-3">
+          <h1 className="text-fg-default flex items-center gap-2 text-xl font-bold tracking-tight">
+            <Icon className="text-fg-muted size-5" />
+            {resolvedTitle}
+          </h1>
+          {showControls && <SortControl />}
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 
