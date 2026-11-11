@@ -18,7 +18,10 @@ export function Sidebar() {
   return (
     <Suspense
       fallback={
-        <aside className="border-border-default bg-bg-surface/80 fixed inset-y-0 left-0 z-20 hidden w-64 border-r lg:block" />
+        <aside
+          aria-label="サイドバー"
+          className="border-border-default bg-bg-surface/80 fixed inset-y-0 left-0 z-20 hidden w-64 border-r lg:block"
+        />
       }
     >
       <SidebarContent />
