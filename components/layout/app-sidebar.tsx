@@ -100,7 +100,11 @@ export function AppSidebar({
   }, [onFeed, activeCategory]);
 
   return (
-    <aside className="border-border-default bg-bg-app fixed inset-y-0 left-0 z-20 hidden w-64 flex-col border-r lg:flex">
+    // 記事ページの関連記事・設定の目次も <aside> なので、名前が無いとランドマーク一覧で見分けられない。
+    <aside
+      aria-label="サイドバー"
+      className="border-border-default bg-bg-app fixed inset-y-0 left-0 z-20 hidden w-64 flex-col border-r lg:flex"
+    >
       {/* 上部: ロゴ */}
       <div className="flex h-16 shrink-0 items-center px-4">
         <Logo showOrigin />
