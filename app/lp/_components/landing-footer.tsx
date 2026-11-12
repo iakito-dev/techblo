@@ -39,8 +39,15 @@ export function LandingFooter() {
           </p>
         </div>
         {COLUMNS.map((col) => (
-          <nav key={col.heading} className="flex flex-col gap-3">
-            <p className="text-fg-default text-sm font-semibold">{col.heading}</p>
+          // ナビが 4 つ(上部 + フッター 3 列)並ぶため、列見出しを名前にしてランドマークを区別する
+          <nav
+            key={col.heading}
+            aria-labelledby={`lp-footer-${col.heading}`}
+            className="flex flex-col gap-3"
+          >
+            <p id={`lp-footer-${col.heading}`} className="text-fg-default text-sm font-semibold">
+              {col.heading}
+            </p>
             {col.links.map((link) => (
               <Link
                 key={link.label}
