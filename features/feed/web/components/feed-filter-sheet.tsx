@@ -14,6 +14,7 @@ import {
   type ReadFilterMode,
 } from '../../domain/feed-sort';
 import type { FilterCompany, FilterUserFeed } from '../view-models/feed-filter-options';
+import { buildFeedHref, feedFiltersPatch } from '../view-models/feed-href';
 import { useFeedNav } from '../view-models/feed-nav-context';
 import { parseListParam } from '../view-models/parse-list-param';
 import { FeedBottomSheet } from './feed-bottom-sheet';
@@ -148,21 +149,17 @@ export function FeedFilterSheet({
   }
 
   function apply() {
-    const sp = new URLSearchParams(params);
-    // latest は既定値なので URL から消してきれいに保つ(useFeedSort.hrefFor と同じ規則)。
-    if (sort === 'latest') sp.delete('sort');
-    else sp.set('sort', sort);
-    if (read === 'all') sp.delete('read');
-    else sp.set('read', read);
-    if (period === 'all') sp.delete('period');
-    else sp.set('period', period);
-    if (selected.length === 0) sp.delete('company');
-    else sp.set('company', selected.join(','));
-    if (selectedFeeds.length === 0) sp.delete('feed');
-    else sp.set('feed', selectedFeeds.join(','));
-    sp.delete('page');
-    const qs = sp.toString();
-    navigate(qs ? `/?${qs}` : '/');
+    navigate(
+      buildFeedHref(params, {
+        sort: sort === 'latest' ? null : sort,
+        ...feedFiltersPatch({
+          status: read,
+          period,
+          companies: selected,
+          userFeeds: selectedFeeds,
+        }),
+      }),
+    );
     onOpenChange(false);
   }
 
