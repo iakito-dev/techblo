@@ -15,6 +15,7 @@ import {
 } from '../view-models/category-tabs';
 import type { FilterCompany, FilterUserFeed } from '../view-models/feed-filter-options';
 import { useFeedNav } from '../view-models/feed-nav-context';
+import { pickKnownSelections } from '../view-models/known-selections';
 import { useFeedFilters } from '../view-models/use-feed-filters';
 import { useFeedSearch } from '../view-models/use-feed-search';
 import { useFeedSort } from '../view-models/use-feed-sort';
@@ -96,6 +97,19 @@ export function MobileFeedControls({
   const params = useSearchParams();
   const category = parseCategoryTab(params.get('category'));
   const [filterOpen, setFilterOpen] = useState(false);
+  // サーバーが無視する未知・購読外の企業 / マイフィードはチップにもバッジの数にも出さない
+  const knownCompanySlugs = pickKnownSelections(
+    companySlugs,
+    companies.map((c) => c.slug),
+  );
+  const knownFeedIds = pickKnownSelections(
+    feedIds,
+    userFeeds.map((f) => f.id),
+  );
+  const shownActiveCount =
+    activeCount -
+    (companySlugs.length - knownCompanySlugs.length) -
+    (feedIds.length - knownFeedIds.length);
 
   return (
     <>
@@ -106,11 +120,11 @@ export function MobileFeedControls({
         category={category}
         status={status}
         period={period}
-        companySlugs={companySlugs}
-        feedIds={feedIds}
+        companySlugs={knownCompanySlugs}
+        feedIds={knownFeedIds}
         tag={tag}
         sort={sort}
-        activeCount={activeCount}
+        activeCount={shownActiveCount}
         onOpenFilter={() => setFilterOpen(true)}
         onRemoveStatus={() => setStatus('all')}
         onRemovePeriod={() => setPeriod('all')}
