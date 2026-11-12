@@ -17,7 +17,8 @@ export function FeedSearchEmptyState({ query }: { query: string }) {
       <div className="bg-bg-surface-2 text-fg-muted grid size-16 place-items-center rounded-xl">
         <SearchX className="size-8" />
       </div>
-      <p className="text-fg-default mt-5 text-lg font-bold">
+      {/* URL など空白の無い長い語は折り返し点が無く画面外へはみ出すため、どこでも折れるようにする */}
+      <p className="text-fg-default mt-5 max-w-full text-lg font-bold wrap-anywhere">
         「{query}」に一致する記事はありません
       </p>
       <p className="text-fg-muted mt-2 max-w-xs text-sm leading-relaxed">
