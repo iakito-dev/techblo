@@ -8,6 +8,7 @@ import {
   parseReadMode,
   type ReadFilterMode,
 } from '../../domain/feed-sort';
+import { buildFeedHref, feedFiltersPatch } from './feed-href';
 import { useFeedNav } from './feed-nav-context';
 import { parseListParam } from './parse-list-param';
 
@@ -65,22 +66,8 @@ export function useFeedFilters(): FeedFilters & {
   // フィルタを変えると対象集合が変わるので page は常にリセットする(FeedList が URL 変化を検知。ADR-0016)。
   const apply = useCallback(
     (next: Partial<FeedFilters>) => {
-      const s = next.status ?? status;
-      const p = next.period ?? period;
-      const c = next.companies ?? companies;
-      const f = next.userFeeds ?? userFeeds;
-      const sp = new URLSearchParams(params);
-      if (s === 'all') sp.delete('read');
-      else sp.set('read', s);
-      if (p === 'all') sp.delete('period');
-      else sp.set('period', p);
-      if (c.length === 0) sp.delete('company');
-      else sp.set('company', c.join(','));
-      if (f.length === 0) sp.delete('feed');
-      else sp.set('feed', f.join(','));
-      sp.delete('page');
-      const qs = sp.toString();
-      navigate(qs ? `/?${qs}` : '/');
+      const patch = feedFiltersPatch({ status, period, companies, userFeeds, ...next });
+      navigate(buildFeedHref(params, patch));
     },
     [params, status, period, companies, userFeeds, navigate],
   );
@@ -117,11 +104,7 @@ export function useFeedFilters(): FeedFilters & {
   );
 
   const removeTag = useCallback(() => {
-    const sp = new URLSearchParams(params);
-    sp.delete('tag');
-    sp.delete('page');
-    const qs = sp.toString();
-    navigate(qs ? `/?${qs}` : '/');
+    navigate(buildFeedHref(params, { tag: null }));
   }, [params, navigate]);
 
   return {
