@@ -170,9 +170,10 @@ export function FauxArticleCard({
           <HatenaBadge count={article.hatena} />
         </span>
       </div>
-      <h3 className="text-fg-default text-[0.9375rem] leading-snug font-bold tracking-tight">
+      {/* 架空記事のタイトルを見出しにすると、見出しジャンプで LP の章立てに紛れ込む(h1 直後の h3 にもなる) */}
+      <p className="text-fg-default text-[0.9375rem] leading-snug font-bold tracking-tight">
         {article.title}
-      </h3>
+      </p>
       <p className="text-fg-muted line-clamp-2 text-xs leading-relaxed">{article.excerpt}</p>
       <div className="text-fg-faint mt-1 flex items-center gap-1.5">
         <span className="border-border-default grid size-7 place-items-center rounded-md border">
