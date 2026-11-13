@@ -99,6 +99,9 @@ export async function generateMetadata({
     q: sp.q,
     tag,
     company: companyName,
+    category: sp.category,
+    read: sp.read,
+    feed: sp.feed,
     sort: parseFeedSort(sp.sort),
   });
   return {

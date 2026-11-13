@@ -15,6 +15,11 @@ export type FeedHeaderParams = {
   tag?: string | null;
 };
 
+const READ_TITLES: Record<string, string | undefined> = {
+  unread: '未読の記事',
+  read: '既読の記事',
+};
+
 const nonEmpty = (value: string | null | undefined): boolean => !!value?.trim();
 
 /**
@@ -47,8 +52,9 @@ export function isFeedDefaultView(params: FeedHeaderParams): boolean {
  * - category 未指定 かつ 他の絞り込みも無く sort=latest だけが指定された「新着一覧」なら「新着」
  * - ?q= があれば「検索結果」
  * - ?company= が 1 社だけで、呼び出し側がその企業名を解決できていれば企業名
+ * - ?read=unread / ?read=read なら「未読の記事」/「既読の記事」(マイフィード ?feed= で絞っているときは除く)
  * - sort=popular のみ(期間の指定は可)なら「人気の記事」
- * - それ以外(既定状態・企業・既読など、または不正な category キー)は「フィード」
+ * - それ以外(既定状態・企業名を解決できない企業・マイフィードなど、または不正な category キー)は「フィード」
  */
 export function resolveFeedHeaderTitle(
   params: FeedHeaderParams,
@@ -72,6 +78,12 @@ export function resolveFeedHeaderTitle(
   // slug しか URL に無いため、名前は呼び出し側がサーバーで引いて渡す。
   const companyName = options.companyName?.trim();
   if (companyName) return companyName;
+
+  // 未読/既読で絞った一覧。サイドバーで選んだ状態と見出しが食い違わないようにする
+  // (以前は「フィード」のままで、全件を見ているのか未読だけなのか見出しから分からなかった)。
+  // 値の解釈は parseReadMode と同じく 'unread' / 'read' 以外は無視する。
+  const readMode = READ_TITLES[params.read?.trim() ?? ''];
+  if (readMode && !nonEmpty(params.feed)) return readMode;
 
   if (!hasOtherFilter(params) && params.sort?.trim() === 'latest') {
     return '新着';
