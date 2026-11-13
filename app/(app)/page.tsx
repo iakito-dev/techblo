@@ -20,6 +20,7 @@ import {
 } from '@/features/feed/domain/feed-sort';
 import { DefaultFeedControls, FeedControls } from '@/features/feed/web/components/feed-controls';
 import { FeedEmptyState } from '@/features/feed/web/components/feed-empty-state';
+import { FeedFilterEmptyState } from '@/features/feed/web/components/feed-filter-empty-state';
 import { FeedGridSkeleton } from '@/features/feed/web/components/feed-grid';
 import { FeedPeriodEmptyState } from '@/features/feed/web/components/feed-period-empty-state';
 import { FeedSearchEmptyState } from '@/features/feed/web/components/feed-search-empty-state';
@@ -376,6 +377,10 @@ async function SubscribedFeed({ searchParams }: { searchParams: Promise<RawSearc
     // 検索 0 件は「記事がまだ無い」「期間が狭い」より優先(クリアを主導線にする。ADR-0022)
     if (query) {
       return <FeedSearchEmptyState query={query} />;
+    }
+    // タグ・カテゴリ・企業・マイフィード・既読状態での絞り込み 0 件は「記事がまだ無い」ではなく解除導線。
+    if (tag || category || companySlugs?.length || feedIds?.length || readMode !== 'all') {
+      return <FeedFilterEmptyState />;
     }
     // 人気順で狭い期間(今日/今週/今月)に該当 0 件 → 取得を促すのではなく期間を広げる導線。
     if (sort === 'popular' && period !== 'all') {
