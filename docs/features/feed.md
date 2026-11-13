@@ -259,4 +259,4 @@ PostHog のイベント(一覧と規約は [observability.md §4](../architectur
 - item の `link` は元記事 URL(元ブログへの送客を優先)、`guid`(isPermaLink=false)は Techblo の記事ページ URL。`dc:creator` と `source` は企業名、`category` は AI要約タグ、`description` は AI要約 overview を優先し、無ければ RSS 抜粋。
 - 合成は app 層(`app/_feed/public-feed.ts`)。XML 生成は `lib/rss/build-feed-xml.ts`(純粋関数、エスケープ・制御文字除去)。
 - `Cache-Control: public, s-maxage=600, stale-while-revalidate=3600`。データは `getFeed`(feed タグで無効化)を再利用。失敗時は 500 + `logger.error`。
-- ルートレイアウトの `alternates.types` で `/feed.xml` を自動検出用に宣言する。`/?tag=` 表示中は `app/(app)/page.tsx` の metadata がタグ別フィードも併記する。
+- ルートレイアウトの `alternates.types` で `/feed.xml` を自動検出用に宣言する。絞り込み中は `app/(app)/page.tsx` の metadata がその一覧のフィードも併記する(`app/_feed/feed-alternates.ts`): `/?tag=` / `/?category=` は `/feed.xml?category=&tag=`(併用時は 1 本にまとめる。不正なカテゴリキーは無視)、`/?company=<slug>`(1 社に解決できたとき)は `/companies/<slug>/feed.xml`。並びは一覧に近いフィードが先、全体フィードが最後。以前はタグだけで、企業・カテゴリで絞った一覧からは専用フィードを自動検出できなかった
