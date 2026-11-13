@@ -32,13 +32,17 @@ export function LegalShell({
       >
         <DesktopHomeBar className="mb-8" />
         <header className="mb-8">
-          <h1 className="text-2xl font-bold tracking-tight md:text-3xl">{title}</h1>
+          <h1 className="text-2xl font-bold tracking-tight [word-break:auto-phrase] md:text-3xl">
+            {title}
+          </h1>
           {lastUpdated && <p className="text-fg-muted mt-2 text-sm">最終更新日: {lastUpdated}</p>}
         </header>
 
-        <div className="text-fg-secondary flex flex-col gap-8 leading-relaxed [word-break:auto-phrase]">
-          {children}
-        </div>
+        {/*
+          本文に word-break:auto-phrase を掛けると、長い段落は文節の途中で折れない代わりに
+          行末に大きな空きが残り、モバイルでは右端がガタガタに見える。文節折り返しは短い見出しだけに使う。
+        */}
+        <div className="text-fg-secondary flex flex-col gap-8 leading-relaxed">{children}</div>
 
         <nav className="border-border-default text-fg-muted mt-12 flex flex-wrap gap-x-6 gap-y-2 border-t pt-6 text-sm">
           <Link href="/privacy" className="hover:text-fg-default transition-colors">
@@ -67,7 +71,7 @@ export function LegalSection({
 }) {
   return (
     <section className="flex flex-col gap-3">
-      <h2 className="text-fg-default text-lg font-semibold">{heading}</h2>
+      <h2 className="text-fg-default text-lg font-semibold [word-break:auto-phrase]">{heading}</h2>
       {children}
     </section>
   );
