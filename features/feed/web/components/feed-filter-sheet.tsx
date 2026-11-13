@@ -17,6 +17,7 @@ import type { FilterCompany, FilterUserFeed } from '../view-models/feed-filter-o
 import { buildFeedHref, feedFiltersPatch } from '../view-models/feed-href';
 import { useFeedNav } from '../view-models/feed-nav-context';
 import { parseListParam } from '../view-models/parse-list-param';
+import { periodOptions } from '../view-models/period-labels';
 import { FeedBottomSheet } from './feed-bottom-sheet';
 
 const READ_OPTIONS: { value: ReadFilterMode; label: string }[] = [
@@ -25,13 +26,8 @@ const READ_OPTIONS: { value: ReadFilterMode; label: string }[] = [
   { value: 'read', label: '既読' },
 ];
 
-// 仕様の表記(24時間/週間/月間)に合わせる。値は既存の PopularPeriod を維持。
-const PERIOD_OPTIONS: { value: PopularPeriod; label: string }[] = [
-  { value: 'all', label: '全期間' },
-  { value: 'today', label: '24時間' },
-  { value: 'week', label: '週間' },
-  { value: 'month', label: '月間' },
-];
+// 表記は全画面で period-labels.ts に揃える。シートは「全期間」を先頭に置く。
+const PERIOD_OPTIONS = periodOptions(['all', 'today', 'week', 'month']);
 
 const SORT_OPTIONS: { value: FeedSort; label: string }[] = [
   { value: 'latest', label: '新着順' },

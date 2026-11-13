@@ -16,6 +16,7 @@ import {
 import type { FilterCompany, FilterUserFeed } from '../view-models/feed-filter-options';
 import { useFeedNav } from '../view-models/feed-nav-context';
 import { pickKnownSelections } from '../view-models/known-selections';
+import { PERIOD_WITHIN_LABEL } from '../view-models/period-labels';
 import { useFeedFilters } from '../view-models/use-feed-filters';
 import { useFeedSearch } from '../view-models/use-feed-search';
 import { useFeedSort } from '../view-models/use-feed-sort';
@@ -25,11 +26,6 @@ import { FeedFilterSheet } from './feed-filter-sheet';
 const STATUS_CHIP: Record<Exclude<ReadFilterMode, 'all'>, string> = {
   unread: '未読のみ',
   read: '既読のみ',
-};
-const PERIOD_CHIP: Record<Exclude<PopularPeriod, 'all'>, string> = {
-  today: '24時間以内',
-  week: '今週以内',
-  month: '今月以内',
 };
 
 type MobileFeedHeaderViewProps = {
@@ -258,7 +254,7 @@ function MobileFeedHeaderView({
             <RemovableChip label={STATUS_CHIP[status]} onRemove={onRemoveStatus} />
           )}
           {period !== 'all' && (
-            <RemovableChip label={PERIOD_CHIP[period]} onRemove={onRemovePeriod} />
+            <RemovableChip label={PERIOD_WITHIN_LABEL[period]} onRemove={onRemovePeriod} />
           )}
           {companySlugs.map((slug) => (
             <RemovableChip
