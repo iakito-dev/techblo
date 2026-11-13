@@ -16,17 +16,13 @@ import {
   DefaultFeedSearchBox,
   FeedSearchBox,
 } from '@/features/feed/web/components/feed-search-box';
+import { periodOptions } from '@/features/feed/web/view-models/period-labels';
 import { useFeedPeriod } from '@/features/feed/web/view-models/use-feed-period';
 import { useFeedSort } from '@/features/feed/web/view-models/use-feed-sort';
 import { cn } from '@/shared/utils';
 import { isFeedDefaultView, resolveFeedHeaderTitle } from './feed-header-title';
 
-const PERIOD_OPTIONS: { value: PopularPeriod; label: string }[] = [
-  { value: 'today', label: '今日' },
-  { value: 'week', label: '今週' },
-  { value: 'month', label: '今月' },
-  { value: 'all', label: '全期間' },
-];
+const PERIOD_OPTIONS = periodOptions(['today', 'week', 'month', 'all']);
 
 /**
  * デスクトップ(lg+)の上部バー。サイドバーのロゴ帯(h-16)と高さを揃えた sticky ヘッダー。
@@ -191,8 +187,8 @@ function SortControl() {
               <span aria-hidden="true" className="text-fg-faint">
                 ・
               </span>
-              {/* 最長ラベル「全期間」(3字)で幅を固定し、期間切替でチップ幅が動かないようにする */}
-              <span className="w-[3em] shrink-0 text-center">{periodLabel}</span>
+              {/* 最長ラベル「24時間」(数字 2 + 漢字 2 で約 3.3em)で幅を固定し、期間切替でチップ幅が動かないようにする */}
+              <span className="w-[3.5em] shrink-0 text-center">{periodLabel}</span>
               <ChevronDown aria-hidden="true" className="text-fg-faint size-3.5" />
             </HeroButton>
             <Dropdown.Popover className="w-36 rounded-sm">

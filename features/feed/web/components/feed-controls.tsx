@@ -9,6 +9,7 @@ import { matchesCompanyName } from '@/shared/company-name-match';
 import type { FeedSort, PopularPeriod } from '../../domain/feed-sort';
 import type { FilterCompany, FilterUserFeed } from '../view-models/feed-filter-options';
 import { useFeedNav } from '../view-models/feed-nav-context';
+import { periodOptions } from '../view-models/period-labels';
 import { useFeedCompany } from '../view-models/use-feed-company';
 import { useFeedFilters } from '../view-models/use-feed-filters';
 import { useFeedPeriod } from '../view-models/use-feed-period';
@@ -16,12 +17,7 @@ import { useFeedSort } from '../view-models/use-feed-sort';
 import { RemovableChip } from './feed-chip';
 import { DefaultFeedSearchBox, FeedSearchBox } from './feed-search-box';
 
-const PERIOD_OPTIONS: { value: PopularPeriod; label: string }[] = [
-  { value: 'today', label: '今日' },
-  { value: 'week', label: '今週' },
-  { value: 'month', label: '今月' },
-  { value: 'all', label: '全期間' },
-];
+const PERIOD_OPTIONS = periodOptions(['today', 'week', 'month', 'all']);
 
 const SORT_OPTIONS: { value: FeedSort; label: string; formLabel: string }[] = [
   { value: 'latest', label: '新着', formLabel: '新着順' },
