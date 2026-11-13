@@ -10,6 +10,7 @@ import {
   getSectionsPageData,
 } from '@/app/_composition/article/feed-load-more';
 import { FeedSectionsView } from '@/app/_composition/article/feed-sections-view';
+import { feedAlternateLinks } from '@/app/_feed/feed-alternates';
 import { FeedHeader, FeedTopbar } from '@/components/layout/feed-topbar';
 import { JsonLd } from '@/components/seo/json-ld';
 import {
@@ -94,7 +95,8 @@ export async function generateMetadata({
   const sp = firstSearchParams(await searchParams);
   const isSearch = !!sp.q?.trim();
   const tag = sp.tag?.trim();
-  const companyName = (await singleCompany(sp.company))?.name;
+  const company = await singleCompany(sp.company);
+  const companyName = company?.name;
   const title = feedPageTitle({
     q: sp.q,
     tag,
@@ -109,14 +111,9 @@ export async function generateMetadata({
     alternates: {
       canonical: '/',
       // alternates はルートレイアウトのものを浅く上書きするので、全体フィードも併記する。
-      // タグ絞り込み中は RSS リーダーの自動検出でそのタグのフィードも見つかるようにする(ADR-0039)。
+      // タグ・カテゴリ・企業で絞り込み中は、RSS リーダーの自動検出でその一覧のフィードも見つかるようにする(ADR-0039)。
       types: {
-        'application/rss+xml': [
-          ...(tag
-            ? [{ url: `/feed.xml?tag=${encodeURIComponent(tag)}`, title: `#${tag} の新着` }]
-            : []),
-          { url: '/feed.xml', title: 'テクブロ 新着' },
-        ],
+        'application/rss+xml': feedAlternateLinks({ tag, category: sp.category, company }),
       },
     },
     ...(isSearch ? { robots: { index: false, follow: true } } : {}),
