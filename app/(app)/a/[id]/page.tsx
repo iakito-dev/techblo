@@ -193,12 +193,15 @@ async function ArticleContent({ params }: { params: Promise<{ id: string }> }) {
         {/* 見出し行: カードと同じ「ファビコン 20px + 企業名 11.5px 太字 / 右端に相対日時」。
           企業名はその企業で絞り込んだフィードへのリンク(下線は hover 時だけ。常時下線だとカードの見出し行と
           見た目が変わる)。著者は記事ページにしか無い情報で、企業名より従属的なので
-          企業名の後ろに通常ウェイト・muted で添える。 */}
+          企業名の後ろに通常ウェイト・muted で添える。
+          企業名リンクは 11.5px の 1 行で高さ 17px しかなく、タップ目標の最小 24px(WCAG 2.5.8)に届かない。
+          py + 同量の負マージンで当たり判定だけ上下に広げる(行の高さ・見た目は不変)。truncate の
+          overflow:hidden が ::before を切るため、カードのタグのような疑似要素ではなく padding で広げる。 */}
         <div className="text-fg-default mb-3 flex items-center gap-[7px] text-[11.5px] font-semibold">
           <CompanyFavicon url={article.url} name={article.company.name} size={20} />
           <Link
             href={`/?company=${encodeURIComponent(article.company.slug)}`}
-            className="hover:text-accent min-w-0 truncate transition-colors hover:underline hover:decoration-[1.5px] hover:underline-offset-4"
+            className="hover:text-accent -my-2 min-w-0 truncate py-2 transition-colors hover:underline hover:decoration-[1.5px] hover:underline-offset-4"
           >
             {article.company.name}
           </Link>
