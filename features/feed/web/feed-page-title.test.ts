@@ -30,6 +30,28 @@ describe('feedPageTitle', () => {
     expect(feedPageTitle({ company: 'mercari', sort: 'popular' })).toBe('mercari の記事');
   });
 
+  it('カテゴリは「表示名 の記事」にする(不正なキーは無視)', () => {
+    expect(feedPageTitle({ category: 'ai' })).toBe('AI・機械学習 の記事');
+    expect(feedPageTitle({ category: 'ai', sort: 'popular' })).toBe('AI・機械学習 の記事');
+    expect(feedPageTitle({ category: 'not-a-category' })).toBeUndefined();
+  });
+
+  it('未読/既読は「未読の記事」/「既読の記事」にする(all・不正な値は無視)', () => {
+    expect(feedPageTitle({ read: 'unread' })).toBe('未読の記事');
+    expect(feedPageTitle({ read: 'read', sort: 'popular' })).toBe('既読の記事');
+    expect(feedPageTitle({ read: 'all' })).toBeUndefined();
+    expect(feedPageTitle({ read: 'bogus' })).toBeUndefined();
+    // マイフィードで絞っているときは見出し(「フィード」)と揃えて既定タイトルのまま
+    expect(feedPageTitle({ read: 'unread', feed: 'f1' })).toBeUndefined();
+  });
+
+  it('検索・タグ・企業はカテゴリ・未読/既読より優先する', () => {
+    expect(feedPageTitle({ q: 'go', read: 'unread' })).toBe('「go」の検索結果');
+    expect(feedPageTitle({ tag: 'SRE', category: 'ai' })).toBe('#SRE の記事');
+    expect(feedPageTitle({ company: 'mercari', read: 'unread' })).toBe('mercari の記事');
+    expect(feedPageTitle({ category: 'ai', read: 'unread' })).toBe('AI・機械学習 の記事');
+  });
+
   it('人気順でも検索・タグがあればそちらを優先する', () => {
     expect(feedPageTitle({ q: 'go', sort: 'popular' })).toBe('「go」の検索結果');
     expect(feedPageTitle({ tag: 'SRE', sort: 'popular' })).toBe('#SRE の記事');
