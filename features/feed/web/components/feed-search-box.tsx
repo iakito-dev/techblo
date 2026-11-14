@@ -157,8 +157,8 @@ function SearchBoxView({
         data-feed-search
         type="search"
         value={value}
-        placeholder="記事を検索"
-        aria-label="記事を検索"
+        placeholder="記事や企業を検索"
+        aria-label="記事や企業を検索"
         aria-busy={pending}
         role={history ? 'combobox' : undefined}
         aria-expanded={history ? open : undefined}

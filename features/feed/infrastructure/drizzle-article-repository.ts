@@ -80,7 +80,8 @@ export class DrizzleArticleRepository implements ArticleRepository {
    * 共通の WHERE 条件: 削除除外 + 企業フィルタ + 期間ウィンドウ(today/week/month) + 未読/既読フィルタ。
    * readFilter は (userId, articleId) の reads 行に対する相関サブクエリ(reads_user_article_uq に乗る)。
    * unread = NOT EXISTS、read = EXISTS。全記事に及ぶ既読集合を取得せず SQL 側で絞るのが肝(ADR-0021)。
-   * query は title/description の ILIKE 部分一致(pg_trgm GIN が効く。ADR-0022)。
+   * query は title/description の ILIKE 部分一致(pg_trgm GIN が効く。ADR-0022)に加え、企業名にも当てる
+   * (「LINEヤフー」のように企業名で探す読者向け。企業は数十件で、呼び出し側は常に companies を JOIN 済み)。
    */
   private filters(
     criteria: Pick<
@@ -106,7 +107,11 @@ export class DrizzleArticleRepository implements ArticleRepository {
     }
     if (criteria.query) {
       const pattern = `%${escapeLike(criteria.query)}%`;
-      const match = or(ilike(articles.title, pattern), ilike(articles.description, pattern));
+      const match = or(
+        ilike(articles.title, pattern),
+        ilike(articles.description, pattern),
+        ilike(companies.name, pattern),
+      );
       // or() の戻りは SQL | undefined(引数ありなら実際は常に定義される)
       if (match) conditions.push(match);
     }
