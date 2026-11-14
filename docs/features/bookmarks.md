@@ -6,6 +6,8 @@
 
 未ログインでも保存・一覧閲覧が可能で、ゲストは localStorage(article ID 配列)に保持する。ログインすると localStorage の保存が DB へマージされ永続化される(ADR-0017)。client ストアは `app/_composition/article/use-guest-saves.ts`、移行は `guest-saves-migrator.tsx`、bulk 追加は Repository の `addMany`。
 
+ゲストの保存ボタンはカードごとに `useGuestSaves` を持つ。トグルは hook の state ではなく localStorage の現在値を読んで反転し(`toggleGuestSave`)、書き込み後に同一タブの他の hook へカスタムイベント(`techblo:guest-saves-change`)で知らせる。以前はカードごとの state(mount 時点の集合)で localStorage を丸ごと上書きしていたため、ゲストが 2 件目を保存すると 1 件目が消え、最後に押した 1 件しか残らなかった(お気に入りも同じ)。
+
 ## ユーザーストーリー
 
 - ログインユーザーとして、気になる記事を後で読むために保存したい
