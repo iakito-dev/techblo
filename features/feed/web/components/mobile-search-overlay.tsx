@@ -109,8 +109,8 @@ export function MobileSearchOverlay({ open, onClose }: { open: boolean; onClose:
             ref={inputRef}
             type="search"
             value={value}
-            placeholder="記事を検索"
-            aria-label="記事を検索"
+            placeholder="記事や企業を検索"
+            aria-label="記事や企業を検索"
             aria-busy={isPending}
             enterKeyHint="search"
             onChange={(e) =>
