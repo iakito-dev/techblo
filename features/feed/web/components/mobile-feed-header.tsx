@@ -17,16 +17,12 @@ import type { FilterCompany, FilterUserFeed } from '../view-models/feed-filter-o
 import { useFeedNav } from '../view-models/feed-nav-context';
 import { pickKnownSelections } from '../view-models/known-selections';
 import { PERIOD_WITHIN_LABEL } from '../view-models/period-labels';
+import { READ_FILTER_CHIP_LABEL } from '../view-models/read-filter-labels';
 import { useFeedFilters } from '../view-models/use-feed-filters';
 import { useFeedSearch } from '../view-models/use-feed-search';
 import { useFeedSort } from '../view-models/use-feed-sort';
 import { RemovableChip } from './feed-chip';
 import { FeedFilterSheet } from './feed-filter-sheet';
-
-const STATUS_CHIP: Record<Exclude<ReadFilterMode, 'all'>, string> = {
-  unread: '未読のみ',
-  read: '既読のみ',
-};
 
 type MobileFeedHeaderViewProps = {
   companies: FilterCompany[];
@@ -251,7 +247,7 @@ function MobileFeedHeaderView({
           {sort === 'popular' && <RemovableChip label="人気順" onRemove={onResetSort} />}
           {tag !== null && <RemovableChip label={`タグ: ${tag}`} onRemove={onRemoveTag} />}
           {status !== 'all' && (
-            <RemovableChip label={STATUS_CHIP[status]} onRemove={onRemoveStatus} />
+            <RemovableChip label={READ_FILTER_CHIP_LABEL[status]} onRemove={onRemoveStatus} />
           )}
           {period !== 'all' && (
             <RemovableChip label={PERIOD_WITHIN_LABEL[period]} onRemove={onRemovePeriod} />
