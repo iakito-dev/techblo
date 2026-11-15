@@ -29,6 +29,14 @@ export function formatRelative(date: DateInput, now: Date = new Date()): string 
   return formatDate(date);
 }
 
+/**
+ * `<time dateTime>` 用の機械可読な日時(ISO 8601・UTC)。
+ * 画面の「3時間前」は人向けの相対表記なので、支援技術・検索エンジン・翻訳ツールには正確な日時をこちらで渡す。
+ */
+export function toIsoDateTime(date: DateInput): string {
+  return toDate(date).toISOString();
+}
+
 export function formatDate(date: DateInput): string {
   return new Intl.DateTimeFormat('ja-JP', {
     timeZone: JST,
