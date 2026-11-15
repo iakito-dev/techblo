@@ -19,7 +19,9 @@ export default function NotFound() {
       <StatusScreen
         icon={FileQuestion}
         title="ページが見つかりません"
-        description="URL が変更されたか、記事が削除された可能性があります。"
+        // ここに来るのは記事以外も含む「どのルートにも一致しない URL」(記事 ID の 404 は (app)/not-found.tsx)。
+        // 記事前提の文言だと、打ち間違えた URL でも「記事が削除された」と誤解させるため、ページ一般の言い方にする。
+        description="URL に誤りがあるか、ページが移動・削除された可能性があります。"
       >
         <Button asChild variant="primary" size="md">
           <Link href="/">フィードへ戻る</Link>
