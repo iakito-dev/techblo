@@ -23,7 +23,7 @@ import { toExcerpt } from '@/features/feed/web/strip-html';
 import { CACHE_TAGS } from '@/lib/cache/tags';
 import { articleJsonLd } from '@/lib/seo';
 import { resolveBaseUrl } from '@/lib/site-url';
-import { formatRelative } from '@/shared/date';
+import { formatDateTime, formatRelative, toIsoDateTime } from '@/shared/date';
 import { MOBILE_GUTTER_CLASS } from '@/shared/layout';
 import { isUuid } from '@/shared/uuid';
 
@@ -211,9 +211,15 @@ async function ArticleContent({ params }: { params: Promise<{ id: string }> }) {
               {article.author}
             </span>
           )}
-          <span className="text-fg-muted ml-auto shrink-0 font-normal">
+          {/* 記事ページは公開日の正確な値を確かめたい場面が多い(相対表記は 7 日未満で日付が出ない)ので、
+            カードと同じく hover の title と機械可読な dateTime を持たせる */}
+          <time
+            dateTime={toIsoDateTime(article.publishedAt)}
+            title={formatDateTime(article.publishedAt)}
+            className="text-fg-muted ml-auto shrink-0 font-normal"
+          >
             {formatRelative(article.publishedAt)}
-          </span>
+          </time>
         </div>
 
         {/* タイトル: カード(18px・3行クランプ)の拡大版。クランプは外し、字間・行送りは

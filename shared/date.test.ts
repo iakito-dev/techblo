@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatDate, formatDateTime, formatRelative } from './date';
+import { formatDate, formatDateTime, formatRelative, toIsoDateTime } from './date';
 
 const now = new Date('2026-10-29T12:00:00Z');
 const ago = (ms: number) => new Date(now.getTime() - ms);
@@ -40,5 +40,14 @@ describe('formatDate / formatDateTime', () => {
     const d = new Date('2026-10-28T20:30:00Z');
     expect(formatDate(d)).toBe('2026/10/29');
     expect(formatDateTime(d)).toBe('2026/10/29 05:30');
+  });
+});
+
+describe('toIsoDateTime', () => {
+  it('Date・ISO 文字列・エポックミリ秒のいずれも UTC の ISO 8601 にする', () => {
+    const iso = '2026-11-15T03:04:05.000Z';
+    expect(toIsoDateTime(new Date(iso))).toBe(iso);
+    expect(toIsoDateTime(iso)).toBe(iso);
+    expect(toIsoDateTime(Date.parse(iso))).toBe(iso);
   });
 });
