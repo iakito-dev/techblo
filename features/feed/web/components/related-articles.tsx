@@ -1,5 +1,5 @@
 import { CompanyFavicon } from '@/components/ui/company-favicon';
-import { formatRelative } from '@/shared/date';
+import { formatDateTime, formatRelative, toIsoDateTime } from '@/shared/date';
 import type { ArticleCard } from '../../application/dto';
 import { ArticleLink } from './article-link';
 
@@ -30,9 +30,13 @@ export function RelatedArticles({ articles }: { articles: ArticleCard[] }) {
               <span className="text-fg-default flex items-center gap-[7px] text-[11.5px] font-semibold">
                 <CompanyFavicon url={article.url} name={article.company.name} size={20} />
                 <span className="min-w-0 truncate">{article.company.name}</span>
-                <span className="text-fg-muted ml-auto shrink-0 font-normal">
+                <time
+                  dateTime={toIsoDateTime(article.publishedAt)}
+                  title={formatDateTime(article.publishedAt)}
+                  className="text-fg-muted ml-auto shrink-0 font-normal"
+                >
                   {formatRelative(article.publishedAt)}
-                </span>
+                </time>
               </span>
               <span className="text-fg-default group-hover:text-accent line-clamp-2 text-[0.9375rem] leading-[1.5] font-bold tracking-[-0.015em] transition-colors xl:text-sm">
                 {article.title}
