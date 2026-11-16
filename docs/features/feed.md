@@ -228,6 +228,7 @@ PostHog のイベント(一覧と規約は [observability.md §4](../architectur
   - 保存状態(ユーザー依存)だけ別の Suspense 境界(`ArticleDetailActions`)に隔離し、本文の表示をユーザー取得で待たせない。
   - `loading.tsx` と本文の Suspense fallback は同じ `ArticleDetailSkeleton`(実レイアウトと同じ位置・高さ。実物と同じ2カラム構造で、左が 上罫 → 見出し行 → タイトル → AI要約、右(aside 相当)が 画像 → ドメイン → アクション行。xl 以上のアクション行は「幅いっぱいのボタン枠 → アイコン3つ」。デザインを変えたら必ず追従させる)。これが無いと `(app)/loading.tsx` のフィード用 skeleton が出て、遷移のたびに一覧の skeleton が一瞬見える。
 - データ取得(ADR-0042): 本文はリクエスト時に描画されるため、記事(`loadArticle`)・AI要約(`getSummaryByArticleId`)・関連記事は `'use cache: remote'`(Vercel Runtime Cache)で引く。記事と要約は記事タグ + `cacheLife('days')`(要約 null は `'hours'`)で、cron の `/api/revalidate` による記事タグ無効化で更新を反映する(ADR-0047)。記事と要約は `Promise.all` で並列、関連記事は本文の取得前に投げて別の Suspense で受ける。記事ページへのリンク(カード・イベント行・関連記事)は画面内に入ると枠だけを先読みし、hover / touchstart で本文まで含めた full prefetch に切り替える(`unstable_dynamicOnHover` + `experimental.dynamicOnHover`)。
+- 存在しない記事(未登録の UUID・UUID でない id): 本文の Suspense 内で `notFound()` するので HTTP は 200 のまま「記事が見つかりません」を出す。`generateMetadata` は title に加えて `robots: noindex, nofollow` を返す(ルートレイアウトの `index, follow` を継承したままだと、Next が notFound 時に足す `noindex` と食い違う robots meta が並んでいた)
 - 記事ページに着地すると `ArticleViewTracker` が `trackArticleView` で表示回数を加算(未ログインも計測)し、既読マークを付ける。クリック時ではなく着地側で行うのは、遷移でリクエストが中断されないようにするため。
 - 保存系は ADR-0013 の `actions` スロットで注入(feed は bookmark/favorite を import しない)。
 
