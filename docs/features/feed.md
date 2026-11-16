@@ -253,7 +253,7 @@ PostHog のイベント(一覧と規約は [observability.md §4](../architectur
 - usecase `listPopularTags(deps)(limit = 120, sinceDays?)`(`features/feed/application/list-popular-tags.ts`): limit を 1..200 に丸め、空白タグを除外し `Result` で返す。
 - キャッシュ: `getPopularTags()` は `'use cache'` + `cacheTag(feed)` + `cacheLife('hours')`。失敗は `logger.warn` して `{ recent: [], all: [] }` を `cacheLife('minutes')` で返す。
 - タグは類義語展開しない(表記ゆれは別タグとして並ぶ)。リンク先の `?tag=` 側が `lib/tags/curated.ts` で類義語を展開する。
-- 導線: `app/sitemap.ts` に `/tags`、サイドバー「カテゴリ」セクション末尾に「タグから探す」行。
+- 導線: `app/sitemap.ts` に `/tags`、サイドバー「カテゴリ」セクション末尾に「タグから探す」行(lg+)。lg 未満はサイドバーが無く下部タブにも枠が無いため、設定タブのメニュー(`SettingsMobileMenu`)の「閲覧履歴」の下に「タグから探す」行を置く(以前はモバイル・タブレットから `/tags` へ辿る手段がカード/記事のタグバッジ経由の `?tag=` 一覧しか無く、タグ一覧そのものに入れなかった)
 
 ## 公開 RSS フィード(ADR-0039)
 
