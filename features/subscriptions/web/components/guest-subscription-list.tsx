@@ -8,6 +8,7 @@ import { SettingsSection } from '@/components/ui/settings-section';
 import { matchesCompanyName } from '@/shared/company-name-match';
 import { trackSubscriptionChange } from '../track-subscription';
 import { useGuestSubscriptions } from '../use-guest-subscriptions';
+import { AllOffDialog } from './all-off-dialog';
 import { SubscriptionToggle } from './subscription-toggle';
 
 /** ゲスト用の購読リストが必要とする企業情報(DTO のサブセット)。 */
@@ -83,15 +84,11 @@ export function GuestSubscriptionList({ companies }: { companies: GuestSubscript
           >
             すべて表示
           </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            isDisabled={!ready || enabledCount === 0}
-            onPress={() => setAllCompanies(false)}
-            className="bg-bg-surface rounded-sm"
-          >
-            すべて非表示
-          </Button>
+          {/* ゲストも Cookie 1 つでフィードが空になる操作なので、ログイン版と同じく確認を挟む。 */}
+          <AllOffDialog
+            disabled={!ready || enabledCount === 0}
+            onConfirm={() => setAllCompanies(false)}
+          />
         </div>
       </div>
 
