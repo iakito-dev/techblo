@@ -211,34 +211,32 @@ function AllOffDialog({ disabled, onConfirm }: { disabled: boolean; onConfirm: (
       >
         すべて非表示
       </Button>
-      <AlertDialog isOpen={open} onOpenChange={setOpen}>
-        <AlertDialog.Backdrop>
-          <AlertDialog.Container>
-            <AlertDialog.Dialog>
-              <AlertDialog.Header>
-                <AlertDialog.Heading>すべての企業を非表示にしますか?</AlertDialog.Heading>
-              </AlertDialog.Header>
-              <AlertDialog.Body>
-                すべての企業を非表示にすると、フィードに記事が表示されなくなります。
-              </AlertDialog.Body>
-              <AlertDialog.Footer>
-                <Button variant="outline" onPress={() => setOpen(false)}>
-                  キャンセル
-                </Button>
-                <Button
-                  variant="danger"
-                  onPress={() => {
-                    setOpen(false);
-                    onConfirm();
-                  }}
-                >
-                  すべて非表示にする
-                </Button>
-              </AlertDialog.Footer>
-            </AlertDialog.Dialog>
-          </AlertDialog.Container>
-        </AlertDialog.Backdrop>
-      </AlertDialog>
+      <AlertDialog.Backdrop isOpen={open} onOpenChange={setOpen}>
+        <AlertDialog.Container>
+          <AlertDialog.Dialog>
+            <AlertDialog.Header>
+              <AlertDialog.Heading>すべての企業を非表示にしますか?</AlertDialog.Heading>
+            </AlertDialog.Header>
+            <AlertDialog.Body>
+              すべての企業を非表示にすると、フィードに記事が表示されなくなります。
+            </AlertDialog.Body>
+            <AlertDialog.Footer>
+              <Button variant="outline" onPress={() => setOpen(false)}>
+                キャンセル
+              </Button>
+              <Button
+                variant="danger"
+                onPress={() => {
+                  setOpen(false);
+                  onConfirm();
+                }}
+              >
+                すべて非表示にする
+              </Button>
+            </AlertDialog.Footer>
+          </AlertDialog.Dialog>
+        </AlertDialog.Container>
+      </AlertDialog.Backdrop>
     </>
   );
 }
