@@ -74,7 +74,10 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { id } = await params;
   const { article, summary } = await loadArticleWithSummary(id);
-  if (!article) return { title: '記事が見つかりません' };
+  // ルートレイアウトの robots(index, follow)を継承したままだと、notFound() で Next が足す noindex と
+  // 食い違う robots meta が 2 本並ぶ(本文はストリーム中に notFound するので HTTP は 200 のまま)。
+  // 存在しない記事は検索結果に残さないよう、ここで明示的に noindex にして 1 本に揃える。
+  if (!article) return { title: '記事が見つかりません', robots: { index: false, follow: false } };
 
   // 説明文は AI要約(独自テキスト)を最優先し、無ければ RSS 抜粋で代替する。
   // アグリゲータの薄い複製ページにならないよう、要約があればそれを meta description にする。
