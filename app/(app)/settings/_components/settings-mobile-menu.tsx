@@ -1,4 +1,4 @@
-import { Building2, CircleHelp, History, Palette, Rss } from 'lucide-react';
+import { Building2, CircleHelp, History, Palette, Rss, Tags } from 'lucide-react';
 import { cookies } from 'next/headers';
 import { CurrentThemeLabel } from '@/components/layout/theme-segment';
 import { AccountCard } from '@/features/auth/components/account-card';
@@ -14,9 +14,9 @@ import { SettingsMenuRow } from './settings-menu-row';
 /**
  * モバイル設定 index のメニュー(ドリルダウンの入口)。
  * 上部にアカウント(ゲストは登録CTA / ログイン時はアカウント情報)、続いて
- * 企業 / マイフィード / 表示 / 閲覧履歴 / サポートの行を出す。各行の右には現在値を出す
- * (企業は「表示中/全体」、マイフィードは「登録数/上限」、表示はテーマ名)。閲覧履歴は下部タブに枠が無いため、
- * モバイルの入口をここに置く(デスクトップはサイドバーのライブラリ)。各行の件数はここでサーバー取得する
+ * 企業 / マイフィード / 表示 / 閲覧履歴 / タグから探す / サポートの行を出す。各行の右には現在値を出す
+ * (企業は「表示中/全体」、マイフィードは「登録数/上限」、表示はテーマ名)。閲覧履歴とタグ一覧(/tags)は
+ * 下部タブに枠が無く、デスクトップのサイドバーにしか入口が無かったため、lg 未満の入口をここに置く。各行の件数はここでサーバー取得する
  * (queries は 'use cache' 済みで、遷移先のサブページと取得が共有される)。
  * マイフィードはログイン専用機能だが、導線はゲストにも見せる
  * (ゲストは件数の代わりに「ログインで利用」を出し、遷移先でログイン案内する)。
@@ -64,6 +64,7 @@ export async function SettingsMobileMenu() {
           value={<CurrentThemeLabel />}
         />
         <SettingsMenuRow href="/history" icon={History} label="閲覧履歴" />
+        <SettingsMenuRow href="/tags" icon={Tags} label="タグから探す" />
         <SettingsMenuRow href="/settings/support" icon={CircleHelp} label="サポート" />
       </nav>
     </div>
