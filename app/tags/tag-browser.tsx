@@ -97,7 +97,7 @@ function TagSection({ heading, note, tags }: { heading: string; note: string; ta
     <section>
       <h2 className="text-fg-default mb-4 text-lg font-semibold">
         {heading}
-        <span className="text-fg-subtle ml-2 text-xs font-normal">{note}</span>
+        <span className="text-fg-muted ml-2 text-xs font-normal">{note}</span>
       </h2>
       <ul className="flex flex-wrap gap-2">
         {tags.map(({ tag, count }) => (
@@ -107,7 +107,7 @@ function TagSection({ heading, note, tags }: { heading: string; note: string; ta
               className="border-border-default text-fg-muted hover:border-accent hover:text-accent inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-sm transition-colors"
             >
               {tag}
-              <span className="text-fg-subtle text-xs tabular-nums">{count}</span>
+              <span className="text-fg-muted text-xs tabular-nums">{count}</span>
             </Link>
           </li>
         ))}
