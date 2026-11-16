@@ -150,11 +150,11 @@ export function AppSidebar({
             {/* 企業(クリックで /?company=slug 絞り込み・折りたたみ) */}
             <Collapsible defaultOpen className="mt-1">
               <div className="flex items-center justify-between px-2.5">
-                <CollapsibleTrigger className="group text-fg-subtle focus-visible:ring-accent flex items-center gap-1 rounded-sm py-1 text-xs font-medium outline-none focus-visible:ring-2">
+                <CollapsibleTrigger className="group text-fg-muted focus-visible:ring-accent flex items-center gap-1 rounded-sm py-1 text-xs font-medium outline-none focus-visible:ring-2">
                   <ChevronRight className="size-3.5 transition-transform group-data-[state=open]:rotate-90" />
                   企業
                 </CollapsibleTrigger>
-                <span className="text-fg-subtle text-xs tabular-nums">{companies.length}</span>
+                <span className="text-fg-muted text-xs tabular-nums">{companies.length}</span>
               </div>
               <CollapsibleContent className="mt-1 flex flex-col gap-0.5">
                 {companies.map((c) => {
@@ -173,7 +173,7 @@ export function AppSidebar({
                     >
                       <CompanyFavicon url={c.siteUrl} name={c.name} />
                       <span className="min-w-0 flex-1 truncate">{c.name}</span>
-                      <span className="text-fg-subtle shrink-0 text-xs tabular-nums">
+                      <span className="text-fg-muted shrink-0 text-xs tabular-nums">
                         {c.articleCount}
                       </span>
                     </Link>
@@ -186,11 +186,11 @@ export function AppSidebar({
             {userFeeds.length > 0 && (
               <Collapsible defaultOpen className="mt-1">
                 <div className="flex items-center justify-between px-2.5">
-                  <CollapsibleTrigger className="group text-fg-subtle focus-visible:ring-accent flex items-center gap-1 rounded-sm py-1 text-xs font-medium outline-none focus-visible:ring-2">
+                  <CollapsibleTrigger className="group text-fg-muted focus-visible:ring-accent flex items-center gap-1 rounded-sm py-1 text-xs font-medium outline-none focus-visible:ring-2">
                     <ChevronRight className="size-3.5 transition-transform group-data-[state=open]:rotate-90" />
                     マイフィード
                   </CollapsibleTrigger>
-                  <span className="text-fg-subtle text-xs tabular-nums">{userFeeds.length}</span>
+                  <span className="text-fg-muted text-xs tabular-nums">{userFeeds.length}</span>
                 </div>
                 <CollapsibleContent className="mt-1 flex flex-col gap-0.5">
                   {userFeeds.map((f) => {
@@ -210,7 +210,7 @@ export function AppSidebar({
                       >
                         <CompanyFavicon url={f.siteUrl ?? ''} name={f.title} />
                         <span className="min-w-0 flex-1 truncate">{f.title}</span>
-                        <span className="text-fg-subtle shrink-0 text-xs tabular-nums">
+                        <span className="text-fg-muted shrink-0 text-xs tabular-nums">
                           {f.articleCount}
                         </span>
                       </Link>
@@ -223,7 +223,7 @@ export function AppSidebar({
 
           {/* フォルダ(一旦空。将来ユーザー定義フォルダを入れる枠) */}
           <Section label="フォルダ">
-            <p className="text-fg-subtle px-2.5 py-1.5 text-xs">まだフォルダがありません</p>
+            <p className="text-fg-muted px-2.5 py-1.5 text-xs">まだフォルダがありません</p>
           </Section>
 
           {/* カテゴリ(?category= 絞り込み・職能軸7種。shared/categories.ts が単一の真実の源。ADR-0034)。
@@ -278,7 +278,7 @@ export function AppSidebar({
 function Section({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="flex flex-col gap-0.5">
-      <span className="text-fg-subtle px-2 py-1 text-xs font-medium tracking-wider uppercase">
+      <span className="text-fg-muted px-2 py-1 text-xs font-medium tracking-wider uppercase">
         {label}
       </span>
       {children}
