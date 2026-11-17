@@ -1,5 +1,10 @@
 {
   "installCommand": "bun install --frozen-lockfile --ignore-scripts",
   "buildCommand": "PATH=\"/node24/bin:$PATH\" node node_modules/next/dist/bin/next build",
-  "regions": ["hnd1"]
+  "regions": ["hnd1"],
+  "git": {
+    "deploymentEnabled": {
+      "factory-screenshots": false
+    }
+  }
 }
