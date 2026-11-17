@@ -63,7 +63,9 @@ export const ArticleCard = memo(function ArticleCard({
         <CompanyFavicon url={article.url} name={article.company.name} size={20} />
         <span className="min-w-0 truncate">{article.company.name}</span>
         <div className="text-fg-muted ml-auto flex shrink-0 items-center gap-1.5 font-normal">
-          <RelativeTime date={article.publishedAt} />
+          {/* RelativeTime は min-w-12 で幅を確保しているため、左寄せのままだと「1分前」など短い表記が
+              右端より手前で止まり、絶対日付の行と右端がそろわない(はてブ数の前にも空きが出る) */}
+          <RelativeTime date={article.publishedAt} className="text-right" />
           {showHatenaCount && article.hatenaBookmarkCount > 0 && (
             <>
               <span aria-hidden="true">・</span>
