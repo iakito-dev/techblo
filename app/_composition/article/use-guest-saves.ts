@@ -119,11 +119,13 @@ export function toggleGuestSave(kind: GuestSaveKind, id: string): boolean {
  * - has(id): 保存済みか
  * - toggle(id): 反転して localStorage に同期書き込み。新しい保存状態を返す
  * - ready: localStorage 読み込み済みか(false の間は全件未保存として描画)
+ * - count: 保存件数(ready 前は 0)
  */
 export function useGuestSaves(kind: GuestSaveKind): {
   has: (id: string) => boolean;
   toggle: (id: string) => boolean;
   ready: boolean;
+  count: number;
 } {
   const [ids, setIds] = useState<Set<string>>(() => new Set());
   const [ready, setReady] = useState(false);
@@ -155,5 +157,5 @@ export function useGuestSaves(kind: GuestSaveKind): {
 
   const toggle = useCallback((id: string): boolean => toggleGuestSave(kind, id), [kind]);
 
-  return { has, toggle, ready };
+  return { has, toggle, ready, count: ids.size };
 }
