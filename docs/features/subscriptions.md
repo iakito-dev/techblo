@@ -17,7 +17,7 @@
   - 企業の視覚表現はサイドバー・記事カードと同じファビコン(`CompanyFavicon`)に統一(色ドット廃止)
   - URL は常時表示せずセルの title 属性(hover)で表示
   - セル全体クリックでもトグル切替。OFF 行は opacity を下げて沈める
-- リスト上部(sticky)に企業名のインクリメンタル検索 + すべてON/OFF 一括操作(すべてOFF は確認ダイアログ)
+- リスト上部(sticky)に企業名のインクリメンタル検索 + すべてON/OFF 一括操作(すべてOFF は確認ダイアログ `AllOffDialog`。ログイン版・ゲスト版で共用。以前はゲスト版だけ確認が無く、1 タップで全社が非表示になりフィードが空になっていた)
 - トグル変更は楽観更新。成功時はトグル横に一瞬チェック、失敗時はロールバック + エラートースト
 - レスポンシブ: 〜767px は1カラム、768px(md)〜 は2カラム。コンテナは max-w-[52rem] 左寄せ
 - ゲスト(未ログイン)も `/settings` にアクセス・購読編集できる。状態は Cookie(`techblo.guest.unsubscribed` = OFF にした slug 群、未設定=全社購読。旧名 `corpex.guest.unsubscribed` は後方互換で読み込む)に保存し、サーバーのフィード取得(`getFeedPageData` の guest 経路 / `getFeedFilterCompanies`)が同 Cookie を読んでスコープを揃える。UI は `GuestSubscriptionList`(`useGuestSubscriptions`)、ログイン版と同じ見た目だが Server Action ではなく Cookie に書き、`router.refresh()` でフィードへ即反映(bookmarks/favorites と同じゲスト永続パターン。ADR-0017)
