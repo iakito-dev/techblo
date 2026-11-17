@@ -21,6 +21,7 @@ import {
 } from '@/features/feed/domain/feed-sort';
 import { DefaultFeedControls, FeedControls } from '@/features/feed/web/components/feed-controls';
 import { FeedEmptyState } from '@/features/feed/web/components/feed-empty-state';
+import { FeedFilteredEmptyState } from '@/features/feed/web/components/feed-filtered-empty-state';
 import { FeedGridSkeleton } from '@/features/feed/web/components/feed-grid';
 import { FeedPeriodEmptyState } from '@/features/feed/web/components/feed-period-empty-state';
 import { FeedSearchEmptyState } from '@/features/feed/web/components/feed-search-empty-state';
@@ -32,6 +33,7 @@ import {
 import { feedPageTitle } from '@/features/feed/web/feed-page-title';
 import { getCompanyBySlug } from '@/features/feed/web/queries';
 import { FeedNavProvider } from '@/features/feed/web/view-models/feed-nav-context';
+import { resolveFilteredEmptyCopy } from '@/features/feed/web/view-models/filtered-empty-copy';
 import { firstSearchParams } from '@/features/feed/web/view-models/first-search-param';
 import { organizationJsonLd, websiteJsonLd } from '@/lib/seo';
 import { resolveBaseUrl } from '@/lib/site-url';
@@ -380,6 +382,18 @@ async function SubscribedFeed({ searchParams }: { searchParams: Promise<RawSearc
     // 人気順で狭い期間(今日/今週/今月)に該当 0 件 → 取得を促すのではなく期間を広げる導線。
     if (sort === 'popular' && period !== 'all') {
       return <FeedPeriodEmptyState period={period} />;
+    }
+    const filteredCopy = resolveFilteredEmptyCopy({
+      sort,
+      period,
+      readMode,
+      tag,
+      category,
+      companySlugs,
+      feedIds,
+    });
+    if (filteredCopy) {
+      return <FeedFilteredEmptyState copy={filteredCopy} />;
     }
     return <FeedEmptyState />;
   }
