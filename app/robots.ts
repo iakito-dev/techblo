@@ -24,6 +24,12 @@ export default function robots(): MetadataRoute.Robots {
         // ?q= 等のパラメータ違いでクロール枠を浪費させない)。
         disallow: ['/api/', '/login', '/signup', '/settings', '/bookmarks', '/favorites'],
       },
+      {
+        // SEO ツールの被リンク収集クローラー。検索流入を生まない一方、/ を 1 日 9,000 回前後叩き、
+        // Vercel Hobby の Fluid Active CPU 枠を使い切ってチームが停止した(2026-11)。
+        userAgent: 'SERankingBacklinksBot',
+        disallow: '/',
+      },
     ],
     sitemap: `${baseUrl}/sitemap.xml`,
     host: baseUrl,
