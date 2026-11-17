@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { Suspense } from 'react';
 import { FeedList } from '@/app/_composition/article/feed-list';
 import {
@@ -19,6 +18,7 @@ import {
   parsePeriod,
   parseReadMode,
 } from '@/features/feed/domain/feed-sort';
+import { FeedAllOffEmptyState } from '@/features/feed/web/components/feed-all-off-empty-state';
 import { DefaultFeedControls, FeedControls } from '@/features/feed/web/components/feed-controls';
 import { FeedEmptyState } from '@/features/feed/web/components/feed-empty-state';
 import { FeedFilteredEmptyState } from '@/features/feed/web/components/feed-filtered-empty-state';
@@ -361,17 +361,7 @@ async function SubscribedFeed({ searchParams }: { searchParams: Promise<RawSearc
   });
 
   if (allOff) {
-    return (
-      <div className="border-border-default bg-bg-surface rounded-md border p-12 text-center">
-        <p className="text-fg-muted">表示する企業が選択されていません。</p>
-        <Link
-          href="/settings"
-          className="text-accent mt-3 inline-block text-sm font-medium hover:underline"
-        >
-          表示する企業を選ぶ
-        </Link>
-      </div>
-    );
+    return <FeedAllOffEmptyState />;
   }
 
   if (isEmpty) {
