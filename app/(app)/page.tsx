@@ -35,6 +35,7 @@ import { getCompanyBySlug } from '@/features/feed/web/queries';
 import { FeedNavProvider } from '@/features/feed/web/view-models/feed-nav-context';
 import { resolveFilteredEmptyCopy } from '@/features/feed/web/view-models/filtered-empty-copy';
 import { firstSearchParams } from '@/features/feed/web/view-models/first-search-param';
+import { resolveSearchEmptyCopy } from '@/features/feed/web/view-models/search-empty-copy';
 import { organizationJsonLd, websiteJsonLd } from '@/lib/seo';
 import { resolveBaseUrl } from '@/lib/site-url';
 import { MOBILE_GUTTER_CLASS } from '@/shared/layout';
@@ -367,7 +368,18 @@ async function SubscribedFeed({ searchParams }: { searchParams: Promise<RawSearc
   if (isEmpty) {
     // 検索 0 件は「記事がまだ無い」「期間が狭い」より優先(クリアを主導線にする。ADR-0022)
     if (query) {
-      return <FeedSearchEmptyState query={query} />;
+      // ゲストの未読/既読とマイフィードはサーバーの絞り込みに効かない(0 件の原因ではない)ので数えない。
+      const searchCopy = resolveSearchEmptyCopy({
+        query,
+        sort,
+        period,
+        readMode: isGuest ? 'all' : readMode,
+        tag,
+        category,
+        companySlugs,
+        feedIds: isGuest ? undefined : feedIds,
+      });
+      return <FeedSearchEmptyState query={query} copy={searchCopy} />;
     }
     // 人気順で狭い期間(今日/今週/今月)に該当 0 件 → 取得を促すのではなく期間を広げる導線。
     if (sort === 'popular' && period !== 'all') {
