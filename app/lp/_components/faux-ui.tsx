@@ -157,7 +157,7 @@ export function FauxArticleCard({
   return (
     <div
       className={cn(
-        '@container border-border-card bg-bg-surface shadow-card hover:shadow-card-hover flex flex-col gap-2.5 rounded-xl border p-4 transition-[transform,box-shadow] duration-200 hover:-translate-y-1',
+        'border-border-card bg-bg-surface shadow-card hover:shadow-card-hover @container flex flex-col gap-2.5 rounded-xl border p-4 transition-[transform,box-shadow] duration-200 hover:-translate-y-1',
         className,
       )}
     >
