@@ -14,10 +14,12 @@ export function FeedFilteredEmptyState({ copy }: { copy: FilteredEmptyCopy }) {
         <FilterX className="size-8" />
       </div>
       {/* タグ名など空白の無い長い語でもはみ出さないよう、どこでも折れるようにする */}
-      <p className="text-fg-default mt-5 max-w-full text-lg font-bold wrap-anywhere">
+      <p className="text-fg-default mt-5 max-w-full text-lg font-bold text-balance wrap-anywhere [word-break:auto-phrase]">
         {copy.title}
       </p>
-      <p className="text-fg-muted mt-2 max-w-xs text-sm leading-relaxed">{copy.hint}</p>
+      <p className="text-fg-muted mt-2 max-w-xs text-sm leading-relaxed text-balance [word-break:auto-phrase]">
+        {copy.hint}
+      </p>
       <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
         <Button asChild variant="primary" size="md">
           <Link href={copy.clearHref}>絞り込みを解除</Link>

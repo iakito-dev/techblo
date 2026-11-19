@@ -22,10 +22,12 @@ export function FeedSearchEmptyState({ query, copy }: { query: string; copy: Sea
         <SearchX className="size-8" />
       </div>
       {/* URL など空白の無い長い語は折り返し点が無く画面外へはみ出すため、どこでも折れるようにする */}
-      <p className="text-fg-default mt-5 max-w-full text-lg font-bold wrap-anywhere">
+      <p className="text-fg-default mt-5 max-w-full text-lg font-bold text-balance wrap-anywhere [word-break:auto-phrase]">
         「{query}」に一致する記事はありません
       </p>
-      <p className="text-fg-muted mt-2 max-w-xs text-sm leading-relaxed">{copy.hint}</p>
+      <p className="text-fg-muted mt-2 max-w-xs text-sm leading-relaxed text-balance [word-break:auto-phrase]">
+        {copy.hint}
+      </p>
       <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
         {searchAllHref && (
           <Button asChild variant="primary" size="md">
