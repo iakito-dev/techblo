@@ -47,11 +47,12 @@ export function SummaryView({
         <ul aria-label="AI生成タグ" className="mt-3 flex flex-wrap gap-1.5">
           {tags.map((tag) => (
             <li key={tag}>
-              {/* 一覧カードのタグと同じ絞り込み入口(?tag=)。hover/focus は輪郭と文字だけ teal(ADR-0035) */}
+              {/* 一覧カードのタグと同じ絞り込み入口(?tag=)。hover/focus は輪郭と文字だけ teal(ADR-0035)。
+                  フォーカスは hover と見分けられるよう内側リングで輪郭を太くする(カードのタグと同じ) */}
               <Link
                 href={`/?tag=${encodeURIComponent(tag)}`}
                 prefetch={false}
-                className="border-border-default text-fg-muted hover:border-accent hover:text-accent focus-visible:border-accent focus-visible:text-accent relative block rounded-full border px-2 text-[11px] leading-5 transition-colors before:absolute before:inset-x-0 before:-inset-y-1.5 focus-visible:outline-none"
+                className="border-border-default text-fg-muted hover:border-accent hover:text-accent focus-visible:border-accent focus-visible:text-accent focus-visible:ring-accent relative block rounded-full border px-2 text-[11px] leading-5 transition-colors before:absolute before:inset-x-0 before:-inset-y-1.5 focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-inset"
               >
                 {tag}
               </Link>

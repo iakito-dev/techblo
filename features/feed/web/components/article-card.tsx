@@ -134,11 +134,13 @@ export const ArticleCard = memo(function ArticleCard({
               <li key={tag} className="shrink-0">
                 {/* タグ絞り込み(?tag=)への入口。一覧に数十個並ぶため prefetch しない。
                     輪郭と文字だけ teal にし塗りは使わない(ADR-0035)。
-                    before は見た目の高さを変えずにタップ領域だけ上下へ広げる。 */}
+                    before は見た目の高さを変えずにタップ領域だけ上下へ広げる。
+                    キーボードフォーカスは hover と同じ 1px の色替えだけだと見分けられないため、内側に
+                    2px のリングを足して輪郭を太くする(外側リングは行の overflow-hidden で先頭が欠ける)。 */}
                 <Link
                   href={`/?tag=${encodeURIComponent(tag)}`}
                   prefetch={false}
-                  className="border-border-default text-fg-muted hover:border-accent hover:text-accent focus-visible:border-accent focus-visible:text-accent relative block rounded-full border px-2 text-[11px] leading-5 transition-colors before:absolute before:inset-x-0 before:-inset-y-1.5 focus-visible:outline-none"
+                  className="border-border-default text-fg-muted hover:border-accent hover:text-accent focus-visible:border-accent focus-visible:text-accent focus-visible:ring-accent relative block rounded-full border px-2 text-[11px] leading-5 transition-colors before:absolute before:inset-x-0 before:-inset-y-1.5 focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-inset"
                 >
                   {tag}
                 </Link>
