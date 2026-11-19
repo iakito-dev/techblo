@@ -1,9 +1,10 @@
 'use client';
 
-import { Bookmark, Heart, Inbox, Search } from 'lucide-react';
+import { Bookmark, Heart, Search } from 'lucide-react';
 import Link from 'next/link';
 import { useRef, useState, useTransition } from 'react';
 import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
 import type { ArticleSummaryDto } from '@/features/ai-summary/application/dto';
 import { setBookmarkAction } from '@/features/bookmarks/web/actions';
 import { setFavoriteAction } from '@/features/favorites/web/actions';
@@ -190,25 +191,33 @@ export function SavedArticlesView({
       )}
 
       {visibleCount === 0 ? (
+        // 見た目はフィードの空状態(FeedEmptyState 等)とそろえる。以前はアイコン単体・小さな見出し・
+        // 文字リンクで、同じ「まだ何もない」状態なのにタブを切り替えるたびに別の画面に見えていた。
         <div className="flex flex-col items-center justify-center px-6 py-24 text-center">
-          <Inbox className="text-fg-subtle size-10" />
-          <p className="text-fg-default mt-4 font-bold">{emptyTitle}</p>
-          <p className="text-fg-muted mt-1 text-sm">{emptyHint}</p>
-          <Link href="/" className="text-accent mt-4 text-sm font-medium hover:underline">
-            フィードを見る
-          </Link>
+          <div className="bg-bg-surface-2 text-fg-muted grid size-16 place-items-center rounded-xl">
+            <Icon className="size-8" />
+          </div>
+          <p className="text-fg-default mt-5 text-lg font-bold text-balance [word-break:auto-phrase]">
+            {emptyTitle}
+          </p>
+          <p className="text-fg-muted mt-2 max-w-xs text-sm leading-relaxed text-balance [word-break:auto-phrase]">
+            {emptyHint}
+          </p>
+          <Button asChild variant="primary" size="md" className="mt-6">
+            <Link href="/">フィードを見る</Link>
+          </Button>
         </div>
       ) : matchedCount === 0 && isFiltering ? (
         <div className="flex flex-col items-center justify-center px-6 py-20 text-center">
-          <Search className="text-fg-subtle size-10" />
-          <p className="text-fg-default mt-4 font-bold">一致する記事がありません</p>
-          <button
-            type="button"
-            onClick={() => setQuery('')}
-            className="text-accent focus-visible:ring-accent mt-3 rounded-sm text-sm font-medium hover:underline focus-visible:ring-2 focus-visible:outline-none"
-          >
+          <div className="bg-bg-surface-2 text-fg-muted grid size-16 place-items-center rounded-xl">
+            <Search className="size-8" />
+          </div>
+          <p className="text-fg-default mt-5 text-lg font-bold text-balance [word-break:auto-phrase]">
+            一致する記事がありません
+          </p>
+          <Button variant="primary" size="md" onClick={() => setQuery('')} className="mt-6">
             絞り込みをクリア
-          </button>
+          </Button>
         </div>
       ) : (
         <>
