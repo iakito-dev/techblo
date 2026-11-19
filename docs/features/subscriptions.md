@@ -11,13 +11,13 @@
 
 ## 画面/UI
 
-- 設定画面 `/settings` の「購読企業」セクション(`SettingsSection` 構造。将来「通知」等を追加可能)
-- 見出しに購読状況「購読企業(24/26)」を表示
+- 設定画面の「表示する企業」セクション(`SettingsSection` 構造)。デスクトップは `/settings`(設定全体を 1 ページに描画し `#companies` で該当セクションへ)、モバイルは設定メニューから `/settings/companies`
+- 見出しに表示状況「表示する企業(24/26)」を表示(以前の呼称は「購読企業」。コード・テーブル名は `subscriptions` のまま)
 - 2カラムグリッドのカード型セル(ファビコン + 企業名 + トグル)。OFF でフィードから除外
   - 企業の視覚表現はサイドバー・記事カードと同じファビコン(`CompanyFavicon`)に統一(色ドット廃止)
   - URL は常時表示せずセルの title 属性(hover)で表示
   - セル全体クリックでもトグル切替。OFF 行は opacity を下げて沈める
-- リスト上部(sticky)に企業名のインクリメンタル検索 + すべてON/OFF 一括操作(すべてOFF は確認ダイアログ `AllOffDialog`。ログイン版・ゲスト版で共用。以前はゲスト版だけ確認が無く、1 タップで全社が非表示になりフィードが空になっていた)
+- リスト上部(sticky)に企業名のインクリメンタル検索(lg+ のみ。モバイルは縦 1 カラムで一覧でき一括操作を主にするため出さない)+「すべて表示 / すべて非表示」の一括操作(すべてOFF は確認ダイアログ `AllOffDialog`。ログイン版・ゲスト版で共用。以前はゲスト版だけ確認が無く、1 タップで全社が非表示になりフィードが空になっていた)
 - トグル変更は楽観更新。成功時はトグル横に一瞬チェック、失敗時はロールバック + エラートースト
 - レスポンシブ: 〜767px は1カラム、768px(md)〜 は2カラム。コンテナは max-w-[52rem] 左寄せ
 - ゲスト(未ログイン)も `/settings` にアクセス・購読編集できる。状態は Cookie(`techblo.guest.unsubscribed` = OFF にした slug 群、未設定=全社購読。旧名 `corpex.guest.unsubscribed` は後方互換で読み込む)に保存し、サーバーのフィード取得(`getFeedPageData` の guest 経路 / `getFeedFilterCompanies`)が同 Cookie を読んでスコープを揃える。UI は `GuestSubscriptionList`(`useGuestSubscriptions`)、ログイン版と同じ見た目だが Server Action ではなく Cookie に書き、`router.refresh()` でフィードへ即反映(bookmarks/favorites と同じゲスト永続パターン。ADR-0017)
@@ -67,21 +67,23 @@ initializeSubscriptions({ userId }): Promise<Result<void, ...>>
 
 > **実装状況(フィード反映)**: 実装済み。
 > - `features/subscriptions/web/queries.ts` の `getEnabledCompanyIds(userId)` が購読 ON の企業 id を返す。
-> - `app/(app)/page.tsx` の `SubscribedFeed`(app 層の合成点)が `getSession` → `getEnabledCompanyIds` →
->   `FeedGrid` の `companyIds` prop へ渡す。`features/feed` は subscriptions を import しない(ADR-0002)。
-> - 未ログインは全企業表示。全 OFF(空配列)は `getFeed` を呼ばず空状態 +`/settings` 導線
->   (article repo は空配列を「フィルタなし=全件」と解釈するため `[]` を渡さない)。
+> - `app/_composition/article/feed-load-more.tsx` の `resolveCompanyScope`(app 層の合成点。`getFeedPageData` と
+>   棚表示の `getSectionsPageData` が共用)が、ログイン時は `getEnabledCompanyIds`、ゲストは Cookie
+>   (`techblo.guest.unsubscribed`)から表示対象の企業 id を解決する。`features/feed` は subscriptions を import しない(ADR-0002)。
+> - ゲストで Cookie 未設定なら絞り込みなし(全企業)。全 OFF(ログイン=購読 0 件 / ゲスト=全社 OFF)は `allOff` を返し、
+>   フィードは記事を取得せず空状態(`FeedAllOffEmptyState`)を出す(article repo は空配列を「フィルタなし=全件」と
+>   解釈するため `[]` を渡さない)。
 
 ## ビジネスルール
 
-- ログイン必須
+- ログイン時は DB(`subscriptions`)、ゲストは Cookie に保存する(ADR-0017。ログイン時に Cookie の OFF 指定を DB へマージ)
 - 初回ログイン時に全企業を `enabled=true` で自動INSERT(`initializeUserSubscriptions`、`subscriptions_user_company_uq` で冪等。ADR-0012)。失敗してもログインは止めず error ログのみ
-- 新企業が追加された場合: 既存ユーザーには `enabled=true` でデフォルトON(企業追加時のJOBで挿入)
-- 未ログインユーザーは全企業を表示(subscriptionsを参照しない)
+- 新企業が追加された場合: 既存ユーザーにも表示 ON で出る。行を挿入するジョブは無く、状態行が無い企業はデフォルト ON として扱う(`mergeSettings` / `getEnabledCompanyIds`)
+- ゲストは Cookie に OFF 指定が無い企業をすべて表示する
 
 ## エッジケース
 
-- 全企業の購読をOFFにした場合 → フィードに「すべての購読がOFFです」と表示、設定画面への導線
+- 表示する企業をすべて OFF にした場合 → フィードに「表示する企業がありません」+「表示する企業を選ぶ」(`/settings/companies#companies`)の空状態。OFF にする前に確認ダイアログ(`AllOffDialog`)を挟む
 - 企業が削除された場合 → subscriptions も CASCADE で削除
 
 ## メトリクス
