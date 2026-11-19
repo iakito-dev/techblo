@@ -14,8 +14,10 @@ export function FeedAllOffEmptyState() {
       <div className="bg-bg-surface-2 text-fg-muted grid size-16 place-items-center rounded-xl">
         <Building2 className="size-8" />
       </div>
-      <p className="text-fg-default mt-5 text-lg font-bold">表示する企業がありません</p>
-      <p className="text-fg-muted mt-2 max-w-xs text-sm leading-relaxed">
+      <p className="text-fg-default mt-5 text-lg font-bold text-balance [word-break:auto-phrase]">
+        表示する企業がありません
+      </p>
+      <p className="text-fg-muted mt-2 max-w-xs text-sm leading-relaxed text-balance [word-break:auto-phrase]">
         すべての企業を非表示にしています。設定で表示する企業を選んでください。
       </p>
       <Button asChild variant="primary" size="md" className="mt-6">
