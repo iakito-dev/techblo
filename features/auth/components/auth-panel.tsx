@@ -52,11 +52,14 @@ export async function AuthPanel({
 
       <p className="text-fg-secondary mt-6 text-center text-xs [word-break:auto-phrase]">
         続けると
-        <Link href="/terms" className="text-accent hover:underline">
+        <Link href="/terms" className="text-accent underline underline-offset-4 hover:decoration-2">
           利用規約
         </Link>
         と
-        <Link href="/privacy" className="text-accent hover:underline">
+        <Link
+          href="/privacy"
+          className="text-accent underline underline-offset-4 hover:decoration-2"
+        >
           プライバシーポリシー
         </Link>
         に同意したものとみなされます。
