@@ -18,6 +18,7 @@ import {
   parsePeriod,
   parseReadMode,
 } from '@/features/feed/domain/feed-sort';
+import { CompanyFeedIntro } from '@/features/feed/web/components/company-feed-intro';
 import { FeedAllOffEmptyState } from '@/features/feed/web/components/feed-all-off-empty-state';
 import { DefaultFeedControls, FeedControls } from '@/features/feed/web/components/feed-controls';
 import { FeedEmptyState } from '@/features/feed/web/components/feed-empty-state';
@@ -32,6 +33,7 @@ import {
 } from '@/features/feed/web/components/mobile-feed-header';
 import { feedPageTitle } from '@/features/feed/web/feed-page-title';
 import { getCompanyBySlug } from '@/features/feed/web/queries';
+import { resolveCompanyFeedIntro } from '@/features/feed/web/view-models/company-feed-intro';
 import { FeedNavProvider } from '@/features/feed/web/view-models/feed-nav-context';
 import { resolveFilteredEmptyCopy } from '@/features/feed/web/view-models/filtered-empty-copy';
 import { firstSearchParams } from '@/features/feed/web/view-models/first-search-param';
@@ -55,13 +57,13 @@ type FeedSearchParams = {
 /** Next.js が渡す生の searchParams(キーが繰り返されると配列)。firstSearchParams で FeedSearchParams にする。 */
 type RawSearchParams = { [K in keyof FeedSearchParams]?: string | string[] };
 
+type SingleCompany = { slug: string; name: string; description: string | null; siteUrl: string };
+
 /**
  * ?company= がちょうど 1 社のときだけ企業名を引く(複数選択はタイトルにしない)。
  * タイトルのためだけに失敗してページ全体を落とさないよう、取得失敗・未登録は無視する。
  */
-async function singleCompany(
-  param: string | undefined,
-): Promise<{ slug: string; name: string } | undefined> {
+async function singleCompany(param: string | undefined): Promise<SingleCompany | undefined> {
   const slugs = param
     ?.split(',')
     .map((s) => s.trim())
@@ -70,17 +72,31 @@ async function singleCompany(
   if (!slug) return undefined;
   try {
     const company = await getCompanyBySlug(slug);
-    return company ? { slug, name: company.name } : undefined;
+    return company
+      ? { slug, name: company.name, description: company.description, siteUrl: company.siteUrl }
+      : undefined;
   } catch {
     return undefined;
   }
 }
 
-/** デスクトップの見出し行。?company= が 1 社なら企業名を見出しにするため、サーバーで名前を引いて渡す。 */
+/**
+ * デスクトップの見出し行。?company= が 1 社なら企業名を見出しにするため、サーバーで名前を引いて渡す。
+ * あわせて紹介文・公式ブログ・企業別 RSS の紹介行を全幅で出す(企業ページ廃止後の導線。ADR-0048)。
+ */
 async function FeedHeading({ searchParams }: { searchParams: Promise<RawSearchParams> }) {
   const sp = firstSearchParams(await searchParams);
   const company = await singleCompany(sp.company);
-  return <FeedHeader icon="feed" showControls company={company} />;
+  return (
+    <>
+      <FeedHeader
+        icon="feed"
+        showControls
+        company={company ? { slug: company.slug, name: company.name } : undefined}
+      />
+      {company && <CompanyFeedIntro view={resolveCompanyFeedIntro(company)} />}
+    </>
+  );
 }
 
 /**
