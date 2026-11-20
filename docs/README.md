@@ -75,6 +75,7 @@ AIエージェントもこのファイルから辿れるように構成されて
 - [0046-factory-features-and-multi-pr.md](./adr/0046-factory-features-and-multi-pr.md)
 - [0047-pr-before-after-screenshots.md](./adr/0047-pr-before-after-screenshots.md)
 - [0048-remove-company-landing-pages.md](./adr/0048-remove-company-landing-pages.md)
+- [0049-remove-from-reading-history.md](./adr/0049-remove-from-reading-history.md)
 - [0047-reduce-runtime-cache-writes.md](./adr/0047-reduce-runtime-cache-writes.md)
 
 ### `features/` — 機能仕様

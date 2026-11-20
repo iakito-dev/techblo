@@ -9,7 +9,7 @@ export type ReadEntry = {
 /**
  * Driven Port。既読マークの永続化インターフェース。実装は infrastructure 層。
  *
- * 既読は「記事ページを開いた」タイミングで付くだけで外す操作は無い(手動トグル無し)。
+ * 既読は「記事ページを開いた」タイミングで付く。外すのは閲覧履歴からの削除だけ(ADR-0049。フィードに手動の既読トグルは無し)。
  * 全記事に及びうるため一覧で全件返さない(フィードの未読/既読フィルタは feed 側の SQL で絞る。ADR-0021)。
  * 閲覧履歴は件数上限付きの直近分だけを返す(ADR-0041)。
  */
@@ -20,4 +20,6 @@ export interface ReadRepository {
   addMany(userId: UserId, articleIds: ArticleId[]): Promise<void>;
   /** 直近に読んだ記事を readAt の降順で最大 limit 件返す。 */
   listRecent(userId: UserId, limit: number): Promise<ReadEntry[]>;
+  /** 1記事の既読を外す(閲覧履歴からの削除。ADR-0049)。既読でなければ何もしない。 */
+  remove(userId: UserId, articleId: ArticleId): Promise<void>;
 }

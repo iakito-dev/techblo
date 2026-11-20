@@ -9,8 +9,10 @@ import { logger } from '@/lib/observability/logger';
 import type { CommonError } from '@/shared/error';
 import { err, ok, type Result } from '@/shared/result';
 import { asArticleId, asUserId } from '@/shared/type-utils';
+import { isUuid } from '@/shared/uuid';
 import { markRead } from '../application/mark-read';
 import { mergeGuestReads } from '../application/merge-guest-reads';
+import { removeRead } from '../application/remove-read';
 import { DrizzleReadRepository } from '../infrastructure/drizzle-read-repository';
 
 const readRepo = new DrizzleReadRepository(db);
@@ -70,4 +72,38 @@ export async function migrateGuestReads(
 
   revalidateTag(CACHE_TAGS.userReads(userId), 'max');
   return ok(result.value);
+}
+
+/**
+ * 記事を閲覧履歴から削除する(= 既読を外す)Server Action(ADR-0049)。
+ * 未ログインは UNAUTHORIZED(ゲストは localStorage 側で消す)。
+ * 不正な ID は DB(uuid 列)まで流さず VALIDATION にする。
+ * 未読/既読フィルタのキャッシュは markReadAction と同じく遅延無効化で足りる
+ * (閲覧履歴は userReads をキャッシュしないうえ、画面からは楽観的に消している)。
+ */
+export async function removeReadAction(
+  articleId: string,
+): Promise<Result<{ removed: boolean }, CommonError>> {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session) return err({ kind: 'UNAUTHORIZED' });
+  if (!isUuid(articleId)) {
+    return err({
+      kind: 'VALIDATION',
+      issues: [{ path: 'articleId', message: '記事 ID が不正です' }],
+    });
+  }
+
+  const userId = asUserId(session.user.id);
+  const result = await removeRead({ reads: readRepo })({
+    userId,
+    articleId: asArticleId(articleId),
+  });
+
+  if (!result.ok) {
+    logger.error('removeRead failed', { error: result.error, userId: session.user.id, articleId });
+    return result;
+  }
+
+  revalidateTag(CACHE_TAGS.userReads(userId), 'max');
+  return ok({ removed: true });
 }
