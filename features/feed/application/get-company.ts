@@ -5,8 +5,8 @@ import type { FeedError } from '../domain/errors';
 import type { CompanyDetailDto } from './dto';
 
 /**
- * slug で1社の詳細を取得するユースケース(企業ページ /companies/[slug] 用)。
- * 有効な企業が無ければ null(呼び出し側で notFound に変換する)。
+ * slug で1社の詳細を取得するユースケース(フィードの企業絞り込み `/?company=` の見出しと企業別 RSS 用。
+ * 企業ページは ADR-0048 で廃止)。有効な企業が無ければ null(見出しは企業名なしに、RSS は 404 にする)。
  */
 export const getCompany =
   (deps: { companies: CompanyRepository }) =>
