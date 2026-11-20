@@ -4,7 +4,7 @@ import type { ReadRepository } from '../domain/read-repository';
 import { markRead } from './mark-read';
 
 function fakeRepo(): ReadRepository {
-  return { markRead: vi.fn(), addMany: vi.fn(), listRecent: vi.fn() };
+  return { markRead: vi.fn(), addMany: vi.fn(), listRecent: vi.fn(), remove: vi.fn() };
 }
 
 describe('markRead', () => {

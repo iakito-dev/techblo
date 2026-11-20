@@ -6,6 +6,7 @@ const h = vi.hoisted(() => ({
   revalidateTag: vi.fn(),
   mark: vi.fn(),
   merge: vi.fn(),
+  remove: vi.fn(),
 }));
 
 vi.mock('next/cache', () => ({ revalidateTag: h.revalidateTag }));
@@ -18,8 +19,11 @@ vi.mock('@/lib/observability/logger', () => ({
 vi.mock('../infrastructure/drizzle-read-repository', () => ({ DrizzleReadRepository: class {} }));
 vi.mock('../application/mark-read', () => ({ markRead: () => h.mark }));
 vi.mock('../application/merge-guest-reads', () => ({ mergeGuestReads: () => h.merge }));
+vi.mock('../application/remove-read', () => ({ removeRead: () => h.remove }));
 
-const { markReadAction, migrateGuestReads } = await import('./actions');
+const { markReadAction, migrateGuestReads, removeReadAction } = await import('./actions');
+
+const ARTICLE_ID = '473692ed-e906-4589-8385-bad43128c7f5';
 
 beforeEach(() => {
   vi.resetAllMocks();
@@ -79,6 +83,40 @@ describe('migrateGuestReads', () => {
     h.merge.mockResolvedValue(failure);
 
     expect(await migrateGuestReads(['a1'])).toBe(failure);
+    expect(h.revalidateTag).not.toHaveBeenCalled();
+  });
+});
+
+describe('removeReadAction', () => {
+  it('未ログインなら UNAUTHORIZED を返し、DB にもキャッシュにも触れない', async () => {
+    h.getSession.mockResolvedValue(null);
+
+    expect(await removeReadAction(ARTICLE_ID)).toEqual(err({ kind: 'UNAUTHORIZED' }));
+    expect(h.remove).not.toHaveBeenCalled();
+    expect(h.revalidateTag).not.toHaveBeenCalled();
+  });
+
+  it('UUID でない ID は DB に流さず VALIDATION を返す', async () => {
+    const result = await removeReadAction('not-a-uuid');
+
+    expect(result.ok).toBe(false);
+    expect(!result.ok && result.error.kind).toBe('VALIDATION');
+    expect(h.remove).not.toHaveBeenCalled();
+  });
+
+  it('削除に成功したらユーザー単位のタグを遅延無効化(max)する', async () => {
+    h.remove.mockResolvedValue(ok({ removed: true }));
+
+    expect(await removeReadAction(ARTICLE_ID)).toEqual(ok({ removed: true }));
+    expect(h.remove).toHaveBeenCalledWith({ userId: 'u1', articleId: ARTICLE_ID });
+    expect(h.revalidateTag).toHaveBeenCalledWith('user-reads-u1', 'max');
+  });
+
+  it('削除に失敗したらエラーをそのまま返し、キャッシュは無効化しない', async () => {
+    const failure = err({ kind: 'INTERNAL' as const });
+    h.remove.mockResolvedValue(failure);
+
+    expect(await removeReadAction(ARTICLE_ID)).toBe(failure);
     expect(h.revalidateTag).not.toHaveBeenCalled();
   });
 });
