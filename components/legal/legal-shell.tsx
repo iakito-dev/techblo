@@ -7,7 +7,7 @@ import { SkipLink } from '@/components/layout/skip-link';
 
 /**
  * プライバシーポリシー / 利用規約 / 運営者情報 など、テキスト主体の静的ページの共有シェル。
- * 企業ページと同じく公開ページなので Header を載せ、本文は読みやすい一段組みに収める。
+ * アプリのシェル(サイドバー・下部ナビ)の外にある公開ページなので Header を載せ、本文は読みやすい一段組みに収める。
  */
 export function LegalShell({
   title,
