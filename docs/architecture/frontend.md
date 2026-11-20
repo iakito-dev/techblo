@@ -221,6 +221,7 @@ MVPでは使わない。複雑度を上げないため。
 - `loading.tsx` ← Suspense fallback、skeleton表示
 - `error.tsx` ← error boundary、リトライUI
 - `not-found.tsx` ← 404
+  - ルート直下の `app/not-found.tsx`(シェル外のページと、どのルートにも一致しない URL)は、法的ページと同じくモバイルは `Header`、デスクトップは `DesktopHomeBar`(ロゴ)を載せる。切れたリンクから直接着地しても何のサイトか分かるようにするため。`(app)/not-found.tsx` はアプリのシェルが受ける
 
 ## 7. UI コンポーネント階層
 
