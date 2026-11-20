@@ -1,12 +1,11 @@
 import type { Metadata } from 'next';
 import { connection } from 'next/server';
 import { Suspense } from 'react';
-import { DesktopHomeBar } from '@/components/layout/desktop-home-bar';
-import { Header } from '@/components/layout/header';
 import { JsonLd } from '@/components/seo/json-ld';
 import { getPopularTags } from '@/features/feed/web/queries';
 import { breadcrumbJsonLd } from '@/lib/seo';
 import { resolveBaseUrl } from '@/lib/site-url';
+import { MOBILE_GUTTER_CLASS } from '@/shared/layout';
 import { isSameTagList } from './same-tag-list';
 import { TagBrowser } from './tag-browser';
 
@@ -34,16 +33,15 @@ export const metadata: Metadata = {
 /**
  * タグ一覧ページ(/tags。公開・SEO 対象。ADR-0040)。
  * 各タグはフィードの ?tag= 絞り込みへのリンクで、クローラへの内部リンク集約点を兼ねる。
+ *
+ * (app) のシェル(サイドバー・モバイル下部ナビ)の中に置く。以前はシェル外の単独ページで、
+ * モバイルの設定メニューやサイドバーの「タグから探す」から来ると下部ナビ・サイドバーが消え、
+ * フィードや保存一覧へ戻る手段がロゴだけになっていた。
  */
 export default function TagsPage() {
   return (
-    <div className="min-h-dvh pb-24 lg:pb-12">
-      <Suspense fallback={<div className="border-border-default bg-bg-surface h-16 border-b" />}>
-        <Header />
-      </Suspense>
-
-      <main className="mx-auto max-w-[84rem] px-4 py-8 md:px-6 lg:px-8">
-        <DesktopHomeBar className="mb-8" />
+    <div className="min-h-dvh pb-24 lg:pt-6 lg:pb-12 lg:pl-64">
+      <div className={`mx-auto max-w-[84rem] ${MOBILE_GUTTER_CLASS} md:px-6 lg:px-8`}>
         <header className="mb-8">
           <h1 className="text-2xl font-bold tracking-tight md:text-3xl">{TITLE}</h1>
           <p className="text-fg-muted mt-3 max-w-2xl leading-relaxed">{DESCRIPTION}</p>
@@ -52,7 +50,7 @@ export default function TagsPage() {
         <Suspense fallback={<TagsSkeleton />}>
           <TagSections />
         </Suspense>
-      </main>
+      </div>
     </div>
   );
 }
