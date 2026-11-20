@@ -1,5 +1,7 @@
+import { cacheLife, cacheTag } from 'next/cache';
 import { ImageResponse } from 'next/og';
 import { getArticleById } from '@/features/feed/web/queries';
+import { CACHE_TAGS } from '@/lib/cache/tags';
 import { FONT_FAMILY, loadOgFonts } from '@/shared/og-fonts';
 
 // favicon と同じ 2×2 ドットマーク(ティールのグラデ地 + 対角=白 / 反対角=ミント)。
@@ -40,14 +42,25 @@ async function loadFavicon(articleUrl: string): Promise<string | null> {
 }
 
 /**
- * 記事のフォールバック OGP 画像(1200x630)を生成する。
+ * 記事のフォールバック OGP 画像(1200x630)を PNG のバイト列で生成する。
  * 元記事に OGP 画像がある記事はここを通さず元画像をそのまま使うため(generateMetadata 側で分岐)、
  * このルートは「元画像がない記事」専用のプレースホルダ生成を担い、タイトルを主役に据える(ADR-0029)。
+ *
+ * Satori + resvg の描画は CPU を食うため、Vercel Hobby の Fluid Active CPU 枠を守る目的で
+ * 'use cache: remote'(Vercel Runtime Cache)に載せ、記事ごとにほぼ 1 回だけ描画する。
+ * CDN の s-maxage だけだとリージョンごと・期限切れのたびに再描画されていた。
+ * 記事タグを付けるので /api/revalidate の記事無効化でも作り直される。
+ * 戻り値は Uint8Array(RSC シリアライズ対応の TypedArray)。
  */
-export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+async function renderOgPng(id: string): Promise<Uint8Array> {
+  'use cache: remote';
+  cacheTag(CACHE_TAGS.article(id));
 
   const article = await getArticleById(id);
+  // 存在しない / 不正な id のプレースホルダを長期間固定しないよう短く留める
+  // (後から取り込まれた記事が長く汎用画像のままになるのを避ける)。
+  cacheLife(article ? 'weeks' : 'minutes');
+
   const favicon = article ? await loadFavicon(article.url) : null;
 
   const brand = article?.company.brandColor ?? palette.accent;
@@ -60,7 +73,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
   const fontText = ['テクブロ', company, meta, title].join('');
   const fonts = await loadOgFonts(fontText);
 
-  return new ImageResponse(
+  const res = new ImageResponse(
     <div
       style={{
         width: '100%',
@@ -149,10 +162,21 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
       width: 1200,
       height: 630,
       fonts,
-      headers: {
-        // 記事内容はほぼ不変。生成コストを抑えるため CDN/ブラウザにキャッシュさせる。
-        'Cache-Control': 'public, max-age=86400, s-maxage=86400, stale-while-revalidate=604800',
-      },
     },
   );
+  return new Uint8Array(await res.arrayBuffer());
+}
+
+export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const bytes = await renderOgPng(id);
+
+  return new Response(bytes as Uint8Array<ArrayBuffer>, {
+    headers: {
+      'Content-Type': 'image/png',
+      // 記事のタイトル・日付はほぼ不変。再描画の CPU コストを抑えるため CDN に 30 日持たせる
+      // (ブラウザは 1 日)。内容の更新は renderOgPng 側の記事タグ無効化で反映される。
+      'Cache-Control': 'public, max-age=86400, s-maxage=2592000, stale-while-revalidate=2592000',
+    },
+  });
 }

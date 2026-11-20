@@ -186,6 +186,7 @@ trackArticleView(input: { articleId: string }): Promise<Result<void, FeedError>>
 
 > カードは OGP 画像を使わない(ADR-0011)ため、画像取得失敗の考慮は不要。
 > プレースホルダー生成 API `/api/og/[id]` は残存するがフィードカードからは参照しない。
+> `/api/og/[id]` の PNG 描画(Satori + resvg は CPU が重い)は `'use cache: remote'`(`cacheTag(article-<id>)`、記事は `weeks`、記事なしは `minutes`)で記事ごとにほぼ 1 回に抑える。CDN は `s-maxage` 30 日。Vercel Hobby の Fluid Active CPU 枠対策。
 
 ## メトリクス
 
