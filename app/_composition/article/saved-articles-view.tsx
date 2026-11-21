@@ -166,6 +166,19 @@ export function SavedArticlesView({
     });
   }
 
+  /**
+   * あとで読むの一覧でお気に入りに追加したときの「昇格」導線(ADR-0006 のシナリオ B:
+   * 読み終えた記事のうち良かったものをお気に入りへ移し、あとで読むからは外す)。
+   * 自動では外さず、トーストの操作で選べるようにする(両方に残したい人もいるため)。
+   * 外す操作は通常の解除と同じ Undo フローに乗せる。
+   */
+  function handlePromote(articleId: string) {
+    toast.success('お気に入りに追加しました', {
+      duration: UNDO_DURATION,
+      action: { label: 'あとで読むから外す', onClick: () => handleUnsave(articleId) },
+    });
+  }
+
   const bookmarkedSet = new Set(bookmarkedIds);
   const favoritedSet = new Set(favoritedIds);
 
@@ -249,6 +262,9 @@ export function SavedArticlesView({
                             : bookmarkedSet.has(article.id)
                         }
                         onUnsave={() => handleUnsave(article.id)}
+                        onPromote={
+                          kind === 'bookmark' ? () => handlePromote(article.id) : undefined
+                        }
                       />
                     }
                   />
@@ -282,12 +298,15 @@ function SavedCardActions({
   isGuest,
   otherInitial,
   onUnsave,
+  onPromote,
 }: {
   articleId: string;
   kind: SavedKind;
   isGuest: boolean;
   otherInitial: boolean;
   onUnsave: () => void;
+  /** もう一方の種別(お気に入り)を追加したときに呼ぶ。あとで読むの一覧でだけ渡す。 */
+  onPromote?: () => void;
 }) {
   const otherKind: SavedKind = kind === 'bookmark' ? 'favorite' : 'bookmark';
   const guestOther = useGuestSaves(otherKind);
@@ -298,7 +317,9 @@ function SavedCardActions({
 
   function toggleOther() {
     if (isGuest) {
-      trackSaveChange(otherKind, articleId, guestOther.toggle(articleId), true);
+      const saved = guestOther.toggle(articleId);
+      trackSaveChange(otherKind, articleId, saved, true);
+      if (saved) onPromote?.();
       return;
     }
     const next = !otherActive;
@@ -318,6 +339,9 @@ function SavedCardActions({
         return;
       }
       trackSaveChange(otherKind, articleId, next, false);
+      // 昇格トーストは保存の成功後に出す。楽観的に出すと、失敗時に「あとで読むから外す」を押した記事が
+      // どちらの一覧にも残らなくなる
+      if (next) onPromote?.();
     });
   }
 
