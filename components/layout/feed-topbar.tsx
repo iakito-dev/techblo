@@ -26,7 +26,7 @@ const PERIOD_OPTIONS = periodOptions(['today', 'week', 'month', 'all']);
 
 /**
  * デスクトップ(lg+)の上部バー。サイドバーのロゴ帯(h-16)と高さを揃えた sticky ヘッダー。
- * オーバーフローは未実装のプレースホルダ(枠だけ)。
+ * 左に記事検索、右端に更新とアカウント導線(TopbarAuth)。
  */
 export function FeedTopbar() {
   return (
@@ -53,7 +53,7 @@ export function FeedTopbar() {
 }
 
 /**
- * コンテンツの見出し行(lg+)。左に「タイトル + アイコン」、右に並び替え(流用) + 表示切替/選択(仮)。
+ * コンテンツの見出し行(lg+)。左に「タイトル + アイコン」、右に並び替え(流用)。
  * sort=popular のときだけ集計期間チップを出す。
  */
 // アイコン関数/要素は Server→Client 境界をまたげないため、キー文字列で受けてクライアント側で解決する。
