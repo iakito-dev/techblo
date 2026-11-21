@@ -1,6 +1,7 @@
-import { Bell, Bookmark, Heart, Rss } from 'lucide-react';
+import { ArrowLeft, Bell, Bookmark, Heart, Rss } from 'lucide-react';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
+import { resolveLoginExitHref } from '../login-exit';
 import { getSession } from '../server';
 import { AuthHeading } from './auth-heading';
 import { SocialSignInButtons } from './social-sign-in-buttons';
@@ -61,6 +62,16 @@ export async function AuthPanel({
         </Link>
         に同意したものとみなされます。
       </p>
+
+      {/* シェル外の画面なので、ここに出口が無いと PWA(standalone)ではブラウザの戻るも無く閉じ込められる。
+          来た画面(callbackURL)へ戻し、無ければトップへ。 */}
+      <Link
+        href={resolveLoginExitHref(callbackURL)}
+        className="text-fg-muted hover:text-fg-default mt-8 inline-flex min-h-11 items-center gap-1.5 px-3 text-sm transition-colors"
+      >
+        <ArrowLeft aria-hidden className="size-4" />
+        ログインせずに戻る
+      </Link>
     </div>
   );
 }

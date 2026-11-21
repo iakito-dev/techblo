@@ -16,6 +16,7 @@ Better Auth + ソーシャル OAuth(Google / GitHub / Discord)でユーザー認
 
 - ログイン/登録導線は**設定タブ最上部の登録カード**に集約(`AccountCard`)。ゲストは「登録してデータを引き継ぐ」カード(無料登録 CTA + ログインリンク)、ログイン時はアカウント情報(アバター/名前/メール)と常時表示の「ログアウト」ボタンに置き換わる(ドロップダウンに隠さない)
 - 認証ページは**`/login` 1画面に統合**(OAuth のみで「ログイン/新規登録」の操作が同一のため)。旧 `/signup` は `callbackURL` を維持して `/login` へリダイレクト。`AuthPanel` が利点リスト + `SocialSignInButtons` を描画し、見出しのみ `AuthHeading` が「前回利用」の記録有無で出し分ける(初回=「テクブロをはじめよう」/ 再訪=「おかえりなさい」)。相互リンク・mode 出し分けは廃止
+  - カードの下に「← ログインせずに戻る」(`resolveLoginExitHref`)を置く。`/login` はアプリのシェル(ヘッダー・ナビ)の外にあり、ホーム画面に追加した PWA(`display: standalone`)ではブラウザの戻るボタンも無いため、以前は画面内に出口が無く閉じ込められていた。戻り先は `callbackURL`(設定から来たら `/settings`)、無ければトップ。`callbackURL` は同一オリジンのパス(`/` 始まり・`//` と `/\` を除く)だけを採用し、`/login`・`/signup` 自身はループするのでトップへ落とす
 - `SocialSignInButtons`: Google / GitHub / Discord を表示。1つを主役(全幅)+ 残りを「または」区切りのコンパクト2列に。直近に使った方法を `localStorage`(`features/auth/last-provider.ts`)に記録し、再訪時はそれを主役+「前回利用」表示に昇格。文言は中立な「{プロバイダ} で続ける」に統一
 - ヘッダー(モバイル <md 以外 / タブレット)はログインボタンを出さない。ログイン時のアバターのみ表示。モバイル(<md)のフィードヘッダー(`MobileFeedControls`)はアバターも持たない(設定タブへ誘導)
 - ブックマーク等の保存はゲストでも localStorage に保存でき(ADR-0017)、追加時は確認トースト「ブックマークに追加しました」のみ(登録 CTA は出さない)。一覧バナー/JIT モーダル等の登録導線は追加しない
@@ -37,6 +38,7 @@ Better Auth が管理するテーブル(`users`, `sessions`, `accounts`)を利�
 | `features/auth/pending-login.ts` | ログインボタン押下時のプロバイダを sessionStorage に置き、認証完了(`login_succeeded`)の判定に使う |
 | `features/auth/components/analytics-identity.tsx` | セッションと PostHog の同期(identify / reset / `login_succeeded`。client) |
 | `features/auth/last-provider.ts` | 直近ログイン方法の `localStorage` 読み書き(`readLastProvider` / `writeLastProvider`) |
+| `features/auth/login-exit.ts` | ログイン画面の「ログインせずに戻る」の遷移先(`resolveLoginExitHref`。callbackURL を同一オリジンのパスに限る) |
 | `features/auth/components/social-sign-in-buttons.tsx` | Google / GitHub / Discord のログインボタン群(主役+「または」+コンパクト2列・前回利用を主役化) |
 | `features/auth/components/auth-heading.tsx` | 認証画面の見出し(client・前回利用の有無で出し分け) |
 | `features/auth/components/user-menu.tsx` | アバター + ログアウトのドロップダウン(client) |
