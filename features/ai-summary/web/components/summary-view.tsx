@@ -61,7 +61,8 @@ export function SummaryView({
         </ul>
       )}
       {/* 断り書きは強調ではなく注記なので teal ではなく muted にする(文字色の teal はラベル・見出しに限る)。subtle(#9a9c9f)は地色に対し 2.6:1 で WCAG AA(4.5:1)に届かない */}
-      <p className="text-fg-muted mt-2.5 text-[11.5px] leading-[1.6]">
+      {/* 文節単位で折る。既定の折り返しだとモバイル幅で「保証されませ / ん。」と語の途中で割れていた */}
+      <p className="text-fg-muted mt-2.5 text-[11.5px] leading-[1.6] [word-break:auto-phrase]">
         元記事の内容を AI が要約したものです。正確性は保証されません。
       </p>
     </section>
