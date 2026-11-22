@@ -10,8 +10,10 @@ export function FeedEmptyState() {
       <div className="border-border-default text-accent grid size-16 place-items-center rounded-xl border">
         <Inbox className="size-8" />
       </div>
-      <p className="text-fg-default mt-5 text-lg font-bold">記事がまだありません</p>
-      <p className="text-fg-muted mt-2 max-w-xs text-sm leading-relaxed">
+      <p className="text-fg-default mt-5 text-lg font-bold text-balance [word-break:auto-phrase]">
+        記事がまだありません
+      </p>
+      <p className="text-fg-muted mt-2 max-w-xs text-sm leading-relaxed text-balance [word-break:auto-phrase]">
         各社のテックブログから定期的に記事を取り込んでいます。しばらくしてから再度確認してください。
       </p>
     </div>

@@ -87,11 +87,11 @@ export async function renderPublicFeed(scope: PublicFeedScope): Promise<Response
 
     const xml = buildFeedXml({
       title,
+      // チャンネルの link は「サイトで見る」の行き先。フィードと同じ絞り込みの一覧へ飛ばす
+      // (以前はカテゴリが落ちて、カテゴリのフィードからでも全体の一覧に着地していた)。
       link: scope.company
         ? `${baseUrl}/?company=${encodeURIComponent(scope.company.slug)}`
-        : tag
-          ? `${baseUrl}/?tag=${encodeURIComponent(tag)}`
-          : `${baseUrl}/`,
+        : `${baseUrl}/${query.size ? `?${query}` : ''}`,
       description: scope.company
         ? `${scope.company.name}の公式技術ブログの新着記事(元記事へのリンク)。`
         : 'テック企業の公式技術ブログの新着記事を集約したフィード(元記事へのリンク)。',

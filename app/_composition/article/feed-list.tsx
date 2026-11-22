@@ -3,15 +3,17 @@
 import { memo, useCallback, useEffect, useRef, useState, useTransition } from 'react';
 import type { FeedSort, PopularPeriod, ReadFilterMode } from '@/features/feed/domain/feed-sort';
 import { ArticleCard } from '@/features/feed/web/components/article-card';
+import { FeedFilteredEmptyState } from '@/features/feed/web/components/feed-filtered-empty-state';
 import {
   FEED_COLUMNS_CLASS,
   FEED_FIRST_RULE_CLASS,
   FEED_GAP_CLASS,
 } from '@/features/feed/web/feed-grid-classes';
 import { useFeedNav } from '@/features/feed/web/view-models/feed-nav-context';
+import { resolveFilteredEmptyCopy } from '@/features/feed/web/view-models/filtered-empty-copy';
 import { ArticleActions } from './article-actions';
 import { loadMoreFeed } from './feed-actions';
-import { shouldTriggerAutoLoad } from './feed-infinite-scroll';
+import { isGuestReadFilterStalled, shouldTriggerAutoLoad } from './feed-infinite-scroll';
 import type { ComposedArticle } from './feed-load-more';
 import { useGuestSaves } from './use-guest-saves';
 
@@ -96,6 +98,14 @@ export function FeedList({
   // ゲストの既読フィルタはサーバーで絞れない(localStorage)ため、ここでクライアント側 hide する(ADR-0021)。
   // ログイン時はサーバー(getReadFilteredFeed)が絞り済みなので素通し。
   const guestReads = useGuestSaves('read');
+  const isGuestReadFilter = isGuest && readMode !== 'all';
+  const matchesGuestReadFilter = useCallback(
+    (item: ComposedArticle) =>
+      readMode === 'read' ? guestReads.has(item.article.id) : !guestReads.has(item.article.id),
+    [readMode, guestReads.has],
+  );
+  // ゲスト × 既読フィルタで、追記しても表示が増えなかったページの連続数(自動読み込みの打ち切りに使う)
+  const [emptyPageStreak, setEmptyPageStreak] = useState(0);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
   const loadingRef = useRef(false);
 
@@ -113,6 +123,7 @@ export function FeedList({
     setItems(initialItems);
     setPage(1);
     setHasMore(initialHasMore);
+    setEmptyPageStreak(0);
     loadingRef.current = false; // 進行中フラグも戻し、切替後の自動読み込みが止まらないようにする
     feedKeyRef.current = feedKey;
   }
@@ -145,6 +156,9 @@ export function FeedList({
         });
         setPage(next);
         setHasMore(stillMore);
+        if (isGuestReadFilter) {
+          setEmptyPageStreak((streak) => (more.some(matchesGuestReadFilter) ? 0 : streak + 1));
+        }
       } finally {
         loadingRef.current = false;
       }
@@ -155,6 +169,8 @@ export function FeedList({
     feedFilterKey,
     feedIds,
     hasMore,
+    isGuestReadFilter,
+    matchesGuestReadFilter,
     page,
     period,
     sort,
@@ -164,9 +180,16 @@ export function FeedList({
     category,
   ]);
 
+  const stalled = isGuestReadFilterStalled({
+    isGuest,
+    readMode,
+    guestReadCount: guestReads.count,
+    emptyPageStreak,
+  });
+
   useEffect(() => {
     const sentinel = sentinelRef.current;
-    if (!sentinel || !hasMore || !('IntersectionObserver' in window)) return;
+    if (!sentinel || !hasMore || stalled || !('IntersectionObserver' in window)) return;
 
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -175,6 +198,7 @@ export function FeedList({
             hasMore,
             isIntersecting: entry?.isIntersecting ?? false,
             isPending: isPending || loadingRef.current,
+            stalled,
           })
         ) {
           loadMore();
@@ -185,16 +209,19 @@ export function FeedList({
 
     observer.observe(sentinel);
     return () => observer.disconnect();
-  }, [hasMore, isPending, loadMore]);
+  }, [hasMore, isPending, loadMore, stalled]);
 
   // ゲスト × 既読フィルタのときだけクライアント側で hide(ログインはサーバーで絞り済み)。
   // guestReads.ready 前は素通し(localStorage 未読込で全件未読扱い)。
   const visibleItems =
-    isGuest && readMode !== 'all' && guestReads.ready
-      ? items.filter((item) =>
-          readMode === 'read' ? guestReads.has(item.article.id) : !guestReads.has(item.article.id),
-        )
-      : items;
+    isGuestReadFilter && guestReads.ready ? items.filter(matchesGuestReadFilter) : items;
+  // 既読 0 件の既読フィルタは何も一致しえないので、「もっと読む」も出さない
+  const nothingCanMatch = isGuestReadFilter && readMode === 'read' && guestReads.count === 0;
+  const showGuestEmpty =
+    isGuestReadFilter && guestReads.ready && visibleItems.length === 0 && (!hasMore || stalled);
+  const emptyCopy = showGuestEmpty
+    ? resolveFilteredEmptyCopy({ sort, period, readMode, tag, category, companySlugs, feedIds })
+    : null;
 
   return (
     <>
@@ -214,7 +241,9 @@ export function FeedList({
         ))}
       </div>
 
-      {hasMore && (
+      {emptyCopy && <FeedFilteredEmptyState copy={emptyCopy} />}
+
+      {hasMore && !(guestReads.ready && nothingCanMatch) && (
         <div ref={sentinelRef} className="mt-10 flex justify-center pb-2">
           <button
             type="button"

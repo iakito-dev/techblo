@@ -12,7 +12,7 @@ import {
  * count は描画する枚数。少ないとリロード毎に skeleton→実カードでページが伸びてガタつくため、
  * フィードは初期取得件数(INITIAL_PAGE_SIZE=24)に合わせる。保存記事ページは件数が可変なので既定の 12。
  *
- * variant: 'auto'(既定)は企業ページ・保存記事ページと同じ auto-fill の feed-grid ユーティリティ
+ * variant: 'auto'(既定)は保存記事ページ・閲覧履歴と同じ auto-fill の feed-grid ユーティリティ
  * (変更対象外)。'columns' はトップ(`/`)の一覧のみで使う、コンテナクエリで1〜4列に可変の
  * FEED_COLUMNS_CLASS(ADR-0035)。祖先に `@container` が無いと単なる1列グリッドになる。
  */

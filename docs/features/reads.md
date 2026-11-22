@@ -16,6 +16,7 @@
 - 既読化は**記事ページ(`/a/[id]`)に着地したタイミング**(`ArticleViewTracker`、`trackArticleView` と同所)。手動トグルは無し
 - 閲覧履歴 `/history`(`ReadingHistoryView`): 最近読んだ順に直近100件。ログイン時は JST の日付ごとに「今日 / 昨日 / M月D日(曜)」の見出しを付ける。タイトル・企業名・タグでの絞り込みと、カードからの保存トグルあり。ゲストは見出し無しで最後に開いた順
   - 導線: サイドバー「ライブラリ」/ モバイルは設定メニューの「閲覧履歴」行 / キーボード `g r`
+  - 0 件の空状態(「まだ読んだ記事がありません」+「フィードを見る」)・絞り込み 0 件は、保存一覧・フィードの空状態と同じ見た目(角丸タイルのアイコン + ボタン)
 
 ## データモデル
 
@@ -48,6 +49,7 @@ getReadFilteredFeed(userId, mode, input?): Promise<FeedPage>   // reads と EXIS
 - 既読化トリガ = 記事ページを開く(`ArticleViewTracker`)。冪等(既読を外す操作は無い)。再閲覧は `readAt` を進めるだけ
 - フィルタ unread = reads に無い記事、read = reads にある記事
 - ログイン = サーバー SQL 絞り込み(正しいページネーション)、ゲスト = クライアント hide(可視件数は変動)
+- ゲストのクライアント hide は、該当が少ないと番兵が画面内に残り続けて自動読み込みが全ページを取り切るまで Server Action を連発していた(既読 0 件の `?read=read` で全ページ取得 → 何も出ない白紙)。`isGuestReadFilterStalled`(`app/_composition/article/feed-infinite-scroll.ts`)で自動読み込みを止める: 既読 0 件の既読フィルタは読み込まない(「もっと読む」も出さない)、表示が増えないページが 3 連続したら自動では止めて「もっと読む」の手動に任せる。表示が 0 件で読み進める先が無い(または止めた)ときは feed の絞り込み空状態(`FeedFilteredEmptyState`)を出す
 
 ## 関連
 

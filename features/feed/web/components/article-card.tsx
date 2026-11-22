@@ -63,7 +63,9 @@ export const ArticleCard = memo(function ArticleCard({
         <CompanyFavicon url={article.url} name={article.company.name} size={20} />
         <span className="min-w-0 truncate">{article.company.name}</span>
         <div className="text-fg-muted ml-auto flex shrink-0 items-center gap-1.5 font-normal">
-          <RelativeTime date={article.publishedAt} />
+          {/* RelativeTime は min-w-12 で幅を確保しているため、左寄せのままだと「1分前」など短い表記が
+              右端より手前で止まり、絶対日付の行と右端がそろわない(はてブ数の前にも空きが出る) */}
+          <RelativeTime date={article.publishedAt} className="text-right" />
           {showHatenaCount && article.hatenaBookmarkCount > 0 && (
             <>
               <span aria-hidden="true">・</span>
@@ -132,11 +134,13 @@ export const ArticleCard = memo(function ArticleCard({
               <li key={tag} className="shrink-0">
                 {/* タグ絞り込み(?tag=)への入口。一覧に数十個並ぶため prefetch しない。
                     輪郭と文字だけ teal にし塗りは使わない(ADR-0035)。
-                    before は見た目の高さを変えずにタップ領域だけ上下へ広げる。 */}
+                    before は見た目の高さを変えずにタップ領域だけ上下へ広げる。
+                    キーボードフォーカスは hover と同じ 1px の色替えだけだと見分けられないため、内側に
+                    2px のリングを足して輪郭を太くする(外側リングは行の overflow-hidden で先頭が欠ける)。 */}
                 <Link
                   href={`/?tag=${encodeURIComponent(tag)}`}
                   prefetch={false}
-                  className="border-border-default text-fg-muted hover:border-accent hover:text-accent focus-visible:border-accent focus-visible:text-accent relative block rounded-full border px-2 text-[11px] leading-5 transition-colors before:absolute before:inset-x-0 before:-inset-y-1.5 focus-visible:outline-none"
+                  className="border-border-default text-fg-muted hover:border-accent hover:text-accent focus-visible:border-accent focus-visible:text-accent focus-visible:ring-accent relative block rounded-full border px-2 text-[11px] leading-5 transition-colors before:absolute before:inset-x-0 before:-inset-y-1.5 focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-inset"
                 >
                   {tag}
                 </Link>

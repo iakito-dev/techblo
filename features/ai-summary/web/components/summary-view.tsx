@@ -47,11 +47,12 @@ export function SummaryView({
         <ul aria-label="AI生成タグ" className="mt-3 flex flex-wrap gap-1.5">
           {tags.map((tag) => (
             <li key={tag}>
-              {/* 一覧カードのタグと同じ絞り込み入口(?tag=)。hover/focus は輪郭と文字だけ teal(ADR-0035) */}
+              {/* 一覧カードのタグと同じ絞り込み入口(?tag=)。hover/focus は輪郭と文字だけ teal(ADR-0035)。
+                  フォーカスは hover と見分けられるよう内側リングで輪郭を太くする(カードのタグと同じ) */}
               <Link
                 href={`/?tag=${encodeURIComponent(tag)}`}
                 prefetch={false}
-                className="border-border-default text-fg-muted hover:border-accent hover:text-accent focus-visible:border-accent focus-visible:text-accent relative block rounded-full border px-2 text-[11px] leading-5 transition-colors before:absolute before:inset-x-0 before:-inset-y-1.5 focus-visible:outline-none"
+                className="border-border-default text-fg-muted hover:border-accent hover:text-accent focus-visible:border-accent focus-visible:text-accent focus-visible:ring-accent relative block rounded-full border px-2 text-[11px] leading-5 transition-colors before:absolute before:inset-x-0 before:-inset-y-1.5 focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-inset"
               >
                 {tag}
               </Link>
@@ -60,7 +61,8 @@ export function SummaryView({
         </ul>
       )}
       {/* 断り書きは強調ではなく注記なので teal ではなく muted にする(文字色の teal はラベル・見出しに限る)。subtle(#9a9c9f)は地色に対し 2.6:1 で WCAG AA(4.5:1)に届かない */}
-      <p className="text-fg-muted mt-2.5 text-[11.5px] leading-[1.6]">
+      {/* 文節単位で折る。既定の折り返しだとモバイル幅で「保証されませ / ん。」と語の途中で割れていた */}
+      <p className="text-fg-muted mt-2.5 text-[11.5px] leading-[1.6] [word-break:auto-phrase]">
         元記事の内容を AI が要約したものです。正確性は保証されません。
       </p>
     </section>

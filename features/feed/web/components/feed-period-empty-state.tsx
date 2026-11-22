@@ -19,10 +19,10 @@ export function FeedPeriodEmptyState({ period }: { period: PopularPeriod }) {
       <div className="bg-bg-surface-2 text-fg-muted grid size-16 place-items-center rounded-xl">
         <CalendarX className="size-8" />
       </div>
-      <p className="text-fg-default mt-5 text-lg font-bold">
+      <p className="text-fg-default mt-5 text-lg font-bold text-balance [word-break:auto-phrase]">
         {PERIOD_RECENT_LABEL[period]}の人気記事はありません
       </p>
-      <p className="text-fg-muted mt-2 max-w-xs text-sm leading-relaxed">
+      <p className="text-fg-muted mt-2 max-w-xs text-sm leading-relaxed text-balance [word-break:auto-phrase]">
         この期間に公開された記事が見つかりませんでした。集計期間を広げてみてください。
       </p>
       <Button size="lg" isDisabled={isPending} onPress={() => setPeriod('all')} className="mt-6">

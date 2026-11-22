@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { Suspense } from 'react';
 import { FeedList } from '@/app/_composition/article/feed-list';
 import {
@@ -19,6 +18,8 @@ import {
   parsePeriod,
   parseReadMode,
 } from '@/features/feed/domain/feed-sort';
+import { CompanyFeedIntro } from '@/features/feed/web/components/company-feed-intro';
+import { FeedAllOffEmptyState } from '@/features/feed/web/components/feed-all-off-empty-state';
 import { DefaultFeedControls, FeedControls } from '@/features/feed/web/components/feed-controls';
 import { FeedEmptyState } from '@/features/feed/web/components/feed-empty-state';
 import { FeedFilteredEmptyState } from '@/features/feed/web/components/feed-filtered-empty-state';
@@ -32,9 +33,11 @@ import {
 } from '@/features/feed/web/components/mobile-feed-header';
 import { feedPageTitle } from '@/features/feed/web/feed-page-title';
 import { getCompanyBySlug } from '@/features/feed/web/queries';
+import { resolveCompanyFeedIntro } from '@/features/feed/web/view-models/company-feed-intro';
 import { FeedNavProvider } from '@/features/feed/web/view-models/feed-nav-context';
 import { resolveFilteredEmptyCopy } from '@/features/feed/web/view-models/filtered-empty-copy';
 import { firstSearchParams } from '@/features/feed/web/view-models/first-search-param';
+import { resolveSearchEmptyCopy } from '@/features/feed/web/view-models/search-empty-copy';
 import { organizationJsonLd, websiteJsonLd } from '@/lib/seo';
 import { resolveBaseUrl } from '@/lib/site-url';
 import { MOBILE_GUTTER_CLASS } from '@/shared/layout';
@@ -54,13 +57,13 @@ type FeedSearchParams = {
 /** Next.js が渡す生の searchParams(キーが繰り返されると配列)。firstSearchParams で FeedSearchParams にする。 */
 type RawSearchParams = { [K in keyof FeedSearchParams]?: string | string[] };
 
+type SingleCompany = { slug: string; name: string; description: string | null; siteUrl: string };
+
 /**
  * ?company= がちょうど 1 社のときだけ企業名を引く(複数選択はタイトルにしない)。
  * タイトルのためだけに失敗してページ全体を落とさないよう、取得失敗・未登録は無視する。
  */
-async function singleCompany(
-  param: string | undefined,
-): Promise<{ slug: string; name: string } | undefined> {
+async function singleCompany(param: string | undefined): Promise<SingleCompany | undefined> {
   const slugs = param
     ?.split(',')
     .map((s) => s.trim())
@@ -69,17 +72,31 @@ async function singleCompany(
   if (!slug) return undefined;
   try {
     const company = await getCompanyBySlug(slug);
-    return company ? { slug, name: company.name } : undefined;
+    return company
+      ? { slug, name: company.name, description: company.description, siteUrl: company.siteUrl }
+      : undefined;
   } catch {
     return undefined;
   }
 }
 
-/** デスクトップの見出し行。?company= が 1 社なら企業名を見出しにするため、サーバーで名前を引いて渡す。 */
+/**
+ * デスクトップの見出し行。?company= が 1 社なら企業名を見出しにするため、サーバーで名前を引いて渡す。
+ * あわせて紹介文・公式ブログ・企業別 RSS の紹介行を全幅で出す(企業ページ廃止後の導線。ADR-0048)。
+ */
 async function FeedHeading({ searchParams }: { searchParams: Promise<RawSearchParams> }) {
   const sp = firstSearchParams(await searchParams);
   const company = await singleCompany(sp.company);
-  return <FeedHeader icon="feed" showControls company={company} />;
+  return (
+    <>
+      <FeedHeader
+        icon="feed"
+        showControls
+        company={company ? { slug: company.slug, name: company.name } : undefined}
+      />
+      {company && <CompanyFeedIntro view={resolveCompanyFeedIntro(company)} />}
+    </>
+  );
 }
 
 /**
@@ -361,23 +378,24 @@ async function SubscribedFeed({ searchParams }: { searchParams: Promise<RawSearc
   });
 
   if (allOff) {
-    return (
-      <div className="border-border-default bg-bg-surface rounded-md border p-12 text-center">
-        <p className="text-fg-muted">表示する企業が選択されていません。</p>
-        <Link
-          href="/settings"
-          className="text-accent mt-3 inline-block text-sm font-medium hover:underline"
-        >
-          表示する企業を選ぶ
-        </Link>
-      </div>
-    );
+    return <FeedAllOffEmptyState />;
   }
 
   if (isEmpty) {
     // 検索 0 件は「記事がまだ無い」「期間が狭い」より優先(クリアを主導線にする。ADR-0022)
     if (query) {
-      return <FeedSearchEmptyState query={query} />;
+      // ゲストの未読/既読とマイフィードはサーバーの絞り込みに効かない(0 件の原因ではない)ので数えない。
+      const searchCopy = resolveSearchEmptyCopy({
+        query,
+        sort,
+        period,
+        readMode: isGuest ? 'all' : readMode,
+        tag,
+        category,
+        companySlugs,
+        feedIds: isGuest ? undefined : feedIds,
+      });
+      return <FeedSearchEmptyState query={query} copy={searchCopy} />;
     }
     // 人気順で狭い期間(今日/今週/今月)に該当 0 件 → 取得を促すのではなく期間を広げる導線。
     if (sort === 'popular' && period !== 'all') {
