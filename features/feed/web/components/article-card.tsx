@@ -7,6 +7,7 @@ import { CompanyFavicon } from '@/components/ui/company-favicon';
 import type { ArticleCard as ArticleCardType } from '../../application/dto';
 import { stripHtml } from '../strip-html';
 import { ArticleLink } from './article-link';
+import { HighlightedText } from './highlighted-text';
 import { RelativeTime } from './relative-time';
 
 /**
@@ -27,6 +28,7 @@ export const ArticleCard = memo(function ArticleCard({
   tags,
   actions,
   showHatenaCount,
+  highlight,
 }: {
   article: ArticleCardType;
   /** AI要約の概要(1文)。要約が無い/未生成の記事は RSS 抜粋(description)にフォールバックする。app 層から注入する(feed は ai-summary を import しない)。 */
@@ -39,6 +41,11 @@ export const ArticleCard = memo(function ArticleCard({
    * はてブ数は一覧のノイズになるため既定で出さない。並び順の根拠になる人気順のときだけ呼び出し側が true にする。
    */
   showHatenaCount?: boolean;
+  /**
+   * 検索語(?q=)。指定するとタイトル・概要・企業名の一致箇所を強調する。
+   * 検索は企業名・RSS 抜粋にも当たるため、なぜこの記事が出たのかを一覧のまま見分けられるようにする。
+   */
+  highlight?: string;
 }) {
   const overviewText = overview || (article.description ? stripHtml(article.description) : null);
   const hatenaLabel = `はてなブックマーク ${article.hatenaBookmarkCount} 件`;
@@ -61,7 +68,9 @@ export const ArticleCard = memo(function ArticleCard({
           (人気順のときだけ表示。並び順の根拠になるため)。 */}
       <div className="text-fg-default mb-2.5 flex items-center gap-[7px] text-[11.5px] font-semibold md:mb-3">
         <CompanyFavicon url={article.url} name={article.company.name} size={20} />
-        <span className="min-w-0 truncate">{article.company.name}</span>
+        <span className="min-w-0 truncate">
+          <HighlightedText text={article.company.name} query={highlight} />
+        </span>
         <div className="text-fg-muted ml-auto flex shrink-0 items-center gap-1.5 font-normal">
           {/* RelativeTime は min-w-12 で幅を確保しているため、左寄せのままだと「1分前」など短い表記が
               右端より手前で止まり、絶対日付の行と右端がそろわない(はてブ数の前にも空きが出る) */}
@@ -100,13 +109,15 @@ export const ArticleCard = memo(function ArticleCard({
           data-article-link
           className="group-hover:text-accent group-has-[[data-detail-trigger]:focus-visible]:text-accent transition-colors group-has-[[data-detail-trigger]:focus-visible]:underline group-has-[[data-detail-trigger]:focus-visible]:decoration-[1.5px] group-has-[[data-detail-trigger]:focus-visible]:underline-offset-4 after:absolute after:inset-0 focus-visible:outline-none"
         >
-          {article.title}
+          <HighlightedText text={article.title} query={highlight} />
         </ArticleLink>
       </h2>
 
       {/* 抜粋: AI要約の概要優先、無ければ RSS 抜粋 */}
       {overviewText && (
-        <p className="text-fg-muted line-clamp-2 text-[13.5px] leading-[1.75]">{overviewText}</p>
+        <p className="text-fg-muted line-clamp-2 text-[13.5px] leading-[1.75]">
+          <HighlightedText text={overviewText} query={highlight} />
+        </p>
       )}
 
       {/*

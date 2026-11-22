@@ -28,10 +28,13 @@ export const FeedRow = memo(function FeedRow({
   item,
   isGuest,
   sort,
+  highlight,
 }: {
   item: ComposedArticle;
   isGuest: boolean;
   sort?: FeedSort;
+  /** 検索語(?q=)。カードのタイトル・概要・企業名の一致箇所を強調する。 */
+  highlight?: string;
 }) {
   const { article, bookmarked, favorited, summary } = item;
   return (
@@ -40,6 +43,7 @@ export const FeedRow = memo(function FeedRow({
       overview={summary?.overview ?? null}
       tags={summary?.tags ?? []}
       showHatenaCount={sort === 'popular'}
+      highlight={highlight}
       actions={
         <ArticleActions
           articleId={article.id}
@@ -237,7 +241,13 @@ export function FeedList({
         }`}
       >
         {visibleItems.map((item) => (
-          <FeedRow key={item.article.id} item={item} isGuest={isGuest} sort={sort} />
+          <FeedRow
+            key={item.article.id}
+            item={item}
+            isGuest={isGuest}
+            sort={sort}
+            highlight={query}
+          />
         ))}
       </div>
 

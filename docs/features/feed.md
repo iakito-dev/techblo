@@ -137,6 +137,7 @@ trackArticleView(input: { articleId: string }): Promise<Result<void, FeedError>>
   - デスクトップはトップバー(⌘K / Ctrl+K でフォーカス、Escape でクリア)、lg 未満は `FeedControls` の searchSlot に配置
   - 検索語・タグの正規化(NUL 除去・trim・100文字上限・空→検索なし)は application 層(NUL は URL の `%00` で、Postgres が受けず 500 になるため。企業 slug に NUL を含む場合も DB を引かず「無い」扱い)、LIKE メタ文字エスケープは infrastructure 層(`escape-like.ts`)
   - 検索結果はフィードキャッシュを通さない(`searchFeed`)。「もっと読む」も `query` を引き継ぐ
+  - 検索結果のカードは、タイトル・概要・企業名のうち検索語に一致した箇所を `<mark>`(`bg-accent-soft` の淡い面。文字色は親のまま)で強調する(`HighlightedText` / `splitHighlight`。検索と同じく NFKC 正規化した語全体の大文字小文字を区別しない部分一致)。検索は企業名や RSS 抜粋にも当たるため、強調が無いと「なぜこの記事が出たのか」(例: `LINE` で `Linear` の記事が出る)が一覧から分からなかった。RSS 抜粋はカードに出ない(AI 要約の概要を優先表示する)ので、抜粋だけに一致した記事は強調なしになる
 - 削除済み記事(`articles.deleted_at` not null)は表示しない
 - 人気順: 集計期間(`?period=today|week|month|all`、既定 all)で切り替え。いずれもその期間に公開された記事に絞り、**期間ごとに並べる指標を変える**(ADR-0018)
   - `today` / `week`(直近 1/7 日・短期): 伸び速度(velocity)降順。`trend_score = (Δはてブ_6h + 1) / (経過時間[h] + 2)^1.0`。累計ではなく「今伸びている」を見る。事前計算列 `articles.trend_score` で並べる(now() 非依存・索引可)
