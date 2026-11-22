@@ -66,14 +66,14 @@ export function LandingFooter() {
             商標・免責表記。実企業名を記述的に挙げるため、各社との無関係・RSS 集約である旨・
             ダミー表示である旨を明示してリスクを抑える(法務配慮。LP 全体を包括カバーする)。
           */}
-          <p className="text-fg-faint text-xs leading-relaxed [word-break:auto-phrase]">
+          <p className="text-fg-muted text-xs leading-relaxed [word-break:auto-phrase]">
             記載の会社名・製品名・サービス名およびロゴは各社の商標または登録商標です。テクブロ
             は各社と資本・提携・公認等の関係にあるものではなく、各社が公開する RSS
             フィードの見出し・抜粋・リンクを集約して表示します(記事本文は各社の元記事ページで閲覧)。本ページに掲載した記事・画面・AI要約・利用者の声はすべて表示イメージであり、実在のものではありません。
           </p>
           {/* 年号は new Date() を使わない(Next.js 16 のプリレンダ制約。LP を完全静的に保つ)。
               年は固定リテラルのため年明けは手動更新が必要。 */}
-          <p className="text-fg-faint text-xs">
+          <p className="text-fg-muted text-xs">
             © 2026 techblo.dev / テクブロ. All rights reserved.
           </p>
         </div>

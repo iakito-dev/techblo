@@ -70,7 +70,7 @@ export function LandingHero() {
             </Button>
           </Magnetic>
         </div>
-        <p className="lp-enter text-fg-faint mt-4 text-xs [--lp-delay:320ms]">
+        <p className="lp-enter text-fg-muted mt-4 text-xs [--lp-delay:320ms]">
           クレジットカード不要 · Google ですぐログイン
         </p>
       </div>
@@ -100,7 +100,7 @@ export function LandingHero() {
             ))}
           </div>
           {/* 画面はイメージである旨を明示(記事は架空。フッターの免責と併せて誤認を防ぐ)。 */}
-          <p className="text-fg-faint absolute right-4 bottom-3 z-10 text-[0.625rem]">
+          <p className="text-fg-muted absolute right-4 bottom-3 z-10 text-[0.625rem]">
             ※ 画面はイメージです
           </p>
           {/* 下端フェード。 */}
