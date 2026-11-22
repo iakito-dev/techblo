@@ -29,12 +29,15 @@ export const FeedRow = memo(function FeedRow({
   isGuest,
   sort,
   highlight,
+  activeTag,
 }: {
   item: ComposedArticle;
   isGuest: boolean;
   sort?: FeedSort;
   /** 検索語(?q=)。カードのタイトル・概要・企業名の一致箇所を強調する。 */
   highlight?: string;
+  /** 絞り込み中のタグ(?tag=)。カードの一致するタグを先頭に寄せて強調する。 */
+  activeTag?: string;
 }) {
   const { article, bookmarked, favorited, summary } = item;
   return (
@@ -44,6 +47,7 @@ export const FeedRow = memo(function FeedRow({
       tags={summary?.tags ?? []}
       showHatenaCount={sort === 'popular'}
       highlight={highlight}
+      activeTag={activeTag}
       actions={
         <ArticleActions
           articleId={article.id}
@@ -247,6 +251,7 @@ export function FeedList({
             isGuest={isGuest}
             sort={sort}
             highlight={query}
+            activeTag={tag}
           />
         ))}
       </div>
