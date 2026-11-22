@@ -270,7 +270,7 @@ async function ArticleContent({ params }: { params: Promise<{ id: string }> }) {
               className="ring-border-default aspect-[1200/630] w-full object-cover ring-1 ring-inset"
             />
           )}
-          <p className={`text-fg-subtle truncate text-[11.5px] ${article.ogImage ? 'mt-2' : ''}`}>
+          <p className={`text-fg-muted truncate text-[11.5px] ${article.ogImage ? 'mt-2' : ''}`}>
             {hostname(article.url)}
           </p>
         </div>

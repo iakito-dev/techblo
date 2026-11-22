@@ -88,7 +88,7 @@ function VoiceCard({ voice }: { voice: Voice }) {
         </span>
         <span className="flex min-w-0 flex-col leading-tight">
           <span className="text-fg-default truncate text-sm font-semibold">{voice.name}</span>
-          <span className="text-fg-faint truncate text-xs">{voice.role}</span>
+          <span className="text-fg-muted truncate text-xs">{voice.role}</span>
         </span>
       </figcaption>
     </figure>

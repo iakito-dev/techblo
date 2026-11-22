@@ -69,7 +69,7 @@ Component (component-specific)
 - すべての interactive 要素に `aria-label` または可視ラベル
 - フォーカスリングは `:focus-visible` で明示(`outline:none` だけは禁止)
 - 色のみで情報を伝えない(アイコン併用)
-- 文字のコントラストは本文サイズで 4.5:1 以上。ライトの `fg-subtle` / `fg-faint`(#9a9c9f)は地色 #fafaf8・白に対し 2.6〜2.75:1 しかないため、読ませる文字(件数・現在値・見出しラベル・注記)には使わず `fg-muted` にする。`fg-subtle` はプレースホルダ・装飾アイコン・無効状態など、コントラスト要件の対象外か 3:1 で足りるものに限る
+- 文字のコントラストは本文サイズで 4.5:1 以上。ライトの `fg-subtle` / `fg-faint`(#9a9c9f)は地色 #fafaf8・白に対し 2.6〜2.75:1 しかないため、読ませる文字(件数・現在値・見出しラベル・注記)には使わず `fg-muted` にする。`fg-subtle` はプレースホルダ・装飾アイコン・無効状態など、コントラスト要件の対象外か 3:1 で足りるものに限る。LP の製品モック(faux UI)内の文字は「画面のイメージ」なので対象外とし、モックの外の注記・見出し・免責・利用者の声の肩書きは `fg-muted` にする
 - キーボードナビゲーション可能(Tab で全機能到達)
 - スキップリンク(`components/layout/skip-link.tsx`)を `(app)` レイアウト・企業ページ・legal シェルの先頭に置き、本文ラッパー `#main-content` へ飛べる
 - 「先頭へ戻る」ボタン(`components/layout/scroll-to-top.tsx`)はビューポート高の約1.5倍スクロールで右下にフェードイン。モバイルでは下部ナビの退避(`BottomChrome`)に追従し、`prefers-reduced-motion` ではスムーススクロールしない

@@ -10,7 +10,7 @@ export function LandingCompanies() {
   return (
     <section id="companies" className="border-border-default/60 bg-bg-surface/40 border-y py-12">
       <Reveal className="w-full">
-        <p className="text-fg-faint px-6 text-center text-xs font-medium tracking-[0.18em] uppercase">
+        <p className="text-fg-muted px-6 text-center text-xs font-medium tracking-[0.18em] uppercase">
           集約しているテックブログ(一部)
         </p>
         {/*
