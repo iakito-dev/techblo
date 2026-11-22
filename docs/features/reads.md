@@ -50,6 +50,7 @@ getReadFilteredFeed(userId, mode, input?): Promise<FeedPage>   // reads と EXIS
 - フィルタ unread = reads に無い記事、read = reads にある記事
 - ログイン = サーバー SQL 絞り込み(正しいページネーション)、ゲスト = クライアント hide(可視件数は変動)
 - ゲストのクライアント hide は、該当が少ないと番兵が画面内に残り続けて自動読み込みが全ページを取り切るまで Server Action を連発していた(既読 0 件の `?read=read` で全ページ取得 → 何も出ない白紙)。`isGuestReadFilterStalled`(`app/_composition/article/feed-infinite-scroll.ts`)で自動読み込みを止める: 既読 0 件の既読フィルタは読み込まない(「もっと読む」も出さない)、表示が増えないページが 3 連続したら自動では止めて「もっと読む」の手動に任せる。表示が 0 件で読み進める先が無い(または止めた)ときは feed の絞り込み空状態(`FeedFilteredEmptyState`)を出す
+- 既読フィルタ(`?read=read`)で、localStorage の既読記事がすべて一覧に出そろったら(`areAllGuestReadsShown`。既読 0 件も含む)、自動読み込みも「もっと読む」も止める。一致しうるのは既読 ID の記事だけなので、それ以上取っても増えない。以前は既読 0 件のときしか止めず、既読が数件だと全部出たあとも空ページを取り続け(サンドボックスの既読 8 件で 6 回)、「もっと読む」を押すとフィード全体を読み進めていた。既読 ID に削除済み・非表示企業や他の絞り込みで外れる記事が含まれると出そろわないので、その場合は従来の空ページ連続の打ち切りに任せる
 
 ## 関連
 

@@ -42,3 +42,26 @@ export function isGuestReadFilterStalled({
   if (readMode === 'read' && guestReadCount === 0) return true;
   return emptyPageStreak >= GUEST_FILTER_MAX_EMPTY_PAGES;
 }
+
+/**
+ * ゲストの既読フィルタ(?read=read)で、localStorage の既読記事がすべて一覧に出そろったか。
+ * 既読フィルタに一致しうるのは既読 ID の記事だけなので、出そろったらこれ以上ページを取っても何も増えない。
+ * 以前は既読 0 件のときだけ止めていたため、既読が数件だと一覧に全部出たあとも自動読み込みが空ページを
+ * 取り続け(サンドボックスの既読 8 件で 6 回)、「もっと読む」も残って押すとフィード全体を読み進めていた。
+ * 既読 ID には削除済み・非表示企業の記事や他の絞り込みで外れる記事も含みうるので、その場合は出そろわず
+ * 従来どおり(isGuestReadFilterStalled の空ページ連続で自動を止める)に任せる。
+ */
+export function areAllGuestReadsShown({
+  isGuest,
+  readMode,
+  guestReadCount,
+  shownCount,
+}: {
+  isGuest: boolean;
+  readMode: ReadFilterMode;
+  guestReadCount: number;
+  /** 既読フィルタで一覧に出ている件数(= 一覧に出ている既読記事の数)。 */
+  shownCount: number;
+}): boolean {
+  return isGuest && readMode === 'read' && shownCount >= guestReadCount;
+}

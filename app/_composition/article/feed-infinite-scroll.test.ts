@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import {
+  areAllGuestReadsShown,
   GUEST_FILTER_MAX_EMPTY_PAGES,
   isGuestReadFilterStalled,
   shouldTriggerAutoLoad,
@@ -81,5 +82,27 @@ describe('isGuestReadFilterStalled', () => {
     expect(
       isGuestReadFilterStalled({ ...base, emptyPageStreak: GUEST_FILTER_MAX_EMPTY_PAGES }),
     ).toBe(true);
+  });
+});
+
+describe('areAllGuestReadsShown', () => {
+  const base = { isGuest: true, readMode: 'read' as const, guestReadCount: 8, shownCount: 8 };
+
+  test('is true once every guest read article is listed under the read filter', () => {
+    expect(areAllGuestReadsShown(base)).toBe(true);
+  });
+
+  test('is true for the read filter when the guest has read nothing', () => {
+    expect(areAllGuestReadsShown({ ...base, guestReadCount: 0, shownCount: 0 })).toBe(true);
+  });
+
+  test('keeps loading while some read articles are not listed yet', () => {
+    expect(areAllGuestReadsShown({ ...base, shownCount: 7 })).toBe(false);
+  });
+
+  test('never applies to signed-in users, the unread filter or no filter', () => {
+    expect(areAllGuestReadsShown({ ...base, isGuest: false })).toBe(false);
+    expect(areAllGuestReadsShown({ ...base, readMode: 'unread' })).toBe(false);
+    expect(areAllGuestReadsShown({ ...base, readMode: 'all' })).toBe(false);
   });
 });
