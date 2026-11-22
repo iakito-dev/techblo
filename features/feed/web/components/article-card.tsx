@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { memo, type ReactNode } from 'react';
 import { CompanyFavicon } from '@/components/ui/company-favicon';
 import type { ArticleCard as ArticleCardType } from '../../application/dto';
+import { cardTags } from '../card-tags';
 import { stripHtml } from '../strip-html';
 import { ArticleLink } from './article-link';
 import { HighlightedText } from './highlighted-text';
@@ -29,6 +30,7 @@ export const ArticleCard = memo(function ArticleCard({
   actions,
   showHatenaCount,
   highlight,
+  activeTag,
 }: {
   article: ArticleCardType;
   /** AI要約の概要(1文)。要約が無い/未生成の記事は RSS 抜粋(description)にフォールバックする。app 層から注入する(feed は ai-summary を import しない)。 */
@@ -46,8 +48,14 @@ export const ArticleCard = memo(function ArticleCard({
    * 検索は企業名・RSS 抜粋にも当たるため、なぜこの記事が出たのかを一覧のまま見分けられるようにする。
    */
   highlight?: string;
+  /**
+   * 絞り込み中のタグ(?tag= の canonical 値)。一致するタグ(類義語を含む)を先頭に寄せて強調し、
+   * 「なぜこの一覧に出ているか」をカード上で見せる。
+   */
+  activeTag?: string;
 }) {
   const overviewText = overview || (article.description ? stripHtml(article.description) : null);
+  const visibleTags = cardTags(tags ?? [], activeTag);
   const hatenaLabel = `はてなブックマーク ${article.hatenaBookmarkCount} 件`;
 
   return (
@@ -132,7 +140,7 @@ export const ArticleCard = memo(function ArticleCard({
         記事ページへは遷移しない。
       */}
       <div className="relative z-10 mt-auto flex items-center gap-2 pt-3 md:pt-4">
-        {tags && tags.length > 0 && (
+        {visibleTags.length > 0 && (
           <ul
             aria-label="AI生成タグ"
             // overflow-hidden が ::before の当たり判定(上下に広げた分)を切らないよう、
@@ -141,17 +149,20 @@ export const ArticleCard = memo(function ArticleCard({
             // 半端に切れた状態では見せない。gap-y-3 は2行目が padding 内へ覗かない余白。
             className="-my-1.5 flex h-8 min-w-0 flex-1 flex-wrap gap-x-1.5 gap-y-3 overflow-hidden py-1.5"
           >
-            {tags.slice(0, 3).map((tag) => (
+            {visibleTags.map(({ tag, active }) => (
               <li key={tag} className="shrink-0">
                 {/* タグ絞り込み(?tag=)への入口。一覧に数十個並ぶため prefetch しない。
                     輪郭と文字だけ teal にし塗りは使わない(ADR-0035)。
                     before は見た目の高さを変えずにタップ領域だけ上下へ広げる。
                     キーボードフォーカスは hover と同じ 1px の色替えだけだと見分けられないため、内側に
                     2px のリングを足して輪郭を太くする(外側リングは行の overflow-hidden で先頭が欠ける)。 */}
+                {/* 絞り込み中のタグ(active)は hover と同じ輪郭・文字の teal で常時示す(塗りは使わない)。
+                    いま見ている一覧そのもの(?tag= と同じ値)のときだけ aria-current を付ける。 */}
                 <Link
                   href={`/?tag=${encodeURIComponent(tag)}`}
                   prefetch={false}
-                  className="border-border-default text-fg-muted hover:border-accent hover:text-accent focus-visible:border-accent focus-visible:text-accent focus-visible:ring-accent relative block rounded-full border px-2 text-[11px] leading-5 transition-colors before:absolute before:inset-x-0 before:-inset-y-1.5 focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-inset"
+                  aria-current={active && tag === activeTag?.trim() ? 'page' : undefined}
+                  className={`${active ? 'border-accent text-accent' : 'border-border-default text-fg-muted'} hover:border-accent hover:text-accent focus-visible:border-accent focus-visible:text-accent focus-visible:ring-accent relative block rounded-full border px-2 text-[11px] leading-5 transition-colors before:absolute before:inset-x-0 before:-inset-y-1.5 focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-inset`}
                 >
                   {tag}
                 </Link>
