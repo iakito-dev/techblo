@@ -273,10 +273,16 @@ export function SavedArticlesView({
             })}
           </div>
           {/* 件数が少ないと左上に寄って空白が広がるため、薄い補足で「これから増える」ことを示す */}
+          {/* 中央寄せの 1〜2 行なので、既定の折り返しだとモバイル幅でリンクが「フィ / ードを見る →」と
+              語の途中で割れていた。本文は文節単位で折り、リンクは 1 語として折り返さない。
+              リンクは 14px の 1 行で 24px(WCAG 2.5.8)に届かないため、py + 同量の負マージンで当たり判定だけ広げる */}
           {visibleCount <= 2 && !isFiltering && (
-            <p className="text-fg-subtle mt-8 text-center text-sm">
+            <p className="text-fg-subtle mt-8 text-center text-sm text-balance [word-break:auto-phrase]">
               {emptyHint}。
-              <Link href="/" className="text-accent ml-1 hover:underline">
+              <Link
+                href="/"
+                className="text-accent -my-1 ml-1 inline-block py-1 whitespace-nowrap hover:underline"
+              >
                 フィードを見る →
               </Link>
             </p>
