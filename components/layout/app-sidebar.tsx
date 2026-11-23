@@ -23,6 +23,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { CompanyFavicon } from '@/components/ui/company-favicon';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { CATEGORY_DEFINITIONS } from '@/shared/categories';
+import { formatCount } from '@/shared/text';
 import { cn } from '@/shared/utils';
 
 /** サイドバーに出す企業(購読企業=フォルダ相当)。 */
@@ -175,7 +176,7 @@ export function AppSidebar({
                       <CompanyFavicon url={c.siteUrl} name={c.name} />
                       <span className="min-w-0 flex-1 truncate">{c.name}</span>
                       <span className="text-fg-muted shrink-0 text-xs tabular-nums">
-                        {c.articleCount}
+                        {formatCount(c.articleCount)}
                       </span>
                     </Link>
                   );
@@ -212,7 +213,7 @@ export function AppSidebar({
                         <CompanyFavicon url={f.siteUrl ?? ''} name={f.title} />
                         <span className="min-w-0 flex-1 truncate">{f.title}</span>
                         <span className="text-fg-muted shrink-0 text-xs tabular-nums">
-                          {f.articleCount}
+                          {formatCount(f.articleCount)}
                         </span>
                       </Link>
                     );

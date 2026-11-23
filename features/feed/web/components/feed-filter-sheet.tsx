@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { CompanyFavicon } from '@/components/ui/company-favicon';
 import { matchesCompanyName } from '@/shared/company-name-match';
+import { formatCount } from '@/shared/text';
 import {
   type FeedSort,
   type PopularPeriod,
@@ -243,7 +244,7 @@ export function FeedFilterSheet({
                       </span>
                     )}
                     <span className="text-fg-subtle shrink-0 text-xs tabular-nums">
-                      {c.articleCount}
+                      {formatCount(c.articleCount)}
                     </span>
                   </button>
                 </li>
@@ -290,7 +291,7 @@ export function FeedFilterSheet({
                         </span>
                       )}
                       <span className="text-fg-subtle shrink-0 text-xs tabular-nums">
-                        {f.articleCount}
+                        {formatCount(f.articleCount)}
                       </span>
                     </button>
                   </li>
@@ -315,7 +316,7 @@ export function FeedFilterSheet({
           onClick={apply}
           className="bg-primary text-fg-inverse active:bg-primary-hover h-12 flex-1 rounded-md text-base font-medium transition-colors"
         >
-          <span className="tabular-nums">{debouncedCount.toLocaleString()}</span>件の記事を表示
+          <span className="tabular-nums">{formatCount(debouncedCount)}</span>件の記事を表示
         </button>
       </footer>
     </FeedBottomSheet>
