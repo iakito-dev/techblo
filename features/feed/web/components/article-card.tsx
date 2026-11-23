@@ -4,6 +4,7 @@ import { Bookmark, Heart } from 'lucide-react';
 import Link from 'next/link';
 import { memo, type ReactNode } from 'react';
 import { CompanyFavicon } from '@/components/ui/company-favicon';
+import { formatCount } from '@/shared/text';
 import type { ArticleCard as ArticleCardType } from '../../application/dto';
 import { cardTags } from '../card-tags';
 import { stripHtml } from '../strip-html';
@@ -56,7 +57,7 @@ export const ArticleCard = memo(function ArticleCard({
 }) {
   const overviewText = overview || (article.description ? stripHtml(article.description) : null);
   const visibleTags = cardTags(tags ?? [], activeTag);
-  const hatenaLabel = `はてなブックマーク ${article.hatenaBookmarkCount} 件`;
+  const hatenaLabel = `はてなブックマーク ${formatCount(article.hatenaBookmarkCount)} 件`;
 
   return (
     // cursor-pointer は iOS Safari 対策。stretched link(::after で全面化)領域を
@@ -93,7 +94,7 @@ export const ArticleCard = memo(function ArticleCard({
                 </span>
                 <span className="sr-only">はてなブックマーク </span>
                 <span className="font-metric text-fg-default font-semibold">
-                  {article.hatenaBookmarkCount}
+                  {formatCount(article.hatenaBookmarkCount)}
                 </span>
               </span>
             </>
