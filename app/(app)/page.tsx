@@ -9,7 +9,7 @@ import {
   getSectionsPageData,
 } from '@/app/_composition/article/feed-load-more';
 import { FeedSectionsView } from '@/app/_composition/article/feed-sections-view';
-import { feedAlternateLinks } from '@/app/_feed/feed-alternates';
+import { feedAlternateLinks, filteredFeedLink } from '@/app/_feed/feed-alternates';
 import { FeedHeader, FeedTopbar } from '@/components/layout/feed-topbar';
 import { JsonLd } from '@/components/seo/json-ld';
 import {
@@ -18,7 +18,10 @@ import {
   parsePeriod,
   parseReadMode,
 } from '@/features/feed/domain/feed-sort';
-import { CompanyFeedIntro } from '@/features/feed/web/components/company-feed-intro';
+import {
+  CompanyFeedIntro,
+  FilteredFeedRssLink,
+} from '@/features/feed/web/components/company-feed-intro';
 import { FeedAllOffEmptyState } from '@/features/feed/web/components/feed-all-off-empty-state';
 import { DefaultFeedControls, FeedControls } from '@/features/feed/web/components/feed-controls';
 import { FeedEmptyState } from '@/features/feed/web/components/feed-empty-state';
@@ -83,10 +86,14 @@ async function singleCompany(param: string | undefined): Promise<SingleCompany |
 /**
  * デスクトップの見出し行。?company= が 1 社なら企業名を見出しにするため、サーバーで名前を引いて渡す。
  * あわせて紹介文・公式ブログ・企業別 RSS の紹介行を全幅で出す(企業ページ廃止後の導線。ADR-0048)。
+ * タグ・カテゴリで絞っているときは、その絞り込みの RSS へのリンクを同じ位置に出す。
  */
 async function FeedHeading({ searchParams }: { searchParams: Promise<RawSearchParams> }) {
   const sp = firstSearchParams(await searchParams);
   const company = await singleCompany(sp.company);
+  // 企業で絞っていれば企業別 RSS(紹介行)を優先する。検索結果は RSS で再現できない一覧なので出さない。
+  const filteredRss =
+    !company && !sp.q?.trim() ? filteredFeedLink({ tag: sp.tag, category: sp.category }) : null;
   return (
     <>
       <FeedHeader
@@ -95,6 +102,7 @@ async function FeedHeading({ searchParams }: { searchParams: Promise<RawSearchPa
         company={company ? { slug: company.slug, name: company.name } : undefined}
       />
       {company && <CompanyFeedIntro view={resolveCompanyFeedIntro(company)} />}
+      {filteredRss && <FilteredFeedRssLink href={filteredRss.url} title={filteredRss.title} />}
     </>
   );
 }

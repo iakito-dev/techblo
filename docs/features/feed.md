@@ -83,6 +83,7 @@
 - 旧 URL は `next.config.ts` の `redirects()` で転送する(`/companies` → `/`、`/companies/<slug>` → `/?company=<slug>`。いずれも恒久)
 - 記事ページ `/a/[id]` の企業名は `/?company=<slug>` へのリンク
 - `/?company=<slug>` が 1 社のときは、見出しの下(モバイルは一覧の先頭)に紹介行(`CompanyFeedIntro`)を出す: 紹介文(企業名と同じ・空なら省く)・公式ブログ(ホスト名 + 外部リンクアイコン、別タブ)・企業別 RSS。内容は `resolveCompanyFeedIntro`(`siteUrl` は http(s) のときだけリンクにする)。企業ページ廃止で紹介文・公式ブログ・企業別 RSS への画面上の導線が無くなっていたため(RSS は自動検出の `<link>` だけだった)
+- `?tag=` / `?category=` で絞っていて企業で絞っていない(検索 `?q=` も無い)ときは、lg+ の見出しの下に同じ表記の「RSS」リンク(`FilteredFeedRssLink`)を出し、その絞り込みの公開 RSS(`/feed.xml?category=&tag=`。`filteredFeedLink` で自動検出の `<link>` と同じ URL を作る)へ導く。以前は自動検出だけで、画面上からタグ・カテゴリ別の RSS を見つける手段が無かった。リンク 1 つだけの行なので、<lg では一覧を押し下げないよう出さない
 - 企業別 RSS(`/companies/[slug]/feed.xml`)は購読者がいるため残す。チャンネルの `link` は `/?company=<slug>`
 - sitemap・構造化データ(`CollectionPage` / 企業 `ItemList`)からは外した
 

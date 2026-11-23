@@ -29,3 +29,21 @@ export function CompanyFeedIntro({ view }: { view: CompanyFeedIntroView }) {
     </div>
   );
 }
+
+/**
+ * タグ・カテゴリで絞ったフィード(/?tag= / /?category=)の見出し下に出す RSS リンク。
+ * 絞り込み別の公開 RSS(ADR-0039)は自動検出(<link rel="alternate">)でしか見つけられず、
+ * 企業で絞った一覧(CompanyFeedIntro)と違って画面上に入口が無かった。企業の紹介行と同じ位置・表記にする。
+ * 紹介文の無いリンク 1 つだけの行なので、<lg(見出し行が無く、チップ行の直下に来る)では
+ * 一覧を 1 行押し下げる割に使う人が少ないため出さず、見出し行のある lg+ だけに出す。
+ */
+export function FilteredFeedRssLink({ href, title }: { href: string; title: string }) {
+  return (
+    <div className="-mt-2 mb-6 hidden items-center text-sm lg:flex">
+      <a href={href} title={`${title}(RSS)`} className={LINK_CLASS}>
+        <Rss aria-hidden="true" className="size-3.5" />
+        RSS
+      </a>
+    </div>
+  );
+}
