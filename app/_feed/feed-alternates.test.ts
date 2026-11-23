@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { feedAlternateLinks } from './feed-alternates';
+import { feedAlternateLinks, filteredFeedLink } from './feed-alternates';
 
 const ALL = { url: '/feed.xml', title: 'テクブロ 新着' };
 
@@ -42,5 +42,23 @@ describe('feedAlternateLinks', () => {
       '/companies/mercari/feed.xml',
       '/feed.xml',
     ]);
+  });
+});
+
+describe('filteredFeedLink', () => {
+  it('タグ・カテゴリが無い、または不正なカテゴリだけなら null', () => {
+    expect(filteredFeedLink({})).toBeNull();
+    expect(filteredFeedLink({ tag: ' ', category: 'not-a-category' })).toBeNull();
+  });
+
+  it('タグ・カテゴリの絞り込みに対応するフィードを返す', () => {
+    expect(filteredFeedLink({ tag: 'LLM' })).toEqual({
+      url: '/feed.xml?tag=LLM',
+      title: '#LLM の新着',
+    });
+    expect(filteredFeedLink({ category: 'ai', tag: 'LLM' })).toEqual({
+      url: '/feed.xml?category=ai&tag=LLM',
+      title: 'AI・機械学習 #LLM の新着',
+    });
   });
 });

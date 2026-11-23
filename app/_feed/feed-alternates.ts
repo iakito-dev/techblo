@@ -16,18 +16,8 @@ export function feedAlternateLinks(params: {
 }): FeedAlternateLink[] {
   const links: FeedAlternateLink[] = [];
 
-  const tag = params.tag?.trim() || undefined;
-  const rawCategory = params.category?.trim();
-  const category = isArticleCategory(rawCategory) ? rawCategory : undefined;
-  if (tag || category) {
-    const query = new URLSearchParams();
-    if (category) query.set('category', category);
-    if (tag) query.set('tag', tag);
-    const label = [category && getCategoryDefinition(category).label, tag && `#${tag}`]
-      .filter(Boolean)
-      .join(' ');
-    links.push({ url: `/feed.xml?${query.toString()}`, title: `${label} の新着` });
-  }
+  const filtered = filteredFeedLink(params);
+  if (filtered) links.push(filtered);
 
   if (params.company) {
     links.push({
@@ -38,4 +28,25 @@ export function feedAlternateLinks(params: {
 
   links.push({ url: '/feed.xml', title: 'テクブロ 新着' });
   return links;
+}
+
+/**
+ * タグ・カテゴリで絞った一覧に対応する公開 RSS(/feed.xml?category=&tag=)。どちらも無い・
+ * 不正なカテゴリキーだけなら null。自動検出(feedAlternateLinks)と一覧の見出し下の RSS リンクで共有する。
+ */
+export function filteredFeedLink(params: {
+  tag?: string;
+  category?: string;
+}): FeedAlternateLink | null {
+  const tag = params.tag?.trim() || undefined;
+  const rawCategory = params.category?.trim();
+  const category = isArticleCategory(rawCategory) ? rawCategory : undefined;
+  if (!tag && !category) return null;
+  const query = new URLSearchParams();
+  if (category) query.set('category', category);
+  if (tag) query.set('tag', tag);
+  const label = [category && getCategoryDefinition(category).label, tag && `#${tag}`]
+    .filter(Boolean)
+    .join(' ');
+  return { url: `/feed.xml?${query.toString()}`, title: `${label} の新着` };
 }
