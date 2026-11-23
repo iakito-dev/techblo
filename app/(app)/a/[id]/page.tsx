@@ -18,6 +18,7 @@ import { ArticleHeroImage } from '@/features/feed/web/components/article-hero-im
 import { ArticleSourceLink } from '@/features/feed/web/components/article-link';
 import { RelatedArticles } from '@/features/feed/web/components/related-articles';
 import { ShareButton } from '@/features/feed/web/components/share-button';
+import { hatenaEntryUrl } from '@/features/feed/web/hatena-entry-url';
 import { getArticleById, getRelatedArticles } from '@/features/feed/web/queries';
 import { toExcerpt } from '@/features/feed/web/strip-html';
 import { CACHE_TAGS } from '@/lib/cache/tags';
@@ -270,9 +271,10 @@ async function ArticleContent({ params }: { params: Promise<{ id: string }> }) {
               className="ring-border-default aspect-[1200/630] w-full object-cover ring-1 ring-inset"
             />
           )}
-          <p className={`text-fg-muted truncate text-[11.5px] ${article.ogImage ? 'mt-2' : ''}`}>
-            {hostname(article.url)}
-          </p>
+          <div className={`flex items-center gap-3 text-[11.5px] ${article.ogImage ? 'mt-2' : ''}`}>
+            <p className="text-fg-muted min-w-0 truncate">{hostname(article.url)}</p>
+            <HatenaEntryLink url={article.url} count={article.hatenaBookmarkCount} />
+          </div>
         </div>
 
         {/* アクション行: xl 未満は左に保存・お気に入り・共有のアイコン、右端に「元記事を開く」
@@ -305,6 +307,44 @@ async function ArticleContent({ params }: { params: Promise<{ id: string }> }) {
         </Suspense>
       </aside>
     </div>
+  );
+}
+
+/**
+ * はてなブックマークのエントリーページ(コメント一覧)への外部リンク。国内のテックブログは
+ * はてブのコメントで読まれ方・反論・補足が付くことが多く、元記事と並ぶ「次に開く先」になる。
+ * 件数は人気順の根拠と同じ値。記事ページは日単位でキャッシュするので新しい記事ほど実数より
+ * 少なく出うるが、件数が増える方向のずれなので許容し、0 件でもリンク自体は出す
+ * (キャッシュ時点で 0 件だった記事からもコメントへ辿れるように)。
+ * ドメイン行(11.5px)と同じ高さのまま、py + 同量の負マージンで当たり判定を 24px 以上に広げる。
+ */
+function HatenaEntryLink({ url, count }: { url: string; count: number }) {
+  const href = hatenaEntryUrl(url);
+  if (!href) return null;
+  const label =
+    count > 0
+      ? `はてなブックマークのコメントを見る(${count.toLocaleString('ja-JP')} users)`
+      : 'はてなブックマークのコメントを見る';
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      title={label}
+      className="text-fg-muted hover:text-accent -my-1.5 ml-auto inline-flex shrink-0 touch-manipulation items-center gap-1 py-1.5 transition-colors"
+    >
+      {/* 読み上げはカードの件数表記と同じく略さない名前にし、行き先(コメント)と新規タブを添える */}
+      <span aria-hidden="true">はてブ</span>
+      <span className="sr-only">はてなブックマークのコメント</span>
+      {count > 0 && (
+        <span className="font-metric text-fg-default font-semibold">
+          {count.toLocaleString('ja-JP')}
+          <span className="sr-only"> users</span>
+        </span>
+      )}
+      <span className="sr-only">(新しいタブで開く)</span>
+      <ExternalLink aria-hidden="true" className="size-3" />
+    </a>
   );
 }
 
