@@ -107,25 +107,29 @@ export class DrizzleArticleRepository implements ArticleRepository {
     }
     if (criteria.query) {
       const pattern = `%${escapeLike(criteria.query)}%`;
-      // AI生成タグ(カードに出ているバッジ)にも部分一致させる。タイトル・抜粋に語が無い記事でも
-      // タグに「認証」が付いていれば「認証」で見つかるようにする(以前はタグにしか無い語は 0 件だった)。
-      // 要約は ready のものだけ(タグ絞り込みと同じ)。行数は記事数と同程度で小さいので、
-      // jsonb_array_elements_text の展開 + ILIKE で足りる(完全一致ではないので tags の GIN は使わない)。
-      const tagRow = this.db
+      // AI要約の概要とタグ(どちらもカードに出ている文字)にも部分一致させる。カードは RSS 抜粋ではなく
+      // 概要を出すため、概要やタグにしか語が無い記事は、見えている語で検索しても 0 件になっていた
+      // (例: 「認証」タグの記事が「認証」で見つからない)。要約は ready のものだけ(タグ絞り込みと同じ)。
+      // 行数は記事数と同程度で小さいので、概要は素の ILIKE、タグは jsonb_array_elements_text の展開 + ILIKE で
+      // 足りる(完全一致ではないので tags の GIN は使わない)。
+      const summaryRow = this.db
         .select({ one: sql`1` })
         .from(articleSummaries)
         .where(
           and(
             eq(articleSummaries.articleId, articles.id),
             eq(articleSummaries.status, 'ready'),
-            sql`exists (select 1 from jsonb_array_elements_text(${articleSummaries.tags}) as t(tag) where t.tag ilike ${pattern})`,
+            or(
+              ilike(articleSummaries.overview, pattern),
+              sql`exists (select 1 from jsonb_array_elements_text(${articleSummaries.tags}) as t(tag) where t.tag ilike ${pattern})`,
+            ),
           ),
         );
       const match = or(
         ilike(articles.title, pattern),
         ilike(articles.description, pattern),
         ilike(companies.name, pattern),
-        exists(tagRow),
+        exists(summaryRow),
       );
       // or() の戻りは SQL | undefined(引数ありなら実際は常に定義される)
       if (match) conditions.push(match);
