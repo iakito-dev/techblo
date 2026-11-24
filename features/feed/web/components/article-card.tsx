@@ -45,8 +45,8 @@ export const ArticleCard = memo(function ArticleCard({
    */
   showHatenaCount?: boolean;
   /**
-   * 検索語(?q=)。指定するとタイトル・概要・企業名の一致箇所を強調する。
-   * 検索は企業名・RSS 抜粋にも当たるため、なぜこの記事が出たのかを一覧のまま見分けられるようにする。
+   * 検索語(?q=)。指定するとタイトル・概要・企業名・タグの一致箇所を強調する(一致したタグは先頭に寄せる)。
+   * 検索は企業名・RSS 抜粋・AI生成タグにも当たるため、なぜこの記事が出たのかを一覧のまま見分けられるようにする。
    */
   highlight?: string;
   /**
@@ -56,7 +56,7 @@ export const ArticleCard = memo(function ArticleCard({
   activeTag?: string;
 }) {
   const overviewText = overview || (article.description ? stripHtml(article.description) : null);
-  const visibleTags = cardTags(tags ?? [], activeTag);
+  const visibleTags = cardTags(tags ?? [], activeTag, highlight);
   const hatenaLabel = `はてなブックマーク ${formatCount(article.hatenaBookmarkCount)} 件`;
 
   return (
@@ -165,7 +165,7 @@ export const ArticleCard = memo(function ArticleCard({
                   aria-current={active && tag === activeTag?.trim() ? 'page' : undefined}
                   className={`${active ? 'border-accent text-accent' : 'border-border-default text-fg-muted'} hover:border-accent hover:text-accent focus-visible:border-accent focus-visible:text-accent focus-visible:ring-accent relative block rounded-full border px-2 text-[11px] leading-5 transition-colors before:absolute before:inset-x-0 before:-inset-y-1.5 focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-inset`}
                 >
-                  {tag}
+                  <HighlightedText text={tag} query={highlight} />
                 </Link>
               </li>
             ))}

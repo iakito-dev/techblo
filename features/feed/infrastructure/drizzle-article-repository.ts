@@ -107,10 +107,25 @@ export class DrizzleArticleRepository implements ArticleRepository {
     }
     if (criteria.query) {
       const pattern = `%${escapeLike(criteria.query)}%`;
+      // AI生成タグ(カードに出ているバッジ)にも部分一致させる。タイトル・抜粋に語が無い記事でも
+      // タグに「認証」が付いていれば「認証」で見つかるようにする(以前はタグにしか無い語は 0 件だった)。
+      // 要約は ready のものだけ(タグ絞り込みと同じ)。行数は記事数と同程度で小さいので、
+      // jsonb_array_elements_text の展開 + ILIKE で足りる(完全一致ではないので tags の GIN は使わない)。
+      const tagRow = this.db
+        .select({ one: sql`1` })
+        .from(articleSummaries)
+        .where(
+          and(
+            eq(articleSummaries.articleId, articles.id),
+            eq(articleSummaries.status, 'ready'),
+            sql`exists (select 1 from jsonb_array_elements_text(${articleSummaries.tags}) as t(tag) where t.tag ilike ${pattern})`,
+          ),
+        );
       const match = or(
         ilike(articles.title, pattern),
         ilike(articles.description, pattern),
         ilike(companies.name, pattern),
+        exists(tagRow),
       );
       // or() の戻りは SQL | undefined(引数ありなら実際は常に定義される)
       if (match) conditions.push(match);
