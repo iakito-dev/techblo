@@ -25,7 +25,7 @@ export const metadata: Metadata = {
 export default function FavoritesPage() {
   return (
     <div className="min-h-dvh pb-24 lg:pt-6 lg:pb-12 lg:pl-64">
-      <div className={`mx-auto max-w-[1200px] ${MOBILE_GUTTER_CLASS} md:px-6`}>
+      <div className={`mx-auto max-w-[1200px] ${MOBILE_GUTTER_CLASS} md:px-6 lg:px-8`}>
         <Suspense fallback={<SavedArticlesSkeleton kind="favorite" />}>
           <FavoritesContent />
         </Suspense>
