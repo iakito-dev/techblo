@@ -153,6 +153,7 @@ trackArticleView(input: { articleId: string }): Promise<Result<void, FeedError>>
 - ページング: 「もっと読む」ボタンで追記(ADR-0013 追補)。初期ページは RSC が SSR、続きは `loadMoreFeed` Server Action がサーバ側で合成したカード(保存系アクション込み)を返し末尾に追記。内部はオフセット(page N)のまま
 - ページサイズ: 固定 12 件(`INITIAL_PAGE_SIZE`)。以前は端末別だったが headers 依存で静的プリレンダを妨げるため固定化(ADR-0013 追補 / ADR-0019)。usecase 上限50件
 - 次ページ判定: 総件数を数えず `limit + 1` 取得の余りで `hasMore` を返す(count(*) 廃止。ADR-0013 追補)
+- 一覧の終端: 続きが無くなったら(`hasMore=false`、またはゲストの既読フィルタで既読記事が出そろったら)末尾に「すべての記事を表示しました」を出す(`shouldShowFeedEnd`)。以前は自動読み込みの一覧が何の印も無く途切れ、続きを読み込み中なのか終わったのかが分からなかった。0 件のときは空状態が受け持つので出さない
 - 公開フィードは `'use cache'` + `cacheTag('feed')` でキャッシュし、`cacheLife('minutes')` で再検証
 - 企業一覧・ユーザー単位データ(bookmark/favorite/購読)も `'use cache'` 化し、操作 Action はユーザー単位タグの `updateTag` で無効化する(`revalidatePath('/')` は使わない=ゲスト共通の feed キャッシュを巻き添えにしない)。ADR-0016
 - ソート/期間/企業の切替は `FeedList` を再マウントせず、URL 由来の変化を検知して内部 state を page=1 へ同期する(カード DOM を保持)。切替先は `FeedControls` のセグメント/チップのホバー/フォーカスで `router.prefetch` 済み。ADR-0016
