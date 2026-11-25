@@ -69,7 +69,7 @@ export function LandingTestimonials() {
         />
       </div>
 
-      <p className="text-fg-faint mt-6 text-center text-xs">※ 掲載内容は利用イメージです。</p>
+      <p className="text-fg-muted mt-6 text-center text-xs">※ 掲載内容は利用イメージです。</p>
     </section>
   );
 }

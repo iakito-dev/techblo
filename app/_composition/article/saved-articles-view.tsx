@@ -272,12 +272,12 @@ export function SavedArticlesView({
               );
             })}
           </div>
-          {/* 件数が少ないと左上に寄って空白が広がるため、薄い補足で「これから増える」ことを示す */}
+          {/* 件数が少ないと左上に寄って空白が広がるため、控えめな補足で「これから増える」ことを示す(読ませる文なので fg-muted) */}
           {/* 中央寄せの 1〜2 行なので、既定の折り返しだとモバイル幅でリンクが「フィ / ードを見る →」と
               語の途中で割れていた。本文は文節単位で折り、リンクは 1 語として折り返さない。
               リンクは 14px の 1 行で 24px(WCAG 2.5.8)に届かないため、py + 同量の負マージンで当たり判定だけ広げる */}
           {visibleCount <= 2 && !isFiltering && (
-            <p className="text-fg-subtle mt-8 text-center text-sm text-balance [word-break:auto-phrase]">
+            <p className="text-fg-muted mt-8 text-center text-sm text-balance [word-break:auto-phrase]">
               {emptyHint}。
               <Link
                 href="/"

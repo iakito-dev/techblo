@@ -156,7 +156,7 @@ export function MobileSearchOverlay({ open, onClose }: { open: boolean; onClose:
             <button
               type="button"
               onClick={clearHistory}
-              className="text-fg-subtle active:bg-bg-surface-2 min-h-11 touch-manipulation px-2 text-xs"
+              className="text-fg-muted active:bg-bg-surface-2 min-h-11 touch-manipulation px-2 text-xs"
             >
               すべて消去
             </button>
@@ -194,7 +194,7 @@ export function MobileSearchOverlay({ open, onClose }: { open: boolean; onClose:
           <p className="text-fg-muted text-sm">
             {value.trim() ? `「${value.trim()}」で絞り込み中` : 'キーワードを入力してください'}
           </p>
-          {value.trim() && <p className="text-fg-subtle text-xs">タップして結果を表示</p>}
+          {value.trim() && <p className="text-fg-muted text-xs">タップして結果を表示</p>}
         </button>
       )}
     </div>,
