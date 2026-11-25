@@ -223,6 +223,10 @@ MVPでは使わない。複雑度を上げないため。
 - `not-found.tsx` ← 404
   - ルート直下の `app/not-found.tsx`(シェル外のページと、どのルートにも一致しない URL)は、法的ページと同じくモバイルは `Header`、デスクトップは `DesktopHomeBar`(ロゴ)を載せる。切れたリンクから直接着地しても何のサイトか分かるようにするため。`(app)/not-found.tsx` はアプリのシェルが受ける
 
+### サイトアイコン
+
+Next のファイル規約で置く: `app/icon.svg`(主)・`app/favicon.ico`(16/32/48px。`icon.svg` を描き出して PNG 埋め込みの ICO にしたもの)・`app/apple-icon.tsx`(180px)・`app/maskable-icon/`(PWA)。`favicon.ico` は `<link>` を読まずに `/favicon.ico` を直接取りに来るクライアント(フィードリーダー・リンクのプレビュー・古い Safari)向けで、以前は無く 404 になっていた。マークを変えたら `icon.svg` と合わせて描き直す。
+
 ## 7. UI コンポーネント階層
 
 ```
