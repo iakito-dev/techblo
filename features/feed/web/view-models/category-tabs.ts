@@ -4,6 +4,7 @@ import {
   getCategoryDefinition,
   isArticleCategory,
 } from '@/shared/categories';
+import { buildFeedHref } from './feed-href';
 
 /**
  * モバイルのカテゴリタブのキー。'latest'(新着)は category 未指定の状態を表す
@@ -51,10 +52,5 @@ export function parseCategoryTab(value: string | null | undefined): CategoryTabK
  */
 export function buildCategoryTabHref(currentParams: URLSearchParams, key: string): string {
   const tab = parseCategoryTab(key);
-  const sp = new URLSearchParams(currentParams);
-  if (tab === 'latest') sp.delete('category');
-  else sp.set('category', tab);
-  sp.delete('page');
-  const qs = sp.toString();
-  return qs ? `/?${qs}` : '/';
+  return buildFeedHref(currentParams, { category: tab === 'latest' ? null : tab });
 }

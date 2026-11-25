@@ -105,7 +105,10 @@ export default function PrivacyPage() {
       <LegalSection heading="8. お問い合わせ窓口">
         <p>
           本ポリシーに関するお問い合わせは{' '}
-          <a href={`mailto:${CONTACT_EMAIL}`} className="text-accent hover:underline">
+          <a
+            href={`mailto:${CONTACT_EMAIL}`}
+            className="text-accent underline underline-offset-4 hover:decoration-2"
+          >
             {CONTACT_EMAIL}
           </a>{' '}
           までお願いします。

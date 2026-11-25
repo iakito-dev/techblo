@@ -4,6 +4,7 @@ import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { type MouseEvent, useEffect, useState } from 'react';
+import { canGoBackInApp } from '@/lib/navigation/can-go-back-in-app';
 
 /**
  * 記事ページ(/a/[id])の戻る導線。
@@ -13,7 +14,8 @@ import { type MouseEvent, useEffect, useState } from 'react';
  * ブラウザの復元に任せられる(Link で `/` へ進むと新しい履歴エントリになり、
  * 一覧の先頭から読み直しになってしまう)。
  *
- * 共有リンクで直接開いた場合(履歴が1件)は戻り先が無いので `/` への通常リンクにする。
+ * 共有リンクで直接開いた場合(外部サイトから同じタブで来た場合を含む)は戻り先が無いので
+ * `/` への通常リンクにする(判定は canGoBackInApp)。
  * 履歴の有無はハイドレーション後にしか分からないため、初期描画は常にリンクとして出し、
  * マウント後に back 動作へ差し替える(見た目は変わらないのでチラつかない)。
  */
@@ -22,7 +24,7 @@ export function ArticleBackLink({ className }: { className?: string }) {
   const [canGoBack, setCanGoBack] = useState(false);
 
   useEffect(() => {
-    setCanGoBack(window.history.length > 1);
+    setCanGoBack(canGoBackInApp());
   }, []);
 
   function handleClick(e: MouseEvent<HTMLAnchorElement>) {

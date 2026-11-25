@@ -4,9 +4,12 @@ import { Bookmark, Heart } from 'lucide-react';
 import Link from 'next/link';
 import { memo, type ReactNode } from 'react';
 import { CompanyFavicon } from '@/components/ui/company-favicon';
+import { formatCount } from '@/shared/text';
 import type { ArticleCard as ArticleCardType } from '../../application/dto';
+import { cardTags } from '../card-tags';
 import { stripHtml } from '../strip-html';
 import { ArticleLink } from './article-link';
+import { HighlightedText } from './highlighted-text';
 import { RelativeTime } from './relative-time';
 
 /**
@@ -27,6 +30,8 @@ export const ArticleCard = memo(function ArticleCard({
   tags,
   actions,
   showHatenaCount,
+  highlight,
+  activeTag,
 }: {
   article: ArticleCardType;
   /** AI要約の概要(1文)。要約が無い/未生成の記事は RSS 抜粋(description)にフォールバックする。app 層から注入する(feed は ai-summary を import しない)。 */
@@ -39,9 +44,20 @@ export const ArticleCard = memo(function ArticleCard({
    * はてブ数は一覧のノイズになるため既定で出さない。並び順の根拠になる人気順のときだけ呼び出し側が true にする。
    */
   showHatenaCount?: boolean;
+  /**
+   * 検索語(?q=)。指定するとタイトル・概要・企業名・タグの一致箇所を強調する(一致したタグは先頭に寄せる)。
+   * 検索は企業名・RSS 抜粋・AI生成タグにも当たるため、なぜこの記事が出たのかを一覧のまま見分けられるようにする。
+   */
+  highlight?: string;
+  /**
+   * 絞り込み中のタグ(?tag= の canonical 値)。一致するタグ(類義語を含む)を先頭に寄せて強調し、
+   * 「なぜこの一覧に出ているか」をカード上で見せる。
+   */
+  activeTag?: string;
 }) {
   const overviewText = overview || (article.description ? stripHtml(article.description) : null);
-  const hatenaLabel = `はてなブックマーク ${article.hatenaBookmarkCount} 件`;
+  const visibleTags = cardTags(tags ?? [], activeTag, highlight);
+  const hatenaLabel = `はてなブックマーク ${formatCount(article.hatenaBookmarkCount)} 件`;
 
   return (
     // cursor-pointer は iOS Safari 対策。stretched link(::after で全面化)領域を
@@ -61,9 +77,13 @@ export const ArticleCard = memo(function ArticleCard({
           (人気順のときだけ表示。並び順の根拠になるため)。 */}
       <div className="text-fg-default mb-2.5 flex items-center gap-[7px] text-[11.5px] font-semibold md:mb-3">
         <CompanyFavicon url={article.url} name={article.company.name} size={20} />
-        <span className="min-w-0 truncate">{article.company.name}</span>
+        <span className="min-w-0 truncate">
+          <HighlightedText text={article.company.name} query={highlight} />
+        </span>
         <div className="text-fg-muted ml-auto flex shrink-0 items-center gap-1.5 font-normal">
-          <RelativeTime date={article.publishedAt} />
+          {/* RelativeTime は min-w-12 で幅を確保しているため、左寄せのままだと「1分前」など短い表記が
+              右端より手前で止まり、絶対日付の行と右端がそろわない(はてブ数の前にも空きが出る) */}
+          <RelativeTime date={article.publishedAt} className="text-right" />
           {showHatenaCount && article.hatenaBookmarkCount > 0 && (
             <>
               <span aria-hidden="true">・</span>
@@ -74,7 +94,7 @@ export const ArticleCard = memo(function ArticleCard({
                 </span>
                 <span className="sr-only">はてなブックマーク </span>
                 <span className="font-metric text-fg-default font-semibold">
-                  {article.hatenaBookmarkCount}
+                  {formatCount(article.hatenaBookmarkCount)}
                 </span>
               </span>
             </>
@@ -98,13 +118,15 @@ export const ArticleCard = memo(function ArticleCard({
           data-article-link
           className="group-hover:text-accent group-has-[[data-detail-trigger]:focus-visible]:text-accent transition-colors group-has-[[data-detail-trigger]:focus-visible]:underline group-has-[[data-detail-trigger]:focus-visible]:decoration-[1.5px] group-has-[[data-detail-trigger]:focus-visible]:underline-offset-4 after:absolute after:inset-0 focus-visible:outline-none"
         >
-          {article.title}
+          <HighlightedText text={article.title} query={highlight} />
         </ArticleLink>
       </h2>
 
       {/* 抜粋: AI要約の概要優先、無ければ RSS 抜粋 */}
       {overviewText && (
-        <p className="text-fg-muted line-clamp-2 text-[13.5px] leading-[1.75]">{overviewText}</p>
+        <p className="text-fg-muted line-clamp-2 text-[13.5px] leading-[1.75]">
+          <HighlightedText text={overviewText} query={highlight} />
+        </p>
       )}
 
       {/*
@@ -119,7 +141,7 @@ export const ArticleCard = memo(function ArticleCard({
         記事ページへは遷移しない。
       */}
       <div className="relative z-10 mt-auto flex items-center gap-2 pt-3 md:pt-4">
-        {tags && tags.length > 0 && (
+        {visibleTags.length > 0 && (
           <ul
             aria-label="AI生成タグ"
             // overflow-hidden が ::before の当たり判定(上下に広げた分)を切らないよう、
@@ -128,17 +150,22 @@ export const ArticleCard = memo(function ArticleCard({
             // 半端に切れた状態では見せない。gap-y-3 は2行目が padding 内へ覗かない余白。
             className="-my-1.5 flex h-8 min-w-0 flex-1 flex-wrap gap-x-1.5 gap-y-3 overflow-hidden py-1.5"
           >
-            {tags.slice(0, 3).map((tag) => (
+            {visibleTags.map(({ tag, active }) => (
               <li key={tag} className="shrink-0">
                 {/* タグ絞り込み(?tag=)への入口。一覧に数十個並ぶため prefetch しない。
                     輪郭と文字だけ teal にし塗りは使わない(ADR-0035)。
-                    before は見た目の高さを変えずにタップ領域だけ上下へ広げる。 */}
+                    before は見た目の高さを変えずにタップ領域だけ上下へ広げる。
+                    キーボードフォーカスは hover と同じ 1px の色替えだけだと見分けられないため、内側に
+                    2px のリングを足して輪郭を太くする(外側リングは行の overflow-hidden で先頭が欠ける)。 */}
+                {/* 絞り込み中のタグ(active)は hover と同じ輪郭・文字の teal で常時示す(塗りは使わない)。
+                    いま見ている一覧そのもの(?tag= と同じ値)のときだけ aria-current を付ける。 */}
                 <Link
                   href={`/?tag=${encodeURIComponent(tag)}`}
                   prefetch={false}
-                  className="border-border-default text-fg-muted hover:border-accent hover:text-accent focus-visible:border-accent focus-visible:text-accent relative block rounded-full border px-2 text-[11px] leading-5 transition-colors before:absolute before:inset-x-0 before:-inset-y-1.5 focus-visible:outline-none"
+                  aria-current={active && tag === activeTag?.trim() ? 'page' : undefined}
+                  className={`${active ? 'border-accent text-accent' : 'border-border-default text-fg-muted'} hover:border-accent hover:text-accent focus-visible:border-accent focus-visible:text-accent focus-visible:ring-accent relative block rounded-full border px-2 text-[11px] leading-5 transition-colors before:absolute before:inset-x-0 before:-inset-y-1.5 focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-inset`}
                 >
-                  {tag}
+                  <HighlightedText text={tag} query={highlight} />
                 </Link>
               </li>
             ))}

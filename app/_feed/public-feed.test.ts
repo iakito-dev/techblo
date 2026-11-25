@@ -81,6 +81,23 @@ describe('renderPublicFeed', () => {
     expect(xml).toContain('feed.xml?category=ai');
   });
 
+  it('チャンネルの link はフィードと同じ絞り込みの一覧を指す', async () => {
+    const linkOf = async (scope: Parameters<typeof renderPublicFeed>[0]) => {
+      const xml = await (await renderPublicFeed(scope)).text();
+      return xml.match(/<channel>[\s\S]*?<link>([^<]*)<\/link>/)?.[1];
+    };
+    expect(await linkOf({})).toBe('https://example.test/');
+    expect(await linkOf({ category: 'ai' })).toBe('https://example.test/?category=ai');
+    expect(await linkOf({ tag: 'Go' })).toBe('https://example.test/?tag=Go');
+    expect(await linkOf({ category: 'ai', tag: 'C++' })).toBe(
+      'https://example.test/?category=ai&amp;tag=C%2B%2B',
+    );
+    expect(await linkOf({ category: 'not-a-category' })).toBe('https://example.test/');
+    expect(await linkOf({ company: { id: 'c1', slug: 'example', name: 'ExampleCo' } })).toBe(
+      'https://example.test/?company=example',
+    );
+  });
+
   it('tag は trim し、空白のみ・51 文字以上は無視する', async () => {
     await renderPublicFeed({ tag: '  React  ' });
     expect(getFeed).toHaveBeenLastCalledWith(expect.objectContaining({ tag: 'React' }));

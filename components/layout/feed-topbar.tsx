@@ -16,21 +16,17 @@ import {
   DefaultFeedSearchBox,
   FeedSearchBox,
 } from '@/features/feed/web/components/feed-search-box';
+import { periodOptions } from '@/features/feed/web/view-models/period-labels';
 import { useFeedPeriod } from '@/features/feed/web/view-models/use-feed-period';
 import { useFeedSort } from '@/features/feed/web/view-models/use-feed-sort';
 import { cn } from '@/shared/utils';
 import { isFeedDefaultView, resolveFeedHeaderTitle } from './feed-header-title';
 
-const PERIOD_OPTIONS: { value: PopularPeriod; label: string }[] = [
-  { value: 'today', label: '今日' },
-  { value: 'week', label: '今週' },
-  { value: 'month', label: '今月' },
-  { value: 'all', label: '全期間' },
-];
+const PERIOD_OPTIONS = periodOptions(['today', 'week', 'month', 'all']);
 
 /**
  * デスクトップ(lg+)の上部バー。サイドバーのロゴ帯(h-16)と高さを揃えた sticky ヘッダー。
- * オーバーフローは未実装のプレースホルダ(枠だけ)。
+ * 左に記事検索、右端に更新とアカウント導線(TopbarAuth)。
  */
 export function FeedTopbar() {
   return (
@@ -57,7 +53,7 @@ export function FeedTopbar() {
 }
 
 /**
- * コンテンツの見出し行(lg+)。左に「タイトル + アイコン」、右に並び替え(流用) + 表示切替/選択(仮)。
+ * コンテンツの見出し行(lg+)。左に「タイトル + アイコン」、右に並び替え(流用)。
  * sort=popular のときだけ集計期間チップを出す。
  */
 // アイコン関数/要素は Server→Client 境界をまたげないため、キー文字列で受けてクライアント側で解決する。
@@ -75,10 +71,13 @@ export function FeedHeader({
   title,
   icon,
   showControls = false,
+  company,
 }: {
   title?: string;
   icon: keyof typeof HEADER_ICONS;
   showControls?: boolean;
+  /** ?company= が 1 社のときの企業(サーバーで slug から名前を引いたもの)。 */
+  company?: { slug: string; name: string };
 }) {
   const searchParams = useSearchParams();
   const params = {
@@ -91,28 +90,37 @@ export function FeedHeader({
     q: searchParams.get('q'),
     tag: searchParams.get('tag'),
   };
-  const resolvedTitle = title ?? resolveFeedHeaderTitle(params);
+  // 遷移中は URL が先に変わりサーバーの company が遅れて届くため、今の URL と slug が一致するときだけ使う。
+  const companyName = company && params.company?.trim() === company.slug ? company.name : undefined;
+  const resolvedTitle = title ?? resolveFeedHeaderTitle(params, { companyName });
   // トップのセクション表示(既定状態)では戻る必要が無いため、リスト表示のときだけ出す。
   const showBackLink = !isFeedDefaultView(params);
   const Icon = HEADER_ICONS[icon];
   return (
-    <div className="mb-5 hidden flex-col gap-1 lg:flex">
-      {showBackLink && (
-        <Link
-          href="/"
-          className="text-fg-muted hover:text-fg-default w-fit text-xs transition-colors"
-        >
-          ← トップ
-        </Link>
-      )}
-      <div className="flex items-center justify-between gap-3">
-        <h1 className="text-fg-default flex items-center gap-2 text-xl font-bold tracking-tight">
-          <Icon className="text-fg-muted size-5" />
-          {resolvedTitle}
-        </h1>
-        {showControls && <SortControl />}
+    <>
+      {/*
+        見える見出し行は lg+ だけ。<lg はページに h1 が 1 つも無くなり、スクリーンリーダーの
+        見出しジャンプで「今どの一覧か」(検索結果・#タグ・企業名など)が分からないため、同じ文言を sr-only で置く。
+      */}
+      <h1 className="sr-only lg:hidden">{resolvedTitle}</h1>
+      <div className="mb-5 hidden flex-col gap-1 lg:flex">
+        {showBackLink && (
+          <Link
+            href="/"
+            className="text-fg-muted hover:text-fg-default w-fit text-xs transition-colors"
+          >
+            ← トップ
+          </Link>
+        )}
+        <div className="flex items-center justify-between gap-3">
+          <h1 className="text-fg-default flex items-center gap-2 text-xl font-bold tracking-tight">
+            <Icon className="text-fg-muted size-5" />
+            {resolvedTitle}
+          </h1>
+          {showControls && <SortControl />}
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 
@@ -179,8 +187,8 @@ function SortControl() {
               <span aria-hidden="true" className="text-fg-faint">
                 ・
               </span>
-              {/* 最長ラベル「全期間」(3字)で幅を固定し、期間切替でチップ幅が動かないようにする */}
-              <span className="w-[3em] shrink-0 text-center">{periodLabel}</span>
+              {/* 最長ラベル「24時間」(数字 2 + 漢字 2 で約 3.3em)で幅を固定し、期間切替でチップ幅が動かないようにする */}
+              <span className="w-[3.5em] shrink-0 text-center">{periodLabel}</span>
               <ChevronDown aria-hidden="true" className="text-fg-faint size-3.5" />
             </HeroButton>
             <Dropdown.Popover className="w-36 rounded-sm">

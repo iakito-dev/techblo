@@ -2,13 +2,21 @@
 
 import { Button, Dropdown, Label } from '@heroui/react';
 import { CalendarDays, ChevronDown, ListFilter, Rss } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
 import type { Key, ReactNode } from 'react';
 import { useEffect, useMemo, useState } from 'react';
 import { CompanyFavicon } from '@/components/ui/company-favicon';
 import { matchesCompanyName } from '@/shared/company-name-match';
 import type { FeedSort, PopularPeriod } from '../../domain/feed-sort';
+import {
+  buildCategoryTabHref,
+  categoryTabLabel,
+  parseCategoryTab,
+} from '../view-models/category-tabs';
 import type { FilterCompany, FilterUserFeed } from '../view-models/feed-filter-options';
 import { useFeedNav } from '../view-models/feed-nav-context';
+import { periodOptions } from '../view-models/period-labels';
+import { READ_FILTER_CHIP_LABEL } from '../view-models/read-filter-labels';
 import { useFeedCompany } from '../view-models/use-feed-company';
 import { useFeedFilters } from '../view-models/use-feed-filters';
 import { useFeedPeriod } from '../view-models/use-feed-period';
@@ -16,12 +24,7 @@ import { useFeedSort } from '../view-models/use-feed-sort';
 import { RemovableChip } from './feed-chip';
 import { DefaultFeedSearchBox, FeedSearchBox } from './feed-search-box';
 
-const PERIOD_OPTIONS: { value: PopularPeriod; label: string }[] = [
-  { value: 'today', label: '今日' },
-  { value: 'week', label: '今週' },
-  { value: 'month', label: '今月' },
-  { value: 'all', label: '全期間' },
-];
+const PERIOD_OPTIONS = periodOptions(['today', 'week', 'month', 'all']);
 
 const SORT_OPTIONS: { value: FeedSort; label: string; formLabel: string }[] = [
   { value: 'latest', label: '新着', formLabel: '新着順' },
@@ -34,8 +37,8 @@ type FeedControlsViewProps = {
   searchSlot?: ReactNode;
   /** マイフィードフィルタ(ライブ版のみ。既定版は URL 非依存のため差し込まない)。 */
   userFeedSlot?: ReactNode;
-  /** 適用中タグ(?tag=)のチップ。タグ指定時のみ(ライブ版のみ)。ツールバーの下に1行足す。 */
-  tagSlot?: ReactNode;
+  /** 適用中のカテゴリ・未読/既読・タグのチップ。いずれか指定時のみ(ライブ版のみ)。ツールバーの下に1行足す。 */
+  filterChipsSlot?: ReactNode;
   companies: FilterCompany[];
   sort: FeedSort;
   period: PopularPeriod;
@@ -79,7 +82,7 @@ export function FeedControls({
     <FeedControlsView
       searchSlot={<FeedSearchBox />}
       userFeedSlot={userFeeds.length > 0 ? <UserFeedFilter userFeeds={userFeeds} /> : undefined}
-      tagSlot={<ActiveTagChip />}
+      filterChipsSlot={<ActiveFilterChips />}
       companies={companies}
       sort={sort}
       period={period}
@@ -142,16 +145,29 @@ export function DefaultFeedControls({ companies }: { companies: FilterCompany[] 
 }
 
 /**
- * 適用中のタグ(?tag=)を ✕ で解除できるチップとして見せる。タブレット(md〜lg)は見出しが無く、
- * モバイルのチップ行も出ないため、これが無いと「なぜこの記事だけ?」が分からず解除もできない。
- * タグ未指定なら何も描画しない。
+ * 適用中のカテゴリ(?category=)・タグ(?tag=)・未読/既読(?read=)を(モバイルのチップ行と同じ順で) ✕ で解除できるチップとして見せる。
+ * タブレット(md〜lg)は見出し(lg+)もモバイルのチップ行(<md)も無いため、これが無いと棚の「もっと見る」
+ * (?category=)や共有リンクで絞り込まれた一覧が「なぜこの記事だけ?」になり、解除もできない。
+ * 企業・期間はツールバーのドロップダウンが状態を見せるので含めない。何も適用していなければ描画しない。
  */
-function ActiveTagChip() {
-  const { tag, removeTag } = useFeedFilters();
-  if (tag === null) return null;
+function ActiveFilterChips() {
+  const params = useSearchParams();
+  const { navigate } = useFeedNav();
+  const { status, setStatus, tag, removeTag } = useFeedFilters();
+  const category = parseCategoryTab(params.get('category'));
+  if (category === 'latest' && status === 'all' && tag === null) return null;
   return (
-    <div className="mt-2 hidden md:flex">
-      <RemovableChip label={`タグ: ${tag}`} onRemove={removeTag} />
+    <div className="mt-2 hidden flex-wrap gap-2 md:flex">
+      {category !== 'latest' && (
+        <RemovableChip
+          label={categoryTabLabel(category)}
+          onRemove={() => navigate(buildCategoryTabHref(params, 'latest'))}
+        />
+      )}
+      {tag !== null && <RemovableChip label={`タグ: ${tag}`} onRemove={removeTag} />}
+      {status !== 'all' && (
+        <RemovableChip label={READ_FILTER_CHIP_LABEL[status]} onRemove={() => setStatus('all')} />
+      )}
     </div>
   );
 }
@@ -160,7 +176,7 @@ function ActiveTagChip() {
 function FeedControlsView({
   searchSlot,
   userFeedSlot,
-  tagSlot,
+  filterChipsSlot,
   companies,
   sort,
   period,
@@ -240,7 +256,7 @@ function FeedControlsView({
           {userFeedSlot}
         </div>
       </div>
-      {tagSlot}
+      {filterChipsSlot}
     </section>
   );
 }

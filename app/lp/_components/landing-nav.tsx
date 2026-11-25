@@ -15,7 +15,10 @@ const NAV_LINKS = [
 export function LandingNav() {
   return (
     <header className="border-border-default/70 bg-bg-app/80 sticky top-0 z-50 border-b backdrop-blur-md">
-      <nav className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-6">
+      <nav
+        aria-label="メイン"
+        className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-6"
+      >
         <Logo />
         <div className="hidden items-center gap-8 md:flex">
           {NAV_LINKS.map((link) => (

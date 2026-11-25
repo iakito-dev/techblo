@@ -25,7 +25,7 @@ export function SettingsMenuRow({
     >
       <Icon className="text-accent size-5 shrink-0" aria-hidden="true" />
       <span className="text-fg-default min-w-0 flex-1 truncate text-sm font-medium">{label}</span>
-      {value !== undefined && <span className="text-fg-subtle shrink-0 text-sm">{value}</span>}
+      {value !== undefined && <span className="text-fg-muted shrink-0 text-sm">{value}</span>}
       <ChevronRight className="text-fg-subtle size-4 shrink-0" aria-hidden="true" />
     </Link>
   );

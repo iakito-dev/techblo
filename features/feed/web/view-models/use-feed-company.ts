@@ -2,6 +2,7 @@
 
 import { useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
+import { buildFeedHref } from './feed-href';
 import { useFeedNav } from './feed-nav-context';
 
 /**
@@ -27,11 +28,7 @@ export function useFeedCompany(): {
 
   const hrefFor = useCallback(
     (slug: string | null) => {
-      const sp = new URLSearchParams(params);
-      if (!slug) sp.delete('company');
-      else sp.set('company', slug);
-      const qs = sp.toString();
-      return qs ? `/?${qs}` : '/';
+      return buildFeedHref(params, { company: slug });
     },
     [params],
   );

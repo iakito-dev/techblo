@@ -1,6 +1,6 @@
 'use client';
 
-import { formatDateTime, formatRelative } from '@/shared/date';
+import { formatDateTime, formatRelative, toIsoDateTime } from '@/shared/date';
 
 /**
  * 公開日時の相対表記(例: 3時間前)。
@@ -15,14 +15,15 @@ import { formatDateTime, formatRelative } from '@/shared/date';
  * suppressHydrationWarning で抑える(差し替えはせずサーバー値を維持 = ちらつかない)。
  */
 export function RelativeTime({ date, className }: { date: Date; className?: string }) {
-  // hover で正確な日時を確認できるようにする
+  // hover で正確な日時を確認できるようにし、<time dateTime> で機械可読な日時も持たせる
   return (
-    <span
+    <time
+      dateTime={toIsoDateTime(date)}
       title={formatDateTime(date)}
       className={`inline-block min-w-12 ${className ?? ''}`}
       suppressHydrationWarning
     >
       {formatRelative(date)}
-    </span>
+    </time>
   );
 }

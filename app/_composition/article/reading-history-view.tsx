@@ -3,6 +3,7 @@
 import { History, Search } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
+import { Button } from '@/components/ui/button';
 import type { ArticleSummaryDto } from '@/features/ai-summary/application/dto';
 import type { ArticleCard as ArticleCardType } from '@/features/feed/application/dto';
 import { ArticleCard } from '@/features/feed/web/components/article-card';
@@ -69,32 +70,42 @@ export function ReadingHistoryView({
       {showControls && (
         <SavedSearchInput value={query} onChange={setQuery} ariaLabel="閲覧履歴を絞り込む" />
       )}
-      <p className={`${showControls ? 'mt-3' : '-mt-2'} text-fg-muted mb-5 text-sm`}>
-        {isFiltering
-          ? `${filtered.length}件 / 全${articles.length}件`
-          : `最近読んだ${articles.length}件`}
-      </p>
+      {/* 0 件のときは下の空状態が同じことを伝えるので件数(「最近読んだ0件」)は出さない */}
+      {articles.length > 0 && (
+        <p className={`${showControls ? 'mt-3' : '-mt-2'} text-fg-muted mb-5 text-sm`}>
+          {isFiltering
+            ? `${filtered.length}件 / 全${articles.length}件`
+            : `最近読んだ${articles.length}件`}
+        </p>
+      )}
 
       {articles.length === 0 ? (
+        // 見た目はフィード・保存一覧の空状態とそろえる(SavedArticlesView と同じ構成)
         <div className="flex flex-col items-center justify-center px-6 py-24 text-center">
-          <History className="text-fg-subtle size-10" />
-          <p className="text-fg-default mt-4 font-bold">まだ読んだ記事がありません</p>
-          <p className="text-fg-muted mt-1 text-sm">記事ページを開くとここに記録されます</p>
-          <Link href="/" className="text-accent mt-4 text-sm font-medium hover:underline">
-            フィードを見る
-          </Link>
+          <div className="bg-bg-surface-2 text-fg-muted grid size-16 place-items-center rounded-xl">
+            <History className="size-8" />
+          </div>
+          <p className="text-fg-default mt-5 text-lg font-bold text-balance [word-break:auto-phrase]">
+            まだ読んだ記事がありません
+          </p>
+          <p className="text-fg-muted mt-2 max-w-xs text-sm leading-relaxed text-balance [word-break:auto-phrase]">
+            記事ページを開くとここに記録されます
+          </p>
+          <Button asChild variant="primary" size="md" className="mt-6">
+            <Link href="/">フィードを見る</Link>
+          </Button>
         </div>
       ) : filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center px-6 py-20 text-center">
-          <Search className="text-fg-subtle size-10" />
-          <p className="text-fg-default mt-4 font-bold">一致する記事がありません</p>
-          <button
-            type="button"
-            onClick={() => setQuery('')}
-            className="text-accent focus-visible:ring-accent mt-3 rounded-sm text-sm font-medium hover:underline focus-visible:ring-2 focus-visible:outline-none"
-          >
+          <div className="bg-bg-surface-2 text-fg-muted grid size-16 place-items-center rounded-xl">
+            <Search className="size-8" />
+          </div>
+          <p className="text-fg-default mt-5 text-lg font-bold text-balance [word-break:auto-phrase]">
+            一致する記事がありません
+          </p>
+          <Button variant="primary" size="md" onClick={() => setQuery('')} className="mt-6">
             絞り込みをクリア
-          </button>
+          </Button>
         </div>
       ) : (
         <div className="flex flex-col gap-8">

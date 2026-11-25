@@ -11,3 +11,14 @@ export function stripNul(value: string): string {
 export function hasNul(value: string): boolean {
   return value.includes('\u0000');
 }
+
+const COUNT_FORMAT = new Intl.NumberFormat('ja-JP');
+
+/**
+ * 件数を 3 桁区切りで表記する(`1035` → `1,035`)。はてブ数・記事数は桁が増えると
+ * 区切り無しでは一目で読めない。ロケールを固定するのは、サーバー描画とブラウザの既定ロケールが
+ * 異なると区切り文字が変わり、ハイドレーションで表記がずれるため。
+ */
+export function formatCount(value: number): string {
+  return COUNT_FORMAT.format(value);
+}

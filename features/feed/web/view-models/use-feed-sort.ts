@@ -3,6 +3,7 @@
 import { useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import { type FeedSort, parseFeedSort } from '../../domain/feed-sort';
+import { buildFeedHref } from './feed-href';
 import { useFeedNav } from './feed-nav-context';
 
 /**
@@ -30,16 +31,10 @@ export function useFeedSort(): {
 
   const hrefFor = useCallback(
     (next: FeedSort) => {
-      const sp = new URLSearchParams(params);
-      // latest は既定値なので URL から消してきれいに保つ
-      if (next === 'latest') sp.delete('sort');
-      else sp.set('sort', next);
-      // ソートが変わると並び順が変わるので、ページ番号は 1 に戻す
-      sp.delete('page');
+      // latest は既定値なので URL から消してきれいに保つ。
       // 集計期間(?period)は保持する。新着⇄人気を往復しても直前の期間で復元される
       // (人気順チップに期間を常時表示する UI の前提。0 件時は FeedPeriodEmptyState が全期間への導線を出す)。
-      const qs = sp.toString();
-      return qs ? `/?${qs}` : '/';
+      return buildFeedHref(params, { sort: next === 'latest' ? null : next });
     },
     [params],
   );

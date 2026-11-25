@@ -201,34 +201,32 @@ export function UserFeedList({ feeds, limit }: { feeds: UserFeedSetting[]; limit
         </ul>
       )}
 
-      <AlertDialog
+      <AlertDialog.Backdrop
         isOpen={pendingDelete !== null}
         onOpenChange={(open) => !open && setPendingDelete(null)}
       >
-        <AlertDialog.Backdrop>
-          <AlertDialog.Container>
-            <AlertDialog.Dialog>
-              <AlertDialog.Header>
-                <AlertDialog.Heading>フィードを削除しますか?</AlertDialog.Heading>
-              </AlertDialog.Header>
-              <AlertDialog.Body>
-                「{pendingDelete?.title}」と取り込んだ記事を削除します。元に戻せません。
-              </AlertDialog.Body>
-              <AlertDialog.Footer>
-                <Button variant="outline" onPress={() => setPendingDelete(null)}>
-                  キャンセル
-                </Button>
-                <Button
-                  variant="danger"
-                  onPress={() => pendingDelete && confirmRemove(pendingDelete)}
-                >
-                  削除する
-                </Button>
-              </AlertDialog.Footer>
-            </AlertDialog.Dialog>
-          </AlertDialog.Container>
-        </AlertDialog.Backdrop>
-      </AlertDialog>
+        <AlertDialog.Container>
+          <AlertDialog.Dialog>
+            <AlertDialog.Header>
+              <AlertDialog.Heading>フィードを削除しますか?</AlertDialog.Heading>
+            </AlertDialog.Header>
+            <AlertDialog.Body>
+              「{pendingDelete?.title}」と取り込んだ記事を削除します。元に戻せません。
+            </AlertDialog.Body>
+            <AlertDialog.Footer>
+              <Button variant="outline" onPress={() => setPendingDelete(null)}>
+                キャンセル
+              </Button>
+              <Button
+                variant="danger"
+                onPress={() => pendingDelete && confirmRemove(pendingDelete)}
+              >
+                削除する
+              </Button>
+            </AlertDialog.Footer>
+          </AlertDialog.Dialog>
+        </AlertDialog.Container>
+      </AlertDialog.Backdrop>
     </SettingsSection>
   );
 }

@@ -3,6 +3,7 @@
 import { useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import { type FeedSort, type PopularPeriod, parsePeriod } from '../../domain/feed-sort';
+import { buildFeedHref, type FeedParamPatch } from './feed-href';
 import { useFeedNav } from './feed-nav-context';
 
 /** 期間と同時にソートも切り替えるオプション(新着順中に期間を選んだら人気順へ、を1回の遷移で行う)。 */
@@ -32,18 +33,11 @@ export function useFeedPeriod(): {
 
   const hrefFor = useCallback(
     (next: PopularPeriod, options?: SetPeriodOptions) => {
-      const sp = new URLSearchParams(params);
-      if (next === 'all') sp.delete('period');
-      else sp.set('period', next);
       // ソート同時切替。setPeriod → setSort の2連続遷移は後勝ちの競合で
       // 片方のパラメータが落ちるため、必ず1つの URL 更新にまとめる。
-      if (options?.sort) {
-        if (options.sort === 'latest') sp.delete('sort');
-        else sp.set('sort', options.sort);
-      }
-      sp.delete('page');
-      const qs = sp.toString();
-      return qs ? `/?${qs}` : '/';
+      const patch: FeedParamPatch = { period: next === 'all' ? null : next };
+      if (options?.sort) patch.sort = options.sort === 'latest' ? null : options.sort;
+      return buildFeedHref(params, patch);
     },
     [params],
   );

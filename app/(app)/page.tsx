@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { Suspense } from 'react';
 import { FeedList } from '@/app/_composition/article/feed-list';
 import {
@@ -10,6 +9,7 @@ import {
   getSectionsPageData,
 } from '@/app/_composition/article/feed-load-more';
 import { FeedSectionsView } from '@/app/_composition/article/feed-sections-view';
+import { feedAlternateLinks, filteredFeedLink } from '@/app/_feed/feed-alternates';
 import { FeedHeader, FeedTopbar } from '@/components/layout/feed-topbar';
 import { JsonLd } from '@/components/seo/json-ld';
 import {
@@ -18,8 +18,14 @@ import {
   parsePeriod,
   parseReadMode,
 } from '@/features/feed/domain/feed-sort';
+import {
+  CompanyFeedIntro,
+  FilteredFeedRssLink,
+} from '@/features/feed/web/components/company-feed-intro';
+import { FeedAllOffEmptyState } from '@/features/feed/web/components/feed-all-off-empty-state';
 import { DefaultFeedControls, FeedControls } from '@/features/feed/web/components/feed-controls';
 import { FeedEmptyState } from '@/features/feed/web/components/feed-empty-state';
+import { FeedFilteredEmptyState } from '@/features/feed/web/components/feed-filtered-empty-state';
 import { FeedGridSkeleton } from '@/features/feed/web/components/feed-grid';
 import { FeedPeriodEmptyState } from '@/features/feed/web/components/feed-period-empty-state';
 import { FeedSearchEmptyState } from '@/features/feed/web/components/feed-search-empty-state';
@@ -30,8 +36,11 @@ import {
 } from '@/features/feed/web/components/mobile-feed-header';
 import { feedPageTitle } from '@/features/feed/web/feed-page-title';
 import { getCompanyBySlug } from '@/features/feed/web/queries';
+import { resolveCompanyFeedIntro } from '@/features/feed/web/view-models/company-feed-intro';
 import { FeedNavProvider } from '@/features/feed/web/view-models/feed-nav-context';
+import { resolveFilteredEmptyCopy } from '@/features/feed/web/view-models/filtered-empty-copy';
 import { firstSearchParams } from '@/features/feed/web/view-models/first-search-param';
+import { resolveSearchEmptyCopy } from '@/features/feed/web/view-models/search-empty-copy';
 import { organizationJsonLd, websiteJsonLd } from '@/lib/seo';
 import { resolveBaseUrl } from '@/lib/site-url';
 import { MOBILE_GUTTER_CLASS } from '@/shared/layout';
@@ -51,11 +60,13 @@ type FeedSearchParams = {
 /** Next.js が渡す生の searchParams(キーが繰り返されると配列)。firstSearchParams で FeedSearchParams にする。 */
 type RawSearchParams = { [K in keyof FeedSearchParams]?: string | string[] };
 
+type SingleCompany = { slug: string; name: string; description: string | null; siteUrl: string };
+
 /**
  * ?company= がちょうど 1 社のときだけ企業名を引く(複数選択はタイトルにしない)。
  * タイトルのためだけに失敗してページ全体を落とさないよう、取得失敗・未登録は無視する。
  */
-async function singleCompanyName(param: string | undefined): Promise<string | undefined> {
+async function singleCompany(param: string | undefined): Promise<SingleCompany | undefined> {
   const slugs = param
     ?.split(',')
     .map((s) => s.trim())
@@ -63,10 +74,37 @@ async function singleCompanyName(param: string | undefined): Promise<string | un
   const slug = slugs?.length === 1 ? slugs[0] : undefined;
   if (!slug) return undefined;
   try {
-    return (await getCompanyBySlug(slug))?.name;
+    const company = await getCompanyBySlug(slug);
+    return company
+      ? { slug, name: company.name, description: company.description, siteUrl: company.siteUrl }
+      : undefined;
   } catch {
     return undefined;
   }
+}
+
+/**
+ * デスクトップの見出し行。?company= が 1 社なら企業名を見出しにするため、サーバーで名前を引いて渡す。
+ * あわせて紹介文・公式ブログ・企業別 RSS の紹介行を全幅で出す(企業ページ廃止後の導線。ADR-0048)。
+ * タグ・カテゴリで絞っているときは、その絞り込みの RSS へのリンクを同じ位置に出す。
+ */
+async function FeedHeading({ searchParams }: { searchParams: Promise<RawSearchParams> }) {
+  const sp = firstSearchParams(await searchParams);
+  const company = await singleCompany(sp.company);
+  // 企業で絞っていれば企業別 RSS(紹介行)を優先する。検索結果は RSS で再現できない一覧なので出さない。
+  const filteredRss =
+    !company && !sp.q?.trim() ? filteredFeedLink({ tag: sp.tag, category: sp.category }) : null;
+  return (
+    <>
+      <FeedHeader
+        icon="feed"
+        showControls
+        company={company ? { slug: company.slug, name: company.name } : undefined}
+      />
+      {company && <CompanyFeedIntro view={resolveCompanyFeedIntro(company)} />}
+      {filteredRss && <FilteredFeedRssLink href={filteredRss.url} title={filteredRss.title} />}
+    </>
+  );
 }
 
 /**
@@ -84,11 +122,15 @@ export async function generateMetadata({
   const sp = firstSearchParams(await searchParams);
   const isSearch = !!sp.q?.trim();
   const tag = sp.tag?.trim();
-  const companyName = await singleCompanyName(sp.company);
+  const company = await singleCompany(sp.company);
+  const companyName = company?.name;
   const title = feedPageTitle({
     q: sp.q,
     tag,
     company: companyName,
+    category: sp.category,
+    read: sp.read,
+    feed: sp.feed,
     sort: parseFeedSort(sp.sort),
   });
   return {
@@ -96,14 +138,9 @@ export async function generateMetadata({
     alternates: {
       canonical: '/',
       // alternates はルートレイアウトのものを浅く上書きするので、全体フィードも併記する。
-      // タグ絞り込み中は RSS リーダーの自動検出でそのタグのフィードも見つかるようにする(ADR-0039)。
+      // タグ・カテゴリ・企業で絞り込み中は、RSS リーダーの自動検出でその一覧のフィードも見つかるようにする(ADR-0039)。
       types: {
-        'application/rss+xml': [
-          ...(tag
-            ? [{ url: `/feed.xml?tag=${encodeURIComponent(tag)}`, title: `#${tag} の新着` }]
-            : []),
-          { url: '/feed.xml', title: 'テクブロ 新着' },
-        ],
+        'application/rss+xml': feedAlternateLinks({ tag, category: sp.category, company }),
       },
     },
     ...(isSearch ? { robots: { index: false, follow: true } } : {}),
@@ -174,7 +211,7 @@ export default function HomePage({ searchParams }: { searchParams: Promise<RawSe
           className={`@container mx-auto max-w-[1680px] ${MOBILE_GUTTER_CLASS} pt-4 md:px-6 md:pt-0 lg:px-8 lg:pt-6`}
         >
           <Suspense fallback={<div className="hidden h-9 lg:block" />}>
-            <FeedHeader icon="feed" showControls />
+            <FeedHeading searchParams={searchParams} />
           </Suspense>
           {/*
             購読/フィルタ/最新DBを反映する動的な FeedBody(既定状態はモバイル=リスト表示 /
@@ -349,27 +386,40 @@ async function SubscribedFeed({ searchParams }: { searchParams: Promise<RawSearc
   });
 
   if (allOff) {
-    return (
-      <div className="border-border-default bg-bg-surface rounded-md border p-12 text-center">
-        <p className="text-fg-muted">表示する企業が選択されていません。</p>
-        <Link
-          href="/settings"
-          className="text-accent mt-3 inline-block text-sm font-medium hover:underline"
-        >
-          表示する企業を選ぶ
-        </Link>
-      </div>
-    );
+    return <FeedAllOffEmptyState />;
   }
 
   if (isEmpty) {
     // 検索 0 件は「記事がまだ無い」「期間が狭い」より優先(クリアを主導線にする。ADR-0022)
     if (query) {
-      return <FeedSearchEmptyState query={query} />;
+      // ゲストの未読/既読とマイフィードはサーバーの絞り込みに効かない(0 件の原因ではない)ので数えない。
+      const searchCopy = resolveSearchEmptyCopy({
+        query,
+        sort,
+        period,
+        readMode: isGuest ? 'all' : readMode,
+        tag,
+        category,
+        companySlugs,
+        feedIds: isGuest ? undefined : feedIds,
+      });
+      return <FeedSearchEmptyState query={query} copy={searchCopy} />;
     }
     // 人気順で狭い期間(今日/今週/今月)に該当 0 件 → 取得を促すのではなく期間を広げる導線。
     if (sort === 'popular' && period !== 'all') {
       return <FeedPeriodEmptyState period={period} />;
+    }
+    const filteredCopy = resolveFilteredEmptyCopy({
+      sort,
+      period,
+      readMode,
+      tag,
+      category,
+      companySlugs,
+      feedIds,
+    });
+    if (filteredCopy) {
+      return <FeedFilteredEmptyState copy={filteredCopy} />;
     }
     return <FeedEmptyState />;
   }

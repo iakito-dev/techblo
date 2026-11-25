@@ -5,7 +5,8 @@ import { SettingsSection } from '@/components/ui/settings-section';
  * SettingsSection + 吸着ツールバー(検索 + 一括操作) + 2カラムの企業行、という同じ外形に
  * 揃え、データ解決時のレイアウトシフトを 0 にする。Suspense fallback と loading.tsx で使う。
  *
- * 行数は対象6社にあわせて 6 行(md+ は2カラム)。件数表示はデータ依存なのでプレースホルダ。
+ * 行数は 6 行(md+ は2カラム)に固定し、実際の企業数(数十社)は待たない。行は下へ伸びるだけで
+ * 上のツールバーの位置は変わらないため、件数をそろえなくてもシフトしない。件数表示はデータ依存なのでプレースホルダ。
  */
 export function SubscriptionListSkeleton() {
   return (

@@ -23,6 +23,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { CompanyFavicon } from '@/components/ui/company-favicon';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { CATEGORY_DEFINITIONS } from '@/shared/categories';
+import { formatCount } from '@/shared/text';
 import { cn } from '@/shared/utils';
 
 /** サイドバーに出す企業(購読企業=フォルダ相当)。 */
@@ -56,7 +57,8 @@ const READ_FILTERS = [
 
 /**
  * Dewey 風の左サイドバー(lg+ のみ表示)。
- * ロゴ+アカウント / ライブラリ / フィルタ(既読状態 + 購読企業, 実件数) / フォルダ(仮) / カテゴリ / 下部ユーティリティ。
+ * ロゴ / ライブラリ / フィルタ(既読状態 + 購読企業・マイフィード, 実件数) / フォルダ(仮) / カテゴリ / 下部ユーティリティ。
+ * アカウント導線はトップバー(feed-topbar.tsx の TopbarAuth)が持つ。
  * 企業フォルダは `/?company=slug` への遷移でフィードを絞り込む。モバイルは Header + MobileNav が担う。
  */
 export function AppSidebar({
@@ -100,7 +102,11 @@ export function AppSidebar({
   }, [onFeed, activeCategory]);
 
   return (
-    <aside className="border-border-default bg-bg-app fixed inset-y-0 left-0 z-20 hidden w-64 flex-col border-r lg:flex">
+    // 記事ページの関連記事・設定の目次も <aside> なので、名前が無いとランドマーク一覧で見分けられない。
+    <aside
+      aria-label="サイドバー"
+      className="border-border-default bg-bg-app fixed inset-y-0 left-0 z-20 hidden w-64 flex-col border-r lg:flex"
+    >
       {/* 上部: ロゴ */}
       <div className="flex h-16 shrink-0 items-center px-4">
         <Logo showOrigin />
@@ -146,11 +152,11 @@ export function AppSidebar({
             {/* 企業(クリックで /?company=slug 絞り込み・折りたたみ) */}
             <Collapsible defaultOpen className="mt-1">
               <div className="flex items-center justify-between px-2.5">
-                <CollapsibleTrigger className="group text-fg-subtle focus-visible:ring-accent flex items-center gap-1 rounded-sm py-1 text-xs font-medium outline-none focus-visible:ring-2">
+                <CollapsibleTrigger className="group text-fg-muted focus-visible:ring-accent flex items-center gap-1 rounded-sm py-1 text-xs font-medium outline-none focus-visible:ring-2">
                   <ChevronRight className="size-3.5 transition-transform group-data-[state=open]:rotate-90" />
                   企業
                 </CollapsibleTrigger>
-                <span className="text-fg-subtle text-xs tabular-nums">{companies.length}</span>
+                <span className="text-fg-muted text-xs tabular-nums">{companies.length}</span>
               </div>
               <CollapsibleContent className="mt-1 flex flex-col gap-0.5">
                 {companies.map((c) => {
@@ -169,8 +175,8 @@ export function AppSidebar({
                     >
                       <CompanyFavicon url={c.siteUrl} name={c.name} />
                       <span className="min-w-0 flex-1 truncate">{c.name}</span>
-                      <span className="text-fg-subtle shrink-0 text-xs tabular-nums">
-                        {c.articleCount}
+                      <span className="text-fg-muted shrink-0 text-xs tabular-nums">
+                        {formatCount(c.articleCount)}
                       </span>
                     </Link>
                   );
@@ -182,11 +188,11 @@ export function AppSidebar({
             {userFeeds.length > 0 && (
               <Collapsible defaultOpen className="mt-1">
                 <div className="flex items-center justify-between px-2.5">
-                  <CollapsibleTrigger className="group text-fg-subtle focus-visible:ring-accent flex items-center gap-1 rounded-sm py-1 text-xs font-medium outline-none focus-visible:ring-2">
+                  <CollapsibleTrigger className="group text-fg-muted focus-visible:ring-accent flex items-center gap-1 rounded-sm py-1 text-xs font-medium outline-none focus-visible:ring-2">
                     <ChevronRight className="size-3.5 transition-transform group-data-[state=open]:rotate-90" />
                     マイフィード
                   </CollapsibleTrigger>
-                  <span className="text-fg-subtle text-xs tabular-nums">{userFeeds.length}</span>
+                  <span className="text-fg-muted text-xs tabular-nums">{userFeeds.length}</span>
                 </div>
                 <CollapsibleContent className="mt-1 flex flex-col gap-0.5">
                   {userFeeds.map((f) => {
@@ -206,8 +212,8 @@ export function AppSidebar({
                       >
                         <CompanyFavicon url={f.siteUrl ?? ''} name={f.title} />
                         <span className="min-w-0 flex-1 truncate">{f.title}</span>
-                        <span className="text-fg-subtle shrink-0 text-xs tabular-nums">
-                          {f.articleCount}
+                        <span className="text-fg-muted shrink-0 text-xs tabular-nums">
+                          {formatCount(f.articleCount)}
                         </span>
                       </Link>
                     );
@@ -219,7 +225,7 @@ export function AppSidebar({
 
           {/* フォルダ(一旦空。将来ユーザー定義フォルダを入れる枠) */}
           <Section label="フォルダ">
-            <p className="text-fg-subtle px-2.5 py-1.5 text-xs">まだフォルダがありません</p>
+            <p className="text-fg-muted px-2.5 py-1.5 text-xs">まだフォルダがありません</p>
           </Section>
 
           {/* カテゴリ(?category= 絞り込み・職能軸7種。shared/categories.ts が単一の真実の源。ADR-0034)。
@@ -274,7 +280,7 @@ export function AppSidebar({
 function Section({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="flex flex-col gap-0.5">
-      <span className="text-fg-subtle px-2 py-1 text-xs font-medium tracking-wider uppercase">
+      <span className="text-fg-muted px-2 py-1 text-xs font-medium tracking-wider uppercase">
         {label}
       </span>
       {children}

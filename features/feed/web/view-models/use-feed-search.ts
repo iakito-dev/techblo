@@ -2,6 +2,7 @@
 
 import { useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { buildFeedHref } from './feed-href';
 import { useFeedNav } from './feed-nav-context';
 
 const DEBOUNCE_MS = 300;
@@ -47,13 +48,7 @@ export function useFeedSearch(): {
 
   const hrefFor = useCallback(
     (q: string) => {
-      const sp = new URLSearchParams(params);
-      const trimmed = q.trim();
-      if (trimmed) sp.set('q', trimmed);
-      else sp.delete('q');
-      sp.delete('page');
-      const qs = sp.toString();
-      return qs ? `/?${qs}` : '/';
+      return buildFeedHref(params, { q: q.trim() });
     },
     [params],
   );

@@ -2,6 +2,7 @@
 
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useRef, useTransition } from 'react';
+import { canGoBackInApp } from '@/lib/navigation/can-go-back-in-app';
 
 const MAIN_ROUTES = ['/', '/bookmarks', '/favorites', '/settings'] as const;
 const INTENT_DISTANCE = 12;
@@ -419,14 +420,15 @@ export function MobileSwipeNavigation() {
       }
 
       // 戻るは履歴を1つ巻き戻す(一覧はルーターキャッシュから復帰し、スクロール位置も
-      // ブラウザが復元する)。共有リンクで直接開いて履歴が無い場合だけフィードへ push する
+      // ブラウザが復元する)。共有リンクで直接開いて(外部サイトから来た場合も)アプリ内の
+      // 戻り先が無い場合だけフィードへ push する
       // (ArticleBackLink と同じ規則)。
       const navigate = () => {
         if (!back) {
           router.push(href as string);
           return;
         }
-        if (window.history.length > 1) router.back();
+        if (canGoBackInApp()) router.back();
         else router.push('/');
       };
 

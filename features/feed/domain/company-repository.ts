@@ -14,11 +14,11 @@ export type CompanyWithCounts = {
 };
 
 /**
- * 企業の詳細(企業ページ /companies/[slug] 用)。
+ * 企業の詳細(フィードの企業絞り込み `/?company=` と企業別 RSS 用。企業ページは ADR-0048 で廃止)。
  * 一覧用の CompanyWithCounts に説明文を加えた読み取りビュー。
  */
 export type CompanyDetail = CompanyWithCounts & {
-  /** 企業紹介文(無ければ null)。ページ本文・meta description に使う */
+  /** 企業紹介文(無ければ null)。 */
   description: string | null;
 };
 
@@ -27,7 +27,7 @@ export type CompanyDetail = CompanyWithCounts & {
  */
 export interface CompanyRepository {
   listEnabledWithCounts(): Promise<CompanyWithCounts[]>;
-  /** slug で1社を引く(有効な企業のみ)。無ければ null。企業ページ用。 */
+  /** slug で1社を引く(有効な企業のみ)。無ければ null。 */
   findBySlug(slug: string): Promise<CompanyDetail | null>;
   /**
    * 企業フィードの直近の取込試行時刻(成功・失敗の新しい方、全企業の最大)。未取込なら null。

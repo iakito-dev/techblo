@@ -4,6 +4,7 @@ import { ArrowLeft, Clock, Loader2, Search, X } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState, useTransition } from 'react';
 import { createPortal } from 'react-dom';
+import { buildFeedHref } from '../view-models/feed-href';
 import { useSearchHistory } from '../view-models/use-search-history';
 
 const DEBOUNCE_MS = 300;
@@ -29,13 +30,8 @@ export function MobileSearchOverlay({ open, onClose }: { open: boolean; onClose:
 
   const commit = useCallback(
     (q: string) => {
-      const sp = new URLSearchParams(params);
-      const trimmed = q.trim();
-      if (trimmed) sp.set('q', trimmed);
-      else sp.delete('q');
-      sp.delete('page');
-      const qs = sp.toString();
-      startTransition(() => router.replace(qs ? `/?${qs}` : '/'));
+      const href = buildFeedHref(params, { q: q.trim() });
+      startTransition(() => router.replace(href));
     },
     [params, router],
   );
@@ -113,8 +109,8 @@ export function MobileSearchOverlay({ open, onClose }: { open: boolean; onClose:
             ref={inputRef}
             type="search"
             value={value}
-            placeholder="記事を検索"
-            aria-label="記事を検索"
+            placeholder="記事や企業を検索"
+            aria-label="記事や企業を検索"
             aria-busy={isPending}
             enterKeyHint="search"
             onChange={(e) =>
