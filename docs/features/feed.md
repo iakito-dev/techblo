@@ -269,5 +269,6 @@ PostHog のイベント(一覧と規約は [observability.md §4](../architectur
 - `/feed.xml`(全企業の新着50件。`?category=<key>` で職能カテゴリに絞り込み。不正キーは無視して全体。`?tag=<タグ>` で AI要約タグ(`/?tag=` と同じ類義語展開。空白のみ・50文字超は無視)に絞り込み、`category` と併用可)と `/companies/[slug]/feed.xml`(存在しない slug は404)を Route Handler で配信する。チャンネルの `link`(RSS リーダーの「サイトで見る」)はフィードと同じ絞り込みの一覧(`/?category=&tag=` / `/?company=<slug>`)を指す。以前はカテゴリのフィードでも `/`(全体)を指していた。RSS 2.0 / `application/rss+xml`。
 - item の `link` は元記事 URL(元ブログへの送客を優先)、`guid`(isPermaLink=false)は Techblo の記事ページ URL。`dc:creator` と `source` は企業名、`category` は AI要約タグ、`description` は AI要約 overview を優先し、無ければ RSS 抜粋。
 - 合成は app 層(`app/_feed/public-feed.ts`)。XML 生成は `lib/rss/build-feed-xml.ts`(純粋関数、エスケープ・制御文字除去)。
+- チャンネルの `lastBuildDate` は最新記事の公開日時。記事が 0 件(追加したばかりの企業・該当記事の無いタグ)なら要素ごと省く。以前は `new Date(0)` を入れており、フィードリーダーに「最終更新 1970-01-01」と出ていた
 - `Cache-Control: public, s-maxage=600, stale-while-revalidate=3600`。データは `getFeed`(feed タグで無効化)を再利用。失敗時は 500 + `logger.error`。
 - ルートレイアウトの `alternates.types` で `/feed.xml` を自動検出用に宣言する。絞り込み中は `app/(app)/page.tsx` の metadata がその一覧のフィードも併記する(`app/_feed/feed-alternates.ts`): `/?tag=` / `/?category=` は `/feed.xml?category=&tag=`(併用時は 1 本にまとめる。不正なカテゴリキーは無視)、`/?company=<slug>`(1 社に解決できたとき)は `/companies/<slug>/feed.xml`。並びは一覧に近いフィードが先、全体フィードが最後。以前はタグだけで、企業・カテゴリで絞った一覧からは専用フィードを自動検出できなかった

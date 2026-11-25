@@ -28,7 +28,11 @@ export type RssFeedChannel = {
   /** このフィード自身の URL(atom:link rel="self")。 */
   selfUrl: string;
   language: string;
-  lastBuildDate: Date;
+  /**
+   * 最新記事の公開日時。記事が 0 件なら省く(要素ごと出さない)。以前は 0 件で `new Date(0)` を渡しており、
+   * 新しく追加した企業や記事の無いタグのフィードが「最終更新 1970-01-01」になっていた。
+   */
+  lastBuildDate?: Date;
   items: RssFeedItem[];
 };
 
@@ -81,7 +85,9 @@ export function buildFeedXml(channel: RssFeedChannel): string {
     `    <link>${escapeXml(channel.link)}</link>`,
     `    <description>${escapeXml(channel.description)}</description>`,
     `    <language>${escapeXml(channel.language)}</language>`,
-    `    <lastBuildDate>${toRfc822(channel.lastBuildDate)}</lastBuildDate>`,
+    ...(channel.lastBuildDate
+      ? [`    <lastBuildDate>${toRfc822(channel.lastBuildDate)}</lastBuildDate>`]
+      : []),
     `    <atom:link href="${escapeXml(channel.selfUrl)}" rel="self" type="application/rss+xml"/>`,
   ];
   const items = channel.items.map(renderItem);

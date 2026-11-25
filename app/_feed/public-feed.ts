@@ -97,7 +97,7 @@ export async function renderPublicFeed(scope: PublicFeedScope): Promise<Response
         : 'テック企業の公式技術ブログの新着記事を集約したフィード(元記事へのリンク)。',
       selfUrl,
       language: 'ja',
-      lastBuildDate: items[0]?.publishedAt ?? new Date(0),
+      lastBuildDate: items[0]?.publishedAt,
       items,
     });
     return xmlResponse(xml);
