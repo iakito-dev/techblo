@@ -65,3 +65,22 @@ export function areAllGuestReadsShown({
 }): boolean {
   return isGuest && readMode === 'read' && shownCount >= guestReadCount;
 }
+
+/**
+ * 一覧の末尾に「すべての記事を表示しました」を出すか。
+ * 自動読み込みの一覧は最後まで読むと何の印も無く途切れ、続きを読み込み中なのか終わったのかが分からなかった。
+ * 続きが無い(hasMore=false)か、ゲストの既読フィルタで一致しうる記事が出そろったときだけ出す。
+ * 表示が 0 件なら空状態が受け持つので出さない。
+ */
+export function shouldShowFeedEnd({
+  hasMore,
+  nothingMoreCanMatch,
+  visibleCount,
+}: {
+  hasMore: boolean;
+  /** areAllGuestReadsShown の結果。 */
+  nothingMoreCanMatch: boolean;
+  visibleCount: number;
+}): boolean {
+  return visibleCount > 0 && (!hasMore || nothingMoreCanMatch);
+}

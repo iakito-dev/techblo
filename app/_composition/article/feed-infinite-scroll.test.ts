@@ -3,6 +3,7 @@ import {
   areAllGuestReadsShown,
   GUEST_FILTER_MAX_EMPTY_PAGES,
   isGuestReadFilterStalled,
+  shouldShowFeedEnd,
   shouldTriggerAutoLoad,
 } from './feed-infinite-scroll';
 
@@ -104,5 +105,34 @@ describe('areAllGuestReadsShown', () => {
     expect(areAllGuestReadsShown({ ...base, isGuest: false })).toBe(false);
     expect(areAllGuestReadsShown({ ...base, readMode: 'unread' })).toBe(false);
     expect(areAllGuestReadsShown({ ...base, readMode: 'all' })).toBe(false);
+  });
+});
+
+describe('shouldShowFeedEnd', () => {
+  test('shows the end marker once there is nothing more to load', () => {
+    expect(
+      shouldShowFeedEnd({ hasMore: false, nothingMoreCanMatch: false, visibleCount: 24 }),
+    ).toBe(true);
+  });
+
+  test('hides it while more pages remain', () => {
+    expect(shouldShowFeedEnd({ hasMore: true, nothingMoreCanMatch: false, visibleCount: 24 })).toBe(
+      false,
+    );
+  });
+
+  test('shows it when every guest read article is already listed even if the server has more', () => {
+    expect(shouldShowFeedEnd({ hasMore: true, nothingMoreCanMatch: true, visibleCount: 3 })).toBe(
+      true,
+    );
+  });
+
+  test('leaves an empty list to the empty state', () => {
+    expect(shouldShowFeedEnd({ hasMore: false, nothingMoreCanMatch: false, visibleCount: 0 })).toBe(
+      false,
+    );
+    expect(shouldShowFeedEnd({ hasMore: true, nothingMoreCanMatch: true, visibleCount: 0 })).toBe(
+      false,
+    );
   });
 });

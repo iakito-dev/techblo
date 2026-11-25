@@ -16,6 +16,7 @@ import { loadMoreFeed } from './feed-actions';
 import {
   areAllGuestReadsShown,
   isGuestReadFilterStalled,
+  shouldShowFeedEnd,
   shouldTriggerAutoLoad,
 } from './feed-infinite-scroll';
 import type { ComposedArticle } from './feed-load-more';
@@ -283,6 +284,11 @@ export function FeedList({
             {isPending ? '読み込み中…' : 'もっと読む'}
           </button>
         </div>
+      )}
+
+      {/* 最後まで読んだことを示す。無いと自動読み込みの一覧が無言で途切れ、続きを待つべきか分からない。 */}
+      {shouldShowFeedEnd({ hasMore, nothingMoreCanMatch, visibleCount: visibleItems.length }) && (
+        <p className="text-fg-muted mt-10 pb-2 text-center text-xs">すべての記事を表示しました</p>
       )}
     </>
   );
