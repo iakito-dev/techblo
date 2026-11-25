@@ -116,7 +116,10 @@ describe('renderPublicFeed', () => {
     getFeed.mockResolvedValue({ items: [] });
     const res = await renderPublicFeed({});
     expect(res.status).toBe(200);
-    expect(await res.text()).toContain('<channel>');
+    const xml = await res.text();
+    expect(xml).toContain('<channel>');
+    // 記事が無いのに最終更新が 1970-01-01 にならないよう、lastBuildDate は出さない
+    expect(xml).not.toContain('<lastBuildDate>');
   });
 
   it('取得に失敗したら 500 を返しログに残す', async () => {

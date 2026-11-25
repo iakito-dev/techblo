@@ -54,6 +54,12 @@ describe('buildFeedXml', () => {
     expect(xml).toContain('<atom:link href="https://techblo.dev/feed.xml" rel="self"');
   });
 
+  it('lastBuildDate が無ければ要素ごと省く(1970-01-01 を出さない)', () => {
+    const xml = buildFeedXml({ ...channel([]), lastBuildDate: undefined });
+    expect(xml).not.toContain('<lastBuildDate>');
+    expect(xml).toContain('<atom:link href="https://techblo.dev/feed.xml" rel="self"');
+  });
+
   it('item の件数がそのまま出力される', () => {
     const xml = buildFeedXml(channel([item(), item({ guid: 'g2' }), item({ guid: 'g3' })]));
     expect(xml.match(/<item>/g)).toHaveLength(3);
