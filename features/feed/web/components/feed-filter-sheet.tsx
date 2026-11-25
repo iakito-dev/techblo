@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { CompanyFavicon } from '@/components/ui/company-favicon';
 import { matchesCompanyName } from '@/shared/company-name-match';
+import { formatCount } from '@/shared/text';
 import {
   type FeedSort,
   type PopularPeriod,
@@ -14,8 +15,10 @@ import {
   type ReadFilterMode,
 } from '../../domain/feed-sort';
 import type { FilterCompany, FilterUserFeed } from '../view-models/feed-filter-options';
+import { buildFeedHref, feedFiltersPatch } from '../view-models/feed-href';
 import { useFeedNav } from '../view-models/feed-nav-context';
 import { parseListParam } from '../view-models/parse-list-param';
+import { periodOptions } from '../view-models/period-labels';
 import { FeedBottomSheet } from './feed-bottom-sheet';
 
 const READ_OPTIONS: { value: ReadFilterMode; label: string }[] = [
@@ -24,13 +27,8 @@ const READ_OPTIONS: { value: ReadFilterMode; label: string }[] = [
   { value: 'read', label: '既読' },
 ];
 
-// 仕様の表記(24時間/週間/月間)に合わせる。値は既存の PopularPeriod を維持。
-const PERIOD_OPTIONS: { value: PopularPeriod; label: string }[] = [
-  { value: 'all', label: '全期間' },
-  { value: 'today', label: '24時間' },
-  { value: 'week', label: '週間' },
-  { value: 'month', label: '月間' },
-];
+// 表記は全画面で period-labels.ts に揃える。シートは「全期間」を先頭に置く。
+const PERIOD_OPTIONS = periodOptions(['all', 'today', 'week', 'month']);
 
 const SORT_OPTIONS: { value: FeedSort; label: string }[] = [
   { value: 'latest', label: '新着順' },
@@ -148,21 +146,17 @@ export function FeedFilterSheet({
   }
 
   function apply() {
-    const sp = new URLSearchParams(params);
-    // latest は既定値なので URL から消してきれいに保つ(useFeedSort.hrefFor と同じ規則)。
-    if (sort === 'latest') sp.delete('sort');
-    else sp.set('sort', sort);
-    if (read === 'all') sp.delete('read');
-    else sp.set('read', read);
-    if (period === 'all') sp.delete('period');
-    else sp.set('period', period);
-    if (selected.length === 0) sp.delete('company');
-    else sp.set('company', selected.join(','));
-    if (selectedFeeds.length === 0) sp.delete('feed');
-    else sp.set('feed', selectedFeeds.join(','));
-    sp.delete('page');
-    const qs = sp.toString();
-    navigate(qs ? `/?${qs}` : '/');
+    navigate(
+      buildFeedHref(params, {
+        sort: sort === 'latest' ? null : sort,
+        ...feedFiltersPatch({
+          status: read,
+          period,
+          companies: selected,
+          userFeeds: selectedFeeds,
+        }),
+      }),
+    );
     onOpenChange(false);
   }
 
@@ -250,7 +244,7 @@ export function FeedFilterSheet({
                       </span>
                     )}
                     <span className="text-fg-subtle shrink-0 text-xs tabular-nums">
-                      {c.articleCount}
+                      {formatCount(c.articleCount)}
                     </span>
                   </button>
                 </li>
@@ -297,7 +291,7 @@ export function FeedFilterSheet({
                         </span>
                       )}
                       <span className="text-fg-subtle shrink-0 text-xs tabular-nums">
-                        {f.articleCount}
+                        {formatCount(f.articleCount)}
                       </span>
                     </button>
                   </li>
@@ -322,7 +316,7 @@ export function FeedFilterSheet({
           onClick={apply}
           className="bg-primary text-fg-inverse active:bg-primary-hover h-12 flex-1 rounded-md text-base font-medium transition-colors"
         >
-          <span className="tabular-nums">{debouncedCount.toLocaleString()}</span>件の記事を表示
+          <span className="tabular-nums">{formatCount(debouncedCount)}</span>件の記事を表示
         </button>
       </footer>
     </FeedBottomSheet>

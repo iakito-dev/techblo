@@ -18,7 +18,7 @@ export default function SettingsAppearancePage() {
     <SettingsFrame>
       <SettingsDesktop className="hidden lg:block" />
       <div className="lg:hidden" data-swipe-nav-ignore>
-        <SettingsBackLink />
+        <SettingsBackLink title="表示" />
         <AppearanceSettings />
       </div>
     </SettingsFrame>

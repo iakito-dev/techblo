@@ -40,7 +40,7 @@ cp .env.example .env.local
 # 6. DB マイグレーション
 bun drizzle-kit migrate
 
-# 7. シード(初期データ: 6社の企業マスタ)
+# 7. シード(企業マスタ。対象企業は scripts/seed.ts が真実源)
 bun run db:seed
 
 # 8. dev サーバー起動

@@ -51,7 +51,7 @@ export function Header() {
             <button
               type="button"
               onClick={() => setSearchOpen(true)}
-              aria-label="記事を検索"
+              aria-label="記事や企業を検索"
               className="text-fg-secondary active:bg-bg-surface-2 grid size-11 touch-manipulation place-items-center rounded-full transition-colors"
             >
               <Search className="size-5" />

@@ -29,7 +29,10 @@ export default function AboutPage() {
           <dd className="text-fg-default">{SITE_OPERATOR}</dd>
           <dt className="text-fg-muted">連絡先</dt>
           <dd>
-            <a href={`mailto:${CONTACT_EMAIL}`} className="text-accent hover:underline">
+            <a
+              href={`mailto:${CONTACT_EMAIL}`}
+              className="text-accent underline underline-offset-4 hover:decoration-2"
+            >
               {CONTACT_EMAIL}
             </a>
           </dd>
@@ -45,11 +48,17 @@ export default function AboutPage() {
       <LegalSection heading="関連ページ">
         <p>
           個人情報の取り扱いは{' '}
-          <Link href="/privacy" className="text-accent hover:underline">
+          <Link
+            href="/privacy"
+            className="text-accent underline underline-offset-4 hover:decoration-2"
+          >
             プライバシーポリシー
           </Link>
           、ご利用条件は{' '}
-          <Link href="/terms" className="text-accent hover:underline">
+          <Link
+            href="/terms"
+            className="text-accent underline underline-offset-4 hover:decoration-2"
+          >
             利用規約
           </Link>{' '}
           をご確認ください。

@@ -1,9 +1,10 @@
 'use client';
 
-import { Bookmark, Heart, Inbox, Search } from 'lucide-react';
+import { Bookmark, Heart, Search } from 'lucide-react';
 import Link from 'next/link';
 import { useRef, useState, useTransition } from 'react';
 import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
 import type { ArticleSummaryDto } from '@/features/ai-summary/application/dto';
 import { setBookmarkAction } from '@/features/bookmarks/web/actions';
 import { setFavoriteAction } from '@/features/favorites/web/actions';
@@ -165,6 +166,19 @@ export function SavedArticlesView({
     });
   }
 
+  /**
+   * あとで読むの一覧でお気に入りに追加したときの「昇格」導線(ADR-0006 のシナリオ B:
+   * 読み終えた記事のうち良かったものをお気に入りへ移し、あとで読むからは外す)。
+   * 自動では外さず、トーストの操作で選べるようにする(両方に残したい人もいるため)。
+   * 外す操作は通常の解除と同じ Undo フローに乗せる。
+   */
+  function handlePromote(articleId: string) {
+    toast.success('お気に入りに追加しました', {
+      duration: UNDO_DURATION,
+      action: { label: 'あとで読むから外す', onClick: () => handleUnsave(articleId) },
+    });
+  }
+
   const bookmarkedSet = new Set(bookmarkedIds);
   const favoritedSet = new Set(favoritedIds);
 
@@ -190,25 +204,33 @@ export function SavedArticlesView({
       )}
 
       {visibleCount === 0 ? (
+        // 見た目はフィードの空状態(FeedEmptyState 等)とそろえる。以前はアイコン単体・小さな見出し・
+        // 文字リンクで、同じ「まだ何もない」状態なのにタブを切り替えるたびに別の画面に見えていた。
         <div className="flex flex-col items-center justify-center px-6 py-24 text-center">
-          <Inbox className="text-fg-subtle size-10" />
-          <p className="text-fg-default mt-4 font-bold">{emptyTitle}</p>
-          <p className="text-fg-muted mt-1 text-sm">{emptyHint}</p>
-          <Link href="/" className="text-accent mt-4 text-sm font-medium hover:underline">
-            フィードを見る
-          </Link>
+          <div className="bg-bg-surface-2 text-fg-muted grid size-16 place-items-center rounded-xl">
+            <Icon className="size-8" />
+          </div>
+          <p className="text-fg-default mt-5 text-lg font-bold text-balance [word-break:auto-phrase]">
+            {emptyTitle}
+          </p>
+          <p className="text-fg-muted mt-2 max-w-xs text-sm leading-relaxed text-balance [word-break:auto-phrase]">
+            {emptyHint}
+          </p>
+          <Button asChild variant="primary" size="md" className="mt-6">
+            <Link href="/">フィードを見る</Link>
+          </Button>
         </div>
       ) : matchedCount === 0 && isFiltering ? (
         <div className="flex flex-col items-center justify-center px-6 py-20 text-center">
-          <Search className="text-fg-subtle size-10" />
-          <p className="text-fg-default mt-4 font-bold">一致する記事がありません</p>
-          <button
-            type="button"
-            onClick={() => setQuery('')}
-            className="text-accent focus-visible:ring-accent mt-3 rounded-sm text-sm font-medium hover:underline focus-visible:ring-2 focus-visible:outline-none"
-          >
+          <div className="bg-bg-surface-2 text-fg-muted grid size-16 place-items-center rounded-xl">
+            <Search className="size-8" />
+          </div>
+          <p className="text-fg-default mt-5 text-lg font-bold text-balance [word-break:auto-phrase]">
+            一致する記事がありません
+          </p>
+          <Button variant="primary" size="md" onClick={() => setQuery('')} className="mt-6">
             絞り込みをクリア
-          </button>
+          </Button>
         </div>
       ) : (
         <>
@@ -240,6 +262,9 @@ export function SavedArticlesView({
                             : bookmarkedSet.has(article.id)
                         }
                         onUnsave={() => handleUnsave(article.id)}
+                        onPromote={
+                          kind === 'bookmark' ? () => handlePromote(article.id) : undefined
+                        }
                       />
                     }
                   />
@@ -248,10 +273,16 @@ export function SavedArticlesView({
             })}
           </div>
           {/* 件数が少ないと左上に寄って空白が広がるため、薄い補足で「これから増える」ことを示す */}
+          {/* 中央寄せの 1〜2 行なので、既定の折り返しだとモバイル幅でリンクが「フィ / ードを見る →」と
+              語の途中で割れていた。本文は文節単位で折り、リンクは 1 語として折り返さない。
+              リンクは 14px の 1 行で 24px(WCAG 2.5.8)に届かないため、py + 同量の負マージンで当たり判定だけ広げる */}
           {visibleCount <= 2 && !isFiltering && (
-            <p className="text-fg-subtle mt-8 text-center text-sm">
+            <p className="text-fg-subtle mt-8 text-center text-sm text-balance [word-break:auto-phrase]">
               {emptyHint}。
-              <Link href="/" className="text-accent ml-1 hover:underline">
+              <Link
+                href="/"
+                className="text-accent -my-1 ml-1 inline-block py-1 whitespace-nowrap hover:underline"
+              >
                 フィードを見る →
               </Link>
             </p>
@@ -273,12 +304,15 @@ function SavedCardActions({
   isGuest,
   otherInitial,
   onUnsave,
+  onPromote,
 }: {
   articleId: string;
   kind: SavedKind;
   isGuest: boolean;
   otherInitial: boolean;
   onUnsave: () => void;
+  /** もう一方の種別(お気に入り)を追加したときに呼ぶ。あとで読むの一覧でだけ渡す。 */
+  onPromote?: () => void;
 }) {
   const otherKind: SavedKind = kind === 'bookmark' ? 'favorite' : 'bookmark';
   const guestOther = useGuestSaves(otherKind);
@@ -289,7 +323,9 @@ function SavedCardActions({
 
   function toggleOther() {
     if (isGuest) {
-      trackSaveChange(otherKind, articleId, guestOther.toggle(articleId), true);
+      const saved = guestOther.toggle(articleId);
+      trackSaveChange(otherKind, articleId, saved, true);
+      if (saved) onPromote?.();
       return;
     }
     const next = !otherActive;
@@ -309,6 +345,9 @@ function SavedCardActions({
         return;
       }
       trackSaveChange(otherKind, articleId, next, false);
+      // 昇格トーストは保存の成功後に出す。楽観的に出すと、失敗時に「あとで読むから外す」を押した記事が
+      // どちらの一覧にも残らなくなる
+      if (next) onPromote?.();
     });
   }
 

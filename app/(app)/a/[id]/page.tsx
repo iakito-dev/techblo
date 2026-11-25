@@ -18,12 +18,13 @@ import { ArticleHeroImage } from '@/features/feed/web/components/article-hero-im
 import { ArticleSourceLink } from '@/features/feed/web/components/article-link';
 import { RelatedArticles } from '@/features/feed/web/components/related-articles';
 import { ShareButton } from '@/features/feed/web/components/share-button';
+import { hatenaEntryUrl } from '@/features/feed/web/hatena-entry-url';
 import { getArticleById, getRelatedArticles } from '@/features/feed/web/queries';
 import { toExcerpt } from '@/features/feed/web/strip-html';
 import { CACHE_TAGS } from '@/lib/cache/tags';
 import { articleJsonLd } from '@/lib/seo';
 import { resolveBaseUrl } from '@/lib/site-url';
-import { formatRelative } from '@/shared/date';
+import { formatDateTime, formatRelative, toIsoDateTime } from '@/shared/date';
 import { MOBILE_GUTTER_CLASS } from '@/shared/layout';
 import { isUuid } from '@/shared/uuid';
 
@@ -74,7 +75,10 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { id } = await params;
   const { article, summary } = await loadArticleWithSummary(id);
-  if (!article) return { title: '記事が見つかりません' };
+  // ルートレイアウトの robots(index, follow)を継承したままだと、notFound() で Next が足す noindex と
+  // 食い違う robots meta が 2 本並ぶ(本文はストリーム中に notFound するので HTTP は 200 のまま)。
+  // 存在しない記事は検索結果に残さないよう、ここで明示的に noindex にして 1 本に揃える。
+  if (!article) return { title: '記事が見つかりません', robots: { index: false, follow: false } };
 
   // 説明文は AI要約(独自テキスト)を最優先し、無ければ RSS 抜粋で代替する。
   // アグリゲータの薄い複製ページにならないよう、要約があればそれを meta description にする。
@@ -193,12 +197,15 @@ async function ArticleContent({ params }: { params: Promise<{ id: string }> }) {
         {/* 見出し行: カードと同じ「ファビコン 20px + 企業名 11.5px 太字 / 右端に相対日時」。
           企業名はその企業で絞り込んだフィードへのリンク(下線は hover 時だけ。常時下線だとカードの見出し行と
           見た目が変わる)。著者は記事ページにしか無い情報で、企業名より従属的なので
-          企業名の後ろに通常ウェイト・muted で添える。 */}
+          企業名の後ろに通常ウェイト・muted で添える。
+          企業名リンクは 11.5px の 1 行で高さ 17px しかなく、タップ目標の最小 24px(WCAG 2.5.8)に届かない。
+          py + 同量の負マージンで当たり判定だけ上下に広げる(行の高さ・見た目は不変)。truncate の
+          overflow:hidden が ::before を切るため、カードのタグのような疑似要素ではなく padding で広げる。 */}
         <div className="text-fg-default mb-3 flex items-center gap-[7px] text-[11.5px] font-semibold">
           <CompanyFavicon url={article.url} name={article.company.name} size={20} />
           <Link
             href={`/?company=${encodeURIComponent(article.company.slug)}`}
-            className="hover:text-accent min-w-0 truncate transition-colors hover:underline hover:decoration-[1.5px] hover:underline-offset-4"
+            className="hover:text-accent -my-2 min-w-0 truncate py-2 transition-colors hover:underline hover:decoration-[1.5px] hover:underline-offset-4"
           >
             {article.company.name}
           </Link>
@@ -208,9 +215,15 @@ async function ArticleContent({ params }: { params: Promise<{ id: string }> }) {
               {article.author}
             </span>
           )}
-          <span className="text-fg-muted ml-auto shrink-0 font-normal">
+          {/* 記事ページは公開日の正確な値を確かめたい場面が多い(相対表記は 7 日未満で日付が出ない)ので、
+            カードと同じく hover の title と機械可読な dateTime を持たせる */}
+          <time
+            dateTime={toIsoDateTime(article.publishedAt)}
+            title={formatDateTime(article.publishedAt)}
+            className="text-fg-muted ml-auto shrink-0 font-normal"
+          >
             {formatRelative(article.publishedAt)}
-          </span>
+          </time>
         </div>
 
         {/* タイトル: カード(18px・3行クランプ)の拡大版。クランプは外し、字間・行送りは
@@ -258,9 +271,10 @@ async function ArticleContent({ params }: { params: Promise<{ id: string }> }) {
               className="ring-border-default aspect-[1200/630] w-full object-cover ring-1 ring-inset"
             />
           )}
-          <p className={`text-fg-subtle truncate text-[11.5px] ${article.ogImage ? 'mt-2' : ''}`}>
-            {hostname(article.url)}
-          </p>
+          <div className={`flex items-center gap-3 text-[11.5px] ${article.ogImage ? 'mt-2' : ''}`}>
+            <p className="text-fg-muted min-w-0 truncate">{hostname(article.url)}</p>
+            <HatenaEntryLink url={article.url} count={article.hatenaBookmarkCount} />
+          </div>
         </div>
 
         {/* アクション行: xl 未満は左に保存・お気に入り・共有のアイコン、右端に「元記事を開く」
@@ -293,6 +307,44 @@ async function ArticleContent({ params }: { params: Promise<{ id: string }> }) {
         </Suspense>
       </aside>
     </div>
+  );
+}
+
+/**
+ * はてなブックマークのエントリーページ(コメント一覧)への外部リンク。国内のテックブログは
+ * はてブのコメントで読まれ方・反論・補足が付くことが多く、元記事と並ぶ「次に開く先」になる。
+ * 件数は人気順の根拠と同じ値。記事ページは日単位でキャッシュするので新しい記事ほど実数より
+ * 少なく出うるが、件数が増える方向のずれなので許容し、0 件でもリンク自体は出す
+ * (キャッシュ時点で 0 件だった記事からもコメントへ辿れるように)。
+ * ドメイン行(11.5px)と同じ高さのまま、py + 同量の負マージンで当たり判定を 24px 以上に広げる。
+ */
+function HatenaEntryLink({ url, count }: { url: string; count: number }) {
+  const href = hatenaEntryUrl(url);
+  if (!href) return null;
+  const label =
+    count > 0
+      ? `はてなブックマークのコメントを見る(${count.toLocaleString('ja-JP')} users)`
+      : 'はてなブックマークのコメントを見る';
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      title={label}
+      className="text-fg-muted hover:text-accent -my-1.5 ml-auto inline-flex shrink-0 touch-manipulation items-center gap-1 py-1.5 transition-colors"
+    >
+      {/* 読み上げはカードの件数表記と同じく略さない名前にし、行き先(コメント)と新規タブを添える */}
+      <span aria-hidden="true">はてブ</span>
+      <span className="sr-only">はてなブックマークのコメント</span>
+      {count > 0 && (
+        <span className="font-metric text-fg-default font-semibold">
+          {count.toLocaleString('ja-JP')}
+          <span className="sr-only"> users</span>
+        </span>
+      )}
+      <span className="sr-only">(新しいタブで開く)</span>
+      <ExternalLink aria-hidden="true" className="size-3" />
+    </a>
   );
 }
 

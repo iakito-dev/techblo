@@ -72,8 +72,11 @@ export function Slider({
         </div>
       </div>
 
-      {/* ドット(現在位置 + ジャンプ)。 */}
-      <div className="mt-5 flex items-center justify-center gap-2">
+      {/*
+        ドット(現在位置 + ジャンプ)。見た目は 6px の点だが、押せる範囲(button)は 24px 角以上にする。
+        点そのものを button にしていた頃は 6×6px で、モバイルで狙って押せなかった(WCAG 2.5.8 の 24px 未満)。
+      */}
+      <div className="mt-3 flex items-center justify-center">
         {snaps.map((_, i) => (
           <button
             // biome-ignore lint/suspicious/noArrayIndexKey: ドットはスナップ位置の固定列で並べ替えが無い
@@ -82,11 +85,15 @@ export function Slider({
             aria-label={`${i + 1} 枚目へ`}
             aria-current={i === selected}
             onClick={() => scrollTo(i)}
-            className={cn(
-              'h-1.5 rounded-full transition-all duration-200',
-              i === selected ? 'bg-accent w-5' : 'bg-border-strong hover:bg-fg-faint w-1.5',
-            )}
-          />
+            className="group focus-visible:ring-accent grid h-6 min-w-6 place-items-center rounded-full px-1 focus-visible:ring-2 focus-visible:outline-none"
+          >
+            <span
+              className={cn(
+                'h-1.5 rounded-full transition-all duration-200',
+                i === selected ? 'bg-accent w-5' : 'bg-border-strong group-hover:bg-fg-faint w-1.5',
+              )}
+            />
+          </button>
         ))}
       </div>
     </section>

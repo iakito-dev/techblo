@@ -157,22 +157,27 @@ export function FauxArticleCard({
   return (
     <div
       className={cn(
-        'border-border-card bg-bg-surface shadow-card hover:shadow-card-hover flex flex-col gap-2.5 rounded-xl border p-4 transition-[transform,box-shadow] duration-200 hover:-translate-y-1',
+        'border-border-card bg-bg-surface shadow-card hover:shadow-card-hover @container flex flex-col gap-2.5 rounded-xl border p-4 transition-[transform,box-shadow] duration-200 hover:-translate-y-1',
         className,
       )}
     >
+      {/* モバイルのヒーローは 2 枚並びでカードが約 150px しかなく、時刻とはてブ数(shrink-0)に押されて
+          企業名(truncate)が 0px まで潰れ「· 2時間前」だけが残っていた。狭いカードでは時刻を省き企業名を残す */}
       <div className="flex items-center gap-1.5 text-[0.6875rem] leading-tight">
         <CompanyGlyph label={article.glyph} />
-        <span className="text-fg-muted truncate font-medium tracking-wide">{article.company}</span>
-        <span className="text-fg-faint">·</span>
-        <span className="text-fg-faint shrink-0">{article.time}</span>
+        <span className="text-fg-muted min-w-0 truncate font-medium tracking-wide">
+          {article.company}
+        </span>
+        <span className="text-fg-faint hidden @[15rem]:inline">·</span>
+        <span className="text-fg-faint hidden shrink-0 @[15rem]:inline">{article.time}</span>
         <span className="ml-auto">
           <HatenaBadge count={article.hatena} />
         </span>
       </div>
-      <h3 className="text-fg-default text-[0.9375rem] leading-snug font-bold tracking-tight">
+      {/* 架空記事のタイトルを見出しにすると、見出しジャンプで LP の章立てに紛れ込む(h1 直後の h3 にもなる) */}
+      <p className="text-fg-default text-[0.9375rem] leading-snug font-bold tracking-tight">
         {article.title}
-      </h3>
+      </p>
       <p className="text-fg-muted line-clamp-2 text-xs leading-relaxed">{article.excerpt}</p>
       <div className="text-fg-faint mt-1 flex items-center gap-1.5">
         <span className="border-border-default grid size-7 place-items-center rounded-md border">

@@ -1,6 +1,6 @@
 'use client';
 
-import { AlertDialog, Button } from '@heroui/react';
+import { Button } from '@heroui/react';
 import { Search } from 'lucide-react';
 import { useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
@@ -11,6 +11,7 @@ import type { CompanyId } from '@/shared/type-utils';
 import type { SubscriptionSetting } from '../../application/dto';
 import { toggleSubscriptionAction } from '../actions';
 import { trackSubscriptionChange } from '../track-subscription';
+import { AllOffDialog } from './all-off-dialog';
 import { SubscriptionToggle } from './subscription-toggle';
 
 /** 保存成功チェックの表示時間(ms)。 */
@@ -191,54 +192,5 @@ export function SubscriptionList({ settings }: { settings: SubscriptionSetting[]
         </ul>
       )}
     </SettingsSection>
-  );
-}
-
-/**
- * 「すべてOFF」の確認ダイアログ。フィードが空になる操作なので明示的な確認を挟む。
- * AlertDialog.Trigger は div(role=button)で Button をネストできないため、controlled で開閉する。
- */
-function AllOffDialog({ disabled, onConfirm }: { disabled: boolean; onConfirm: () => void }) {
-  const [open, setOpen] = useState(false);
-  return (
-    <>
-      <Button
-        variant="outline"
-        size="sm"
-        isDisabled={disabled}
-        onPress={() => setOpen(true)}
-        className="bg-bg-surface rounded-sm"
-      >
-        すべて非表示
-      </Button>
-      <AlertDialog isOpen={open} onOpenChange={setOpen}>
-        <AlertDialog.Backdrop>
-          <AlertDialog.Container>
-            <AlertDialog.Dialog>
-              <AlertDialog.Header>
-                <AlertDialog.Heading>すべての企業を非表示にしますか?</AlertDialog.Heading>
-              </AlertDialog.Header>
-              <AlertDialog.Body>
-                すべての企業を非表示にすると、フィードに記事が表示されなくなります。
-              </AlertDialog.Body>
-              <AlertDialog.Footer>
-                <Button variant="outline" onPress={() => setOpen(false)}>
-                  キャンセル
-                </Button>
-                <Button
-                  variant="danger"
-                  onPress={() => {
-                    setOpen(false);
-                    onConfirm();
-                  }}
-                >
-                  すべて非表示にする
-                </Button>
-              </AlertDialog.Footer>
-            </AlertDialog.Dialog>
-          </AlertDialog.Container>
-        </AlertDialog.Backdrop>
-      </AlertDialog>
-    </>
   );
 }

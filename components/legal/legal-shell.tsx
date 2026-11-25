@@ -4,10 +4,11 @@ import { DesktopHomeBar } from '@/components/layout/desktop-home-bar';
 import { Header } from '@/components/layout/header';
 import { ScrollToTop } from '@/components/layout/scroll-to-top';
 import { SkipLink } from '@/components/layout/skip-link';
+import { MOBILE_GUTTER_CLASS } from '@/shared/layout';
 
 /**
  * プライバシーポリシー / 利用規約 / 運営者情報 など、テキスト主体の静的ページの共有シェル。
- * 企業ページと同じく公開ページなので Header を載せ、本文は読みやすい一段組みに収める。
+ * アプリのシェル(サイドバー・下部ナビ)の外にある公開ページなので Header を載せ、本文は読みやすい一段組みに収める。
  */
 export function LegalShell({
   title,
@@ -25,10 +26,12 @@ export function LegalShell({
         <Header />
       </Suspense>
 
+      {/* モバイルの左右ガターは Header(ロゴ帯)と同じ定数にする。px-4(16px)だとロゴより本文が
+          4px 左に出て、見出しの左端がロゴとそろわなかった。 */}
       <main
         id="main-content"
         tabIndex={-1}
-        className="mx-auto max-w-3xl px-4 py-10 focus:outline-none md:px-6 lg:px-8"
+        className={`mx-auto max-w-3xl ${MOBILE_GUTTER_CLASS} py-10 focus:outline-none md:px-6 lg:px-8`}
       >
         <DesktopHomeBar className="mb-8" />
         <header className="mb-8">

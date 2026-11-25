@@ -60,13 +60,24 @@ export function clearGuestSaves(): void {
   }
 }
 
+// 同一タブ内の hook へ変更を知らせるイベント。storage イベントは他タブにしか発火しないため、
+// これが無いとカードごとの hook が mount 時点の集合を持ち続け、別カードの保存を上書きで消してしまう。
+const GUEST_SAVES_CHANGE_EVENT = 'techblo:guest-saves-change';
+
 function writeGuestSaves(kind: GuestSaveKind, ids: string[]): void {
   if (typeof window === 'undefined') return;
   try {
     window.localStorage.setItem(STORAGE_KEYS[kind], JSON.stringify(ids));
+    // 新キーを空にしたとき readGuestSaves が旧キーへフォールバックして解除済みの ID が蘇らないよう、旧キーは消す。
+    window.localStorage.removeItem(LEGACY_STORAGE_KEYS[kind]);
   } catch {
     // quota 超過等。保存できなくてもアプリは継続する
   }
+}
+
+function notifyGuestSavesChange(kind: GuestSaveKind): void {
+  if (typeof window === 'undefined') return;
+  window.dispatchEvent(new CustomEvent<GuestSaveKind>(GUEST_SAVES_CHANGE_EVENT, { detail: kind }));
 }
 
 /**
@@ -90,6 +101,17 @@ export function setGuestSave(kind: GuestSaveKind, id: string, saved: boolean): v
   const current = readGuestSaves(kind);
   if (current.includes(id) === saved) return;
   writeGuestSaves(kind, saved ? [...current, id] : current.filter((v) => v !== id));
+  notifyGuestSavesChange(kind);
+}
+
+/**
+ * ゲストの保存状態を反転する。新しい保存状態を返す。hook 外から呼べる純関数。
+ * 反転の基準は hook の state ではなく localStorage の現在値にする(state は他カードの保存を知らないことがある)。
+ */
+export function toggleGuestSave(kind: GuestSaveKind, id: string): boolean {
+  const saved = !readGuestSaves(kind).includes(id);
+  setGuestSave(kind, id, saved);
+  return saved;
 }
 
 /**
@@ -97,11 +119,13 @@ export function setGuestSave(kind: GuestSaveKind, id: string, saved: boolean): v
  * - has(id): 保存済みか
  * - toggle(id): 反転して localStorage に同期書き込み。新しい保存状態を返す
  * - ready: localStorage 読み込み済みか(false の間は全件未保存として描画)
+ * - count: 保存件数(ready 前は 0)
  */
 export function useGuestSaves(kind: GuestSaveKind): {
   has: (id: string) => boolean;
   toggle: (id: string) => boolean;
   ready: boolean;
+  count: number;
 } {
   const [ids, setIds] = useState<Set<string>>(() => new Set());
   const [ready, setReady] = useState(false);
@@ -110,30 +134,28 @@ export function useGuestSaves(kind: GuestSaveKind): {
     setIds(new Set(readGuestSaves(kind)));
     setReady(true);
 
-    // 他タブでの変更を反映(同一タブには storage イベントは発火しない)
+    // 他タブでの変更(storage)と、同一タブの別 hook による変更(カスタムイベント)を反映する
     function onStorage(e: StorageEvent) {
       if (e.key === STORAGE_KEYS[kind]) {
         setIds(new Set(readGuestSaves(kind)));
       }
     }
+    function onChange(e: Event) {
+      if (e instanceof CustomEvent && e.detail === kind) {
+        setIds(new Set(readGuestSaves(kind)));
+      }
+    }
     window.addEventListener('storage', onStorage);
-    return () => window.removeEventListener('storage', onStorage);
+    window.addEventListener(GUEST_SAVES_CHANGE_EVENT, onChange);
+    return () => {
+      window.removeEventListener('storage', onStorage);
+      window.removeEventListener(GUEST_SAVES_CHANGE_EVENT, onChange);
+    };
   }, [kind]);
 
   const has = useCallback((id: string) => ids.has(id), [ids]);
 
-  const toggle = useCallback(
-    (id: string): boolean => {
-      const next = new Set(ids);
-      const nowSaved = !next.has(id);
-      if (nowSaved) next.add(id);
-      else next.delete(id);
-      setIds(next);
-      writeGuestSaves(kind, [...next]);
-      return nowSaved;
-    },
-    [ids, kind],
-  );
+  const toggle = useCallback((id: string): boolean => toggleGuestSave(kind, id), [kind]);
 
-  return { has, toggle, ready };
+  return { has, toggle, ready, count: ids.size };
 }

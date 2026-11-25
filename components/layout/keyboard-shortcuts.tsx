@@ -184,50 +184,52 @@ function ShortcutsDialog({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
+  // 開閉は `?` キーで制御し、押して開くトリガー要素を持たない。ルートの <Modal> は react-aria の
+  // DialogTrigger(子のトリガーを PressResponder で包む)なので、トリガー無しで使うと全ページで
+  // 「PressResponder was rendered without a pressable child」の警告が出る。開閉状態は
+  // Backdrop(ModalOverlay)に直接渡す。設定画面の確認ダイアログ(AlertDialog)も同じ。
   return (
-    <Modal isOpen={open} onOpenChange={onOpenChange}>
-      <Modal.Backdrop>
-        <Modal.Container>
-          <Modal.Dialog className="border-border-default bg-bg-surface text-fg-default border">
-            <Modal.CloseTrigger />
-            <Modal.Header>
-              <Modal.Heading>キーボードショートカット</Modal.Heading>
-            </Modal.Header>
-            <Modal.Body>
-              <div className="flex flex-col gap-5">
-                {SHORTCUT_GROUPS.map((group) => (
-                  <section key={group.title}>
-                    <h3 className="text-fg-subtle mb-2 text-xs font-medium">{group.title}</h3>
-                    <dl className="flex flex-col">
-                      {group.items.map((item) => (
-                        <div
-                          key={item.label}
-                          className="border-border-default flex items-center justify-between gap-4 border-t py-2 text-sm first:border-t-0"
-                        >
-                          <dt className="text-fg-default">{item.label}</dt>
-                          <dd className="text-fg-muted flex shrink-0 items-center gap-1">
-                            {item.keys.map((key, i) => (
-                              <Fragment key={key}>
-                                {i > 0 && (
-                                  <span aria-hidden="true" className="text-fg-subtle text-xs">
-                                    →
-                                  </span>
-                                )}
-                                <Kbd>{key}</Kbd>
-                              </Fragment>
-                            ))}
-                          </dd>
-                        </div>
-                      ))}
-                    </dl>
-                  </section>
-                ))}
-              </div>
-            </Modal.Body>
-          </Modal.Dialog>
-        </Modal.Container>
-      </Modal.Backdrop>
-    </Modal>
+    <Modal.Backdrop isOpen={open} onOpenChange={onOpenChange}>
+      <Modal.Container>
+        <Modal.Dialog className="border-border-default bg-bg-surface text-fg-default border">
+          <Modal.CloseTrigger />
+          <Modal.Header>
+            <Modal.Heading>キーボードショートカット</Modal.Heading>
+          </Modal.Header>
+          <Modal.Body>
+            <div className="flex flex-col gap-5">
+              {SHORTCUT_GROUPS.map((group) => (
+                <section key={group.title}>
+                  <h3 className="text-fg-subtle mb-2 text-xs font-medium">{group.title}</h3>
+                  <dl className="flex flex-col">
+                    {group.items.map((item) => (
+                      <div
+                        key={item.label}
+                        className="border-border-default flex items-center justify-between gap-4 border-t py-2 text-sm first:border-t-0"
+                      >
+                        <dt className="text-fg-default">{item.label}</dt>
+                        <dd className="text-fg-muted flex shrink-0 items-center gap-1">
+                          {item.keys.map((key, i) => (
+                            <Fragment key={key}>
+                              {i > 0 && (
+                                <span aria-hidden="true" className="text-fg-subtle text-xs">
+                                  →
+                                </span>
+                              )}
+                              <Kbd>{key}</Kbd>
+                            </Fragment>
+                          ))}
+                        </dd>
+                      </div>
+                    ))}
+                  </dl>
+                </section>
+              ))}
+            </div>
+          </Modal.Body>
+        </Modal.Dialog>
+      </Modal.Container>
+    </Modal.Backdrop>
   );
 }
 

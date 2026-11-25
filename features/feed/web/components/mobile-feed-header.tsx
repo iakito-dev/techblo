@@ -15,21 +15,14 @@ import {
 } from '../view-models/category-tabs';
 import type { FilterCompany, FilterUserFeed } from '../view-models/feed-filter-options';
 import { useFeedNav } from '../view-models/feed-nav-context';
+import { pickKnownSelections } from '../view-models/known-selections';
+import { PERIOD_WITHIN_LABEL } from '../view-models/period-labels';
+import { READ_FILTER_CHIP_LABEL } from '../view-models/read-filter-labels';
 import { useFeedFilters } from '../view-models/use-feed-filters';
 import { useFeedSearch } from '../view-models/use-feed-search';
 import { useFeedSort } from '../view-models/use-feed-sort';
 import { RemovableChip } from './feed-chip';
 import { FeedFilterSheet } from './feed-filter-sheet';
-
-const STATUS_CHIP: Record<Exclude<ReadFilterMode, 'all'>, string> = {
-  unread: '未読のみ',
-  read: '既読のみ',
-};
-const PERIOD_CHIP: Record<Exclude<PopularPeriod, 'all'>, string> = {
-  today: '24時間以内',
-  week: '今週以内',
-  month: '今月以内',
-};
 
 type MobileFeedHeaderViewProps = {
   companies: FilterCompany[];
@@ -96,6 +89,19 @@ export function MobileFeedControls({
   const params = useSearchParams();
   const category = parseCategoryTab(params.get('category'));
   const [filterOpen, setFilterOpen] = useState(false);
+  // サーバーが無視する未知・購読外の企業 / マイフィードはチップにもバッジの数にも出さない
+  const knownCompanySlugs = pickKnownSelections(
+    companySlugs,
+    companies.map((c) => c.slug),
+  );
+  const knownFeedIds = pickKnownSelections(
+    feedIds,
+    userFeeds.map((f) => f.id),
+  );
+  const shownActiveCount =
+    activeCount -
+    (companySlugs.length - knownCompanySlugs.length) -
+    (feedIds.length - knownFeedIds.length);
 
   return (
     <>
@@ -106,11 +112,11 @@ export function MobileFeedControls({
         category={category}
         status={status}
         period={period}
-        companySlugs={companySlugs}
-        feedIds={feedIds}
+        companySlugs={knownCompanySlugs}
+        feedIds={knownFeedIds}
         tag={tag}
         sort={sort}
-        activeCount={activeCount}
+        activeCount={shownActiveCount}
         onOpenFilter={() => setFilterOpen(true)}
         onRemoveStatus={() => setStatus('all')}
         onRemovePeriod={() => setPeriod('all')}
@@ -241,10 +247,10 @@ function MobileFeedHeaderView({
           {sort === 'popular' && <RemovableChip label="人気順" onRemove={onResetSort} />}
           {tag !== null && <RemovableChip label={`タグ: ${tag}`} onRemove={onRemoveTag} />}
           {status !== 'all' && (
-            <RemovableChip label={STATUS_CHIP[status]} onRemove={onRemoveStatus} />
+            <RemovableChip label={READ_FILTER_CHIP_LABEL[status]} onRemove={onRemoveStatus} />
           )}
           {period !== 'all' && (
-            <RemovableChip label={PERIOD_CHIP[period]} onRemove={onRemovePeriod} />
+            <RemovableChip label={PERIOD_WITHIN_LABEL[period]} onRemove={onRemovePeriod} />
           )}
           {companySlugs.map((slug) => (
             <RemovableChip

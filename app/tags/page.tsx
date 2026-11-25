@@ -1,14 +1,14 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { connection } from 'next/server';
 import { Suspense } from 'react';
 import { DesktopHomeBar } from '@/components/layout/desktop-home-bar';
 import { Header } from '@/components/layout/header';
 import { JsonLd } from '@/components/seo/json-ld';
-import { getPopularTags, type TagIndex } from '@/features/feed/web/queries';
+import { getPopularTags } from '@/features/feed/web/queries';
 import { breadcrumbJsonLd } from '@/lib/seo';
 import { resolveBaseUrl } from '@/lib/site-url';
 import { isSameTagList } from './same-tag-list';
+import { TagBrowser } from './tag-browser';
 
 const TITLE = 'タグから探す';
 const DESCRIPTION =
@@ -87,45 +87,8 @@ async function TagSections() {
           まだタグがありません。記事の AI 要約が生成されると、ここに表示されます。
         </p>
       ) : (
-        <div className="flex flex-col gap-10">
-          {recent.length > 0 && !isSameTagList(recent, all) && (
-            <TagSection heading="最近よく書かれているタグ" note="直近90日" tags={recent} />
-          )}
-          <TagSection heading="すべてのタグ" note="全期間" tags={all} />
-        </div>
+        <TagBrowser recent={isSameTagList(recent, all) ? null : recent} all={all} />
       )}
     </>
-  );
-}
-
-function TagSection({
-  heading,
-  note,
-  tags,
-}: {
-  heading: string;
-  note: string;
-  tags: TagIndex['all'];
-}) {
-  return (
-    <section>
-      <h2 className="text-fg-default mb-4 text-lg font-semibold">
-        {heading}
-        <span className="text-fg-subtle ml-2 text-xs font-normal">{note}</span>
-      </h2>
-      <ul className="flex flex-wrap gap-2">
-        {tags.map(({ tag, count }) => (
-          <li key={tag}>
-            <Link
-              href={`/?tag=${encodeURIComponent(tag)}`}
-              className="border-border-default text-fg-muted hover:border-accent hover:text-accent inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-sm transition-colors"
-            >
-              {tag}
-              <span className="text-fg-subtle text-xs tabular-nums">{count}</span>
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </section>
   );
 }
