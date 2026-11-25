@@ -232,7 +232,7 @@ function SearchBoxView({
               type="button"
               tabIndex={-1}
               onClick={history.onClearAll}
-              className="text-fg-subtle hover:bg-bg-surface-2 hover:text-fg-default rounded-sm px-1 text-xs transition-colors"
+              className="text-fg-muted hover:bg-bg-surface-2 hover:text-fg-default rounded-sm px-1 text-xs transition-colors"
             >
               すべて消去
             </button>

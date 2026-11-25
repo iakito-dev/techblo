@@ -243,7 +243,7 @@ export function FeedFilterSheet({
                         選択中
                       </span>
                     )}
-                    <span className="text-fg-subtle shrink-0 text-xs tabular-nums">
+                    <span className="text-fg-muted shrink-0 text-xs tabular-nums">
                       {formatCount(c.articleCount)}
                     </span>
                   </button>
@@ -290,7 +290,7 @@ export function FeedFilterSheet({
                           選択中
                         </span>
                       )}
-                      <span className="text-fg-subtle shrink-0 text-xs tabular-nums">
+                      <span className="text-fg-muted shrink-0 text-xs tabular-nums">
                         {formatCount(f.articleCount)}
                       </span>
                     </button>

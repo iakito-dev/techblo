@@ -200,7 +200,7 @@ function ShortcutsDialog({
             <div className="flex flex-col gap-5">
               {SHORTCUT_GROUPS.map((group) => (
                 <section key={group.title}>
-                  <h3 className="text-fg-subtle mb-2 text-xs font-medium">{group.title}</h3>
+                  <h3 className="text-fg-muted mb-2 text-xs font-medium">{group.title}</h3>
                   <dl className="flex flex-col">
                     {group.items.map((item) => (
                       <div

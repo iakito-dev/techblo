@@ -156,7 +156,7 @@ export function UserFeedList({ feeds, limit }: { feeds: UserFeedSetting[]; limit
                   <CompanyFavicon url={feed.siteUrl ?? feed.rssUrl} name={feed.title} />
                   <span className="flex min-w-0 flex-col">
                     <span className="truncate text-sm font-medium">{feed.title}</span>
-                    <span className="text-fg-subtle truncate text-xs" title={feed.rssUrl}>
+                    <span className="text-fg-muted truncate text-xs" title={feed.rssUrl}>
                       {feed.rssUrl}
                     </span>
                     {feed.lastError && (
