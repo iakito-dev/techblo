@@ -89,7 +89,10 @@ export class DrizzleArticleRepository implements ArticleRepository {
       'companyIds' | 'period' | 'readFilter' | 'query' | 'tag' | 'category'
     >,
   ) {
-    const conditions = [isNull(articles.deletedAt)];
+    // 取り込みを止めた企業(companies.enabled=false)の記事は一覧に出さない。企業一覧(サイドバー・絞り込み・
+    // 設定の「表示する企業」)と /?company= はその企業を存在しない扱いにするため、記事だけが出ると
+    // 読者には非表示にする手段が無かった。呼び出し側は常に companies を JOIN 済み。
+    const conditions = [isNull(articles.deletedAt), eq(companies.enabled, true)];
     if (criteria.companyIds && criteria.companyIds.length > 0) {
       conditions.push(inArray(articles.companyId, criteria.companyIds));
     }
@@ -249,7 +252,7 @@ export class DrizzleArticleRepository implements ArticleRepository {
         c.brand_color as "companyBrandColor"
       from ${articles} as a
       join ${companies} as c on c.id = a.company_id
-      where a.deleted_at is null${companyCond}${periodCond('a.published_at')}`;
+      where a.deleted_at is null and c.enabled${companyCond}${periodCond('a.published_at')}`;
     const userSelect = sql`
       select
         ufa.id as "id", ufa.url as "url", ufa.title as "title", ufa.description as "description",
@@ -345,6 +348,7 @@ export class DrizzleArticleRepository implements ArticleRepository {
         join ${companies} as c on c.id = a.company_id
         join ${articleSummaries} as s on s.article_id = a.id
         where a.deleted_at is null
+          and c.enabled
           and s.status = 'ready'
           and s.category in (${categoriesCond})
           ${companyCond}
@@ -389,6 +393,7 @@ export class DrizzleArticleRepository implements ArticleRepository {
         where t.tag in (select tag from target)
       ) as m
       where a.deleted_at is null
+        and c.enabled
         and s.status = 'ready'
         and a.id <> ${id}::uuid
         and m.overlap > 0
@@ -416,9 +421,11 @@ export class DrizzleArticleRepository implements ArticleRepository {
     const result = await this.db.execute(sql`
       select t.tag as "tag", count(distinct a.id)::int as "count"
       from ${articles} as a
+      join ${companies} as c on c.id = a.company_id
       join ${articleSummaries} as s on s.article_id = a.id
       cross join lateral jsonb_array_elements_text(s.tags) as t(tag)
       where a.deleted_at is null
+        and c.enabled
         and s.status = 'ready'
         and btrim(t.tag) <> ''
         ${sinceCondition}
@@ -436,7 +443,11 @@ export class DrizzleArticleRepository implements ArticleRepository {
    * companyIds 指定時は購読スコープ/企業フィルタと同じ絞り込みを適用する(既存の件数表示と揃える)。
    */
   async countByCategory(companyIds?: CompanyId[]): Promise<CategoryCounts> {
-    const conditions = [isNull(articles.deletedAt), eq(articleSummaries.status, 'ready')];
+    const conditions = [
+      isNull(articles.deletedAt),
+      eq(companies.enabled, true),
+      eq(articleSummaries.status, 'ready'),
+    ];
     if (companyIds && companyIds.length > 0) {
       conditions.push(inArray(articles.companyId, companyIds));
     }
@@ -445,6 +456,7 @@ export class DrizzleArticleRepository implements ArticleRepository {
       .select({ category: articleSummaries.category, count: count() })
       .from(articleSummaries)
       .innerJoin(articles, eq(articles.id, articleSummaries.articleId))
+      .innerJoin(companies, eq(articles.companyId, companies.id))
       .where(and(...conditions))
       .groupBy(articleSummaries.category);
 
