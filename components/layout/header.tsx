@@ -1,12 +1,10 @@
 'use client';
 
-import { Search } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useSession } from '@/features/auth/client';
 import { UserMenu } from '@/features/auth/components/user-menu';
 import { ArticleBackLink } from '@/features/feed/web/components/article-back-link';
-import { MobileSearchOverlay } from '@/features/feed/web/components/mobile-search-overlay';
 import { MOBILE_GUTTER_CLASS } from '@/shared/layout';
 import { Logo } from './logo';
 
@@ -20,15 +18,15 @@ export function Header() {
   const pathname = usePathname();
   const { data: session, isPending } = useSession();
   const [mounted, setMounted] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // 検索はフィード(/)専用。他ページではアイコンを出さない。
+  // ヘッダーに検索アイコンは置かない。フィードの検索欄は <md が MobileFeedControls、md〜lg が
+  // ツールバー(FeedControls)に常にあり、以前ここにあった検索アイコンはフィードの md〜lg でしか
+  // 見えず、すぐ下の検索欄と同じ操作が 2 つ並んでいた。
   const isFeed = pathname === '/';
-  const showSearch = isFeed;
   // 記事ページ(/a/[id])はロゴの代わりに「戻る」を置く。本文側の戻るはスクロールで画面外へ
   // 消えるため、関連記事まで読み進めた後に一覧へ戻る手段が端のスワイプだけになっていた。
   // ヘッダーは sticky なので、ここに置けばどこまで読んでも親指を伸ばさず戻れる。
@@ -47,16 +45,6 @@ export function Header() {
       >
         {isDetail ? <ArticleBackLink /> : <Logo />}
         <div className="ml-auto flex items-center gap-1">
-          {showSearch && (
-            <button
-              type="button"
-              onClick={() => setSearchOpen(true)}
-              aria-label="記事や企業を検索"
-              className="text-fg-secondary active:bg-bg-surface-2 grid size-11 touch-manipulation place-items-center rounded-full transition-colors"
-            >
-              <Search className="size-5" />
-            </button>
-          )}
           {/* ログイン導線は設定タブの登録カードへ集約した。ここではゲストに何も出さない
               (ログイン済みのアバターのみ。docs/features/auth.md)。 */}
           {!mounted || isPending ? (
@@ -70,10 +58,6 @@ export function Header() {
           ) : null}
         </div>
       </div>
-      {/* open のときだけマウントする(useSearchParams を prerender 時に走らせず Suspense 境界を不要にする)。 */}
-      {showSearch && searchOpen && (
-        <MobileSearchOverlay open onClose={() => setSearchOpen(false)} />
-      )}
     </header>
   );
 }
