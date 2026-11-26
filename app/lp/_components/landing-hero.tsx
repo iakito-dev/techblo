@@ -70,8 +70,8 @@ export function LandingHero() {
             </Button>
           </Magnetic>
         </div>
-        <p className="lp-enter text-fg-muted mt-4 text-xs [--lp-delay:320ms]">
-          クレジットカード不要 · Google ですぐログイン
+        <p className="lp-enter text-fg-muted mt-4 text-xs text-balance [word-break:auto-phrase] [--lp-delay:320ms]">
+          クレジットカード不要 · Google・GitHub・Discord ですぐログイン
         </p>
       </div>
 
