@@ -22,7 +22,7 @@ export function LandingCta() {
           見逃さない<span className="text-accent">.</span>
         </h2>
         <p className="text-fg-muted relative mx-auto mt-5 max-w-md leading-relaxed text-balance [word-break:auto-phrase]">
-          登録は Google アカウントで数秒。無料で今日から始められます。
+          登録は Google・GitHub・Discord のアカウントで数秒。無料で今日から始められます。
         </p>
         <div className="relative mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
           <Button asChild size="md" className="h-12 w-full px-7 text-base sm:w-auto">
