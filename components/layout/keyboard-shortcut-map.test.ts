@@ -5,6 +5,7 @@ import {
   nextIndex,
   resolveShortcut,
   SEQUENCE_TIMEOUT_MS,
+  SHORTCUT_GROUPS,
   shouldIgnoreKeyEvent,
 } from './keyboard-shortcut-map';
 
@@ -59,7 +60,14 @@ describe('resolveShortcut', () => {
   });
 
   test('g の後の2打鍵目で遷移し、待ち状態を解除する', () => {
-    const cases = { h: '/', b: '/bookmarks', f: '/favorites', r: '/history', s: '/settings' };
+    const cases = {
+      h: '/',
+      p: '/?sort=popular',
+      b: '/bookmarks',
+      f: '/favorites',
+      r: '/history',
+      s: '/settings',
+    };
     for (const [key, href] of Object.entries(cases)) {
       expect(resolveShortcut({ key, pendingSince: 1000, now: 1500 })).toEqual({
         action: { type: 'navigate', href },
@@ -117,5 +125,19 @@ describe('isSafeExternalUrl', () => {
     expect(isSafeExternalUrl('javascript:alert(1)')).toBe(false);
     expect(isSafeExternalUrl('not a url')).toBe(false);
     expect(isSafeExternalUrl(undefined)).toBe(false);
+  });
+});
+
+describe('SHORTCUT_GROUPS', () => {
+  // 一覧ダイアログは手書きの表なので、載せた g → x が実際の割り当てから外れていないかを守る
+  test('一覧に載せた g → x はすべて実際の操作に解決する', () => {
+    const sequences = SHORTCUT_GROUPS.flatMap((group) => group.items).filter(
+      (item) => item.sequence,
+    );
+    expect(sequences.length).toBeGreaterThan(0);
+    for (const { keys } of sequences) {
+      const second = keys[1] ?? '';
+      expect(resolveShortcut({ key: second, pendingSince: 1000, now: 1500 }).action).not.toBeNull();
+    }
   });
 });

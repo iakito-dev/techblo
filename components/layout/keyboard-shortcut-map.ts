@@ -13,6 +13,8 @@ export type ShortcutAction =
 
 const GO_TARGETS: Record<string, string> = {
   h: '/',
+  // 人気順はフィードと並ぶ主要な一覧。期間は付けず、既定(全期間)で開く。
+  p: '/?sort=popular',
   b: '/bookmarks',
   f: '/favorites',
   r: '/history',
@@ -117,6 +119,7 @@ export const SHORTCUT_GROUPS: ShortcutGroup[] = [
     title: '移動',
     items: [
       { keys: ['g', 'h'], label: 'フィードへ', sequence: true },
+      { keys: ['g', 'p'], label: '人気の記事へ', sequence: true },
       { keys: ['g', 'b'], label: 'あとで読むへ', sequence: true },
       { keys: ['g', 'f'], label: 'お気に入りへ', sequence: true },
       { keys: ['g', 'r'], label: '閲覧履歴へ', sequence: true },
