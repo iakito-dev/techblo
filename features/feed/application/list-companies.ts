@@ -1,3 +1,4 @@
+import { compareCompanyNames } from '@/shared/company-name-order';
 import { ok, type Result } from '@/shared/result';
 import type { CompanyRepository } from '../domain/company-repository';
 import type { FeedError } from '../domain/errors';
@@ -28,5 +29,5 @@ function compareByArticleCountThenName(
   a: { articleCount: number; name: string },
   b: { articleCount: number; name: string },
 ): number {
-  return b.articleCount - a.articleCount || a.name.localeCompare(b.name, 'ja');
+  return b.articleCount - a.articleCount || compareCompanyNames(a.name, b.name);
 }

@@ -28,4 +28,30 @@ describe('listSubscriptions', () => {
       ['b', false],
     ]);
   });
+
+  it('DB の照合順序に依らず、大文字小文字を区別しない企業名順に並べる', async () => {
+    const named = (id: string, name: string) => ({ ...company(id), name });
+    // C 照合の ORDER BY name が返す順(大文字始まり → 小文字始まり → かな)
+    const repo: SubscriptionRepository = {
+      listEnabledCompanies: vi
+        .fn()
+        .mockResolvedValue([
+          named('aws', 'AWS Japan'),
+          named('anthropic', 'Anthropic Engineering'),
+          named('zozo', 'ZOZO'),
+          named('mercari', 'mercari'),
+          named('loglass', 'ログラス'),
+        ]),
+      listUserStates: vi.fn().mockResolvedValue([]),
+      setEnabled: vi.fn(),
+    };
+    const result = await listSubscriptions({ subscriptions: repo })({ userId: asUserId('u1') });
+    expect(result.ok && result.value.map((s) => s.slug)).toEqual([
+      'anthropic',
+      'aws',
+      'mercari',
+      'zozo',
+      'loglass',
+    ]);
+  });
 });

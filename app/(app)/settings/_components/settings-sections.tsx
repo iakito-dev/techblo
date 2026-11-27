@@ -13,6 +13,7 @@ import { getSubscriptionSettings } from '@/features/subscriptions/web/queries';
 import { MAX_FEEDS_PER_USER } from '@/features/user-feeds/application/errors';
 import { UserFeedList } from '@/features/user-feeds/web/components/user-feed-list';
 import { getUserFeeds } from '@/features/user-feeds/web/queries';
+import { compareCompanyNames } from '@/shared/company-name-order';
 import { asUserId } from '@/shared/type-utils';
 
 /**
@@ -28,9 +29,11 @@ export async function SubscriptionSettings() {
   const session = await getSession();
   if (!session) {
     const companies = await getCompanies();
+    // getCompanies はサイドバー用の記事数順。設定の一覧はログイン時と同じ企業名順で探せるようにする。
+    const byName = [...companies].sort((a, b) => compareCompanyNames(a.name, b.name));
     return (
       <GuestSubscriptionList
-        companies={companies.map((c) => ({ slug: c.slug, name: c.name, siteUrl: c.siteUrl }))}
+        companies={byName.map((c) => ({ slug: c.slug, name: c.name, siteUrl: c.siteUrl }))}
       />
     );
   }
