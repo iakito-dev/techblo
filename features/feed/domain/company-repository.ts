@@ -26,6 +26,7 @@ export type CompanyDetail = CompanyWithCounts & {
  * Driven Port。企業マスタの読み取りインターフェース。
  */
 export interface CompanyRepository {
+  /** 有効な企業を記事数つきで返す(記事数の多い順、同数は企業名順)。 */
   listEnabledWithCounts(): Promise<CompanyWithCounts[]>;
   /** slug で1社を引く(有効な企業のみ)。無ければ null。 */
   findBySlug(slug: string): Promise<CompanyDetail | null>;

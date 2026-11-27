@@ -39,4 +39,35 @@ describe('listCompanies', () => {
     } as unknown as CompanyRepository;
     expect(await listCompanies({ companies })()).toEqual({ ok: true, value: [] });
   });
+
+  it('記事数の多い順に並べ、同数の企業は企業名順にする', async () => {
+    const row = (name: string, articleCount: number) => ({
+      id: name,
+      slug: name,
+      name,
+      brandColor: null,
+      siteUrl: `https://${name}.example.com`,
+      articleCount,
+    });
+    // リポジトリが同数の企業を任意の順で返しても、結果の並びは変わらない
+    const companies = {
+      listEnabledWithCounts: vi
+        .fn()
+        .mockResolvedValue([
+          row('ログラス', 3),
+          row('ZOZO', 0),
+          row('ANDPAD', 3),
+          row('mercari', 10),
+          row('Cybozu', 0),
+        ]),
+    } as unknown as CompanyRepository;
+    const result = await listCompanies({ companies })();
+    expect(result.ok && result.value.map((c) => c.name)).toEqual([
+      'mercari',
+      'ANDPAD',
+      'ログラス',
+      'Cybozu',
+      'ZOZO',
+    ]);
+  });
 });
