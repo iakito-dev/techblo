@@ -1,4 +1,4 @@
-import { and, count, desc, eq, isNull, max } from 'drizzle-orm';
+import { and, asc, count, desc, eq, isNull, max } from 'drizzle-orm';
 import type { Database } from '@/db/client';
 import { articles } from '@/db/schema/articles';
 import { companies } from '@/db/schema/companies';
@@ -29,7 +29,7 @@ export class DrizzleCompanyRepository implements CompanyRepository {
       .leftJoin(articles, and(eq(articles.companyId, companies.id), isNull(articles.deletedAt)))
       .where(eq(companies.enabled, true))
       .groupBy(companies.id)
-      .orderBy(desc(count(articles.id)));
+      .orderBy(desc(count(articles.id)), asc(companies.name));
 
     return rows.map((r) => ({
       id: asCompanyId(r.id),
