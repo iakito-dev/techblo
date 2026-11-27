@@ -191,7 +191,10 @@ function ShortcutsDialog({
   return (
     <Modal.Backdrop isOpen={open} onOpenChange={onOpenChange}>
       <Modal.Container>
-        <Modal.Dialog className="border-border-default bg-bg-surface text-fg-default border">
+        {/* 一覧は 20 行近くあり、高さ 768px 前後のノート PC では画面に収まらない。HeroUI の Dialog は
+            flex 子の min-height:auto のまま中身の高さまで伸び、overflow:clip で下の行(全般の / ? Esc)が
+            切れてスクロールもできなかった。高さを Container に収め、Body の内側スクロールに任せる。 */}
+        <Modal.Dialog className="border-border-default bg-bg-surface text-fg-default max-h-full border">
           <Modal.CloseTrigger />
           <Modal.Header>
             <Modal.Heading>キーボードショートカット</Modal.Heading>
