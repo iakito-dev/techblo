@@ -174,7 +174,7 @@ trackArticleView(input: { articleId: string }): Promise<Result<void, FeedError>>
 | `o` | フォーカス中カード(無ければ記事ページの主記事)の元記事を新規タブで開く(`noopener`、http(s) のみ) |
 | `b` / `f` | あとで読む / お気に入りを切り替え(既存の保存ボタンを `click()`。optimistic・ゲスト保存・失敗時ロールバックは既存ロジックのまま) |
 | `/` | 検索ボックスへフォーカス(⌘K と同じ対象。検索ボックスが無いページでは何もしない) |
-| `g` → `h` / `b` / `f` / `s` | 1 秒以内の 2 打鍵で `/` / `/bookmarks` / `/favorites` / `/settings` へ遷移 |
+| `g` → `h` / `p` / `b` / `f` / `r` / `s` | 1 秒以内の 2 打鍵で `/` / `/?sort=popular`(人気の記事。期間は既定の全期間) / `/bookmarks` / `/favorites` / `/history` / `/settings` へ遷移 |
 | `g` → `t` | 1 秒以内の 2 打鍵でページ先頭へスクロール(`prefers-reduced-motion` 時は即時) |
 | `?` | ショートカット一覧ダイアログを開閉(`Esc` でも閉じる)。サイドバー下部の「キーボードショートカット」からも開ける |
 
