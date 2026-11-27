@@ -56,6 +56,7 @@
 | [0046](./0046-factory-features-and-multi-pr.md) | ファクトリーの作業範囲を機能追加・UI/UX 改善に広げ、1 回の実行で複数 PR を出す | Accepted |
 | [0047](./0047-pr-before-after-screenshots.md) | UI を変える PR に変更前後のスクリーンショットを付ける | Accepted |
 | [0048](./0048-remove-company-landing-pages.md) | 企業ページ(/companies)を廃止し、フィードの企業絞り込みに寄せる | Accepted |
+| [0049](./0049-remove-from-reading-history.md) | 閲覧履歴から記事を削除できるようにする(既読を外す唯一の操作) | Proposed |
 | [0047](./0047-reduce-runtime-cache-writes.md) | Runtime Cache の書き込みを減らすため、記事ページの remote キャッシュを記事タグ + 長い寿命にする | Accepted |
 
 ※ 0013 と 0014 は同日に並行して採番され、番号が2件ずつ重複している。コードやドキュメントから

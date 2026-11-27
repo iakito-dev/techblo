@@ -1,4 +1,4 @@
-import { desc, eq, sql } from 'drizzle-orm';
+import { and, desc, eq, sql } from 'drizzle-orm';
 import type { Database } from '@/db/client';
 import { reads } from '@/db/schema/reads';
 import { type ArticleId, asArticleId, type UserId } from '@/shared/type-utils';
@@ -38,5 +38,11 @@ export class DrizzleReadRepository implements ReadRepository {
       .orderBy(desc(reads.readAt))
       .limit(limit);
     return rows.map((r) => ({ articleId: asArticleId(r.articleId), readAt: r.readAt }));
+  }
+
+  async remove(userId: UserId, articleId: ArticleId): Promise<void> {
+    await this.db
+      .delete(reads)
+      .where(and(eq(reads.userId, userId), eq(reads.articleId, articleId)));
   }
 }

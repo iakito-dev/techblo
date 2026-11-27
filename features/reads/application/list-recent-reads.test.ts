@@ -4,7 +4,12 @@ import type { ReadRepository } from '../domain/read-repository';
 import { listRecentReads, READ_HISTORY_LIMIT } from './list-recent-reads';
 
 function fakeRepo(entries: Awaited<ReturnType<ReadRepository['listRecent']>> = []): ReadRepository {
-  return { markRead: vi.fn(), addMany: vi.fn(), listRecent: vi.fn().mockResolvedValue(entries) };
+  return {
+    markRead: vi.fn(),
+    addMany: vi.fn(),
+    listRecent: vi.fn().mockResolvedValue(entries),
+    remove: vi.fn(),
+  };
 }
 
 describe('listRecentReads', () => {

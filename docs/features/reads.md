@@ -13,7 +13,8 @@
 
 - 「すべて / 未読 / 既読」フィルタ(`?read=unread|read`、既定 all)。デスクトップ=サイドバーの「フィルタ」、モバイル=絞り込みシートの「ステータス」で切り替える。タブレット(md〜lg)は切り替え UI を持たず、適用中のときだけツールバー下に「未読のみ ✕」/「既読のみ ✕」のチップで状態を見せて解除できる(`ActiveFilterChips`)
 - カードに未読バッジ・既読 dim は **付けない**(フィルタのみ)
-- 既読化は**記事ページ(`/a/[id]`)に着地したタイミング**(`ArticleViewTracker`、`trackArticleView` と同所)。手動トグルは無し
+- 既読化は**記事ページ(`/a/[id]`)に着地したタイミング**(`ArticleViewTracker`、`trackArticleView` と同所)。フィードのカードに手動トグルは無し
+- 既読を外すのは閲覧履歴の「閲覧履歴から削除」(✕)だけ(ADR-0049)。履歴と既読は同じ `reads` の行なので、消した記事は未読フィルタに戻る。画面は楽観的に消し、ログイン時に失敗したら戻してトースト。Undo は無し(付け直すと `readAt` が今になり並び位置が変わるため)
 - 閲覧履歴 `/history`(`ReadingHistoryView`): 最近読んだ順に直近100件。ログイン時は JST の日付ごとに「今日 / 昨日 / M月D日(曜)」の見出しを付ける。タイトル・企業名・タグでの絞り込みと、カードからの保存トグルあり。ゲストは見出し無しで最後に開いた順
   - 導線: サイドバー「ライブラリ」/ モバイルは設定メニューの「閲覧履歴」行 / キーボード `g r`
   - 0 件の空状態(「まだ読んだ記事がありません」+「フィードを見る」)・絞り込み 0 件は、保存一覧・フィードの空状態と同じ見た目(角丸タイルのアイコン + ボタン)
@@ -35,6 +36,7 @@
 ```ts
 // features/reads/web/actions.ts
 markReadAction(articleId: string): Promise<Result<{ read: boolean }, CommonError>>   // 記事ページ着地で発火。未ログインは no-op
+removeReadAction(articleId: string): Promise<Result<{ removed: boolean }, CommonError>>   // 閲覧履歴から削除(ADR-0049)。未ログインは UNAUTHORIZED、UUID 以外は VALIDATION
 migrateGuestReads(articleIds: string[]): Promise<Result<{ merged: number }, CommonError>>  // ログイン時マージ(ADR-0017)
 
 // features/reads/web/queries.ts
@@ -46,7 +48,7 @@ getReadFilteredFeed(userId, mode, input?): Promise<FeedPage>   // reads と EXIS
 
 ## ビジネスルール
 
-- 既読化トリガ = 記事ページを開く(`ArticleViewTracker`)。冪等(既読を外す操作は無い)。再閲覧は `readAt` を進めるだけ
+- 既読化トリガ = 記事ページを開く(`ArticleViewTracker`)。冪等。再閲覧は `readAt` を進めるだけ。既読を外すのは閲覧履歴からの削除だけ(ADR-0049)
 - フィルタ unread = reads に無い記事、read = reads にある記事
 - ログイン = サーバー SQL 絞り込み(正しいページネーション)、ゲスト = クライアント hide(可視件数は変動)
 - ゲストのクライアント hide は、該当が少ないと番兵が画面内に残り続けて自動読み込みが全ページを取り切るまで Server Action を連発していた(既読 0 件の `?read=read` で全ページ取得 → 何も出ない白紙)。`isGuestReadFilterStalled`(`app/_composition/article/feed-infinite-scroll.ts`)で自動読み込みを止める: 既読 0 件の既読フィルタは読み込まない(「もっと読む」も出さない)、表示が増えないページが 3 連続したら自動では止めて「もっと読む」の手動に任せる。表示が 0 件で読み進める先が無い(または止めた)ときは feed の絞り込み空状態(`FeedFilteredEmptyState`)を出す
@@ -56,5 +58,6 @@ getReadFilteredFeed(userId, mode, input?): Promise<FeedPage>   // reads と EXIS
 
 - ADR-0021(既読管理は feed クエリ側で SQL 絞り込み)
 - ADR-0041(閲覧履歴を readAt から提供)
+- ADR-0049(閲覧履歴から削除 = 既読を外す)
 - ADR-0017(ゲスト保存→ログインでマージ)、ADR-0016(user-scoped cache)
 - 機能: feed(フィルタ UI とクエリの実体)
