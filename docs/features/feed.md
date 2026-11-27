@@ -256,9 +256,9 @@ PostHog のイベント(一覧と規約は [observability.md §4](../architectur
 
 ## タグ一覧ページ(/tags、ADR-0040)
 
-- 公開・SEO 対象のハブ(`app/tags/page.tsx`)。構成は Header / 静的シェル + `connection()` + Suspense でストリーム)。h1「タグから探す」、canonical は自己参照 `/tags`、JSON-LD は `breadcrumbJsonLd`(ホーム → タグから探す)。
+- 公開・SEO 対象のハブ(`app/(app)/tags/page.tsx`)。(app) のシェル(サイドバー・モバイル下部ナビ)の中に置く(以前はシェル外で、設定メニューやサイドバーから来ると下部ナビ・サイドバーが消えた)。構成は静的シェル + `connection()` + Suspense でストリーム)。h1「タグから探す」、canonical は自己参照 `/tags`、JSON-LD は `breadcrumbJsonLd`(ホーム → タグから探す)。
 - 2セクション: 「最近よく書かれているタグ」(直近90日・上位40)と「すべてのタグ」(全期間・上位120)。各タグは `/?tag=<encodeURIComponent(tag)>` への輪郭バッジ + 件数(`text-fg-muted`。subtle では AA に届かないため)。0件なら空状態メッセージ。直近セクションは0件なら出さない。
-- タグ名の絞り込み入力(`app/tags/tag-browser.tsx`、クライアント側の即時フィルタ・URL は変えない)。`filterTags`(`app/tags/filter-tags.ts`)が NFKC + 小文字化の部分一致で両セクションを絞り、先頭の `#` は無視する。一致 0 件のセクションは隠し、両方 0 件なら「一致するタグはありません」+ クリア。Esc でクリア。全タグのリンクはサーバー HTML に含まれたまま(内部リンク集約点を保つ)。
+- タグ名の絞り込み入力(`app/(app)/tags/tag-browser.tsx`、クライアント側の即時フィルタ・URL は変えない)。`filterTags`(`app/(app)/tags/filter-tags.ts`)が NFKC + 小文字化の部分一致で両セクションを絞り、先頭の `#` は無視する。一致 0 件のセクションは隠し、両方 0 件なら「一致するタグはありません」+ クリア。Esc でクリア。全タグのリンクはサーバー HTML に含まれたまま(内部リンク集約点を保つ)。
 - 集計: `ArticleRepository.listPopularTags(limit, sinceDays?)` が `article_summaries.tags`(jsonb)を `jsonb_array_elements_text` で展開し、削除済み除外・`status='ready'` で `group by tag`、`count(distinct a.id) desc, tag asc`。`sinceDays` 指定時は `articles.published_at` で絞る。空白タグは除外。
 - usecase `listPopularTags(deps)(limit = 120, sinceDays?)`(`features/feed/application/list-popular-tags.ts`): limit を 1..200 に丸め、空白タグを除外し `Result` で返す。
 - キャッシュ: `getPopularTags()` は `'use cache'` + `cacheTag(feed)` + `cacheLife('hours')`。失敗は `logger.warn` して `{ recent: [], all: [] }` を `cacheLife('minutes')` で返す。
